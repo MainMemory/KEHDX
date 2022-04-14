@@ -1,0 +1,309 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Sega Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// Aliases
+private alias object.value0 : sega.timer
+
+private alias object.value1 : KEH.menusel
+private alias object.value2 : sega.peekPos
+private alias object.value3 : sega.levelSelectCheatPos
+private alias object.value4 : sega.touchDown
+private alias object.value5 : sega.regionSwitchCheatPos
+
+// States
+private alias 0 : SEGA_SETUP
+private alias 1 : SEGA_FADEIN
+private alias 2 : SEGA_PEEKSEGA
+private alias 3 : SEGA_REVEALSEGA
+private alias 4 : SEGA_SEGASCREEN
+private alias 5 : SEGA_FADEOUT
+private alias 6 : STAGESELECT_FADEOUT
+private alias 7 : OPTIONS_FADEOUT
+private alias 8 : COMPETITION_FADEOUT
+
+// Function declarations
+reserve function Sega_Background
+
+function Sega_Background
+	//Background
+	object.value22++
+	object.value22 %= 1
+	if object.value22 == 0
+		object.value21++
+		object.value21 %= 128
+	end if
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 384
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 512
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+end function
+
+
+event ObjectMain
+	switch object.state
+	case SEGA_SETUP
+		object.alpha = 0x00
+		object.inkEffect = INK_ALPHA
+		sega.timer = 320
+		SetActivePalette(1, 0, screen.ysize)
+		SetScreenFade(0, 0, 0, sega.timer)
+		object.state++
+		break
+
+	case SEGA_FADEIN
+		if sega.timer > 0
+			sega.timer -= 8
+		else
+			sega.peekPos = screen.xcenter
+			sega.peekPos -= 104
+			object.alpha = 0x80
+			PlayMusic(1)
+			object.state++
+		end if
+
+		SetScreenFade(0, 0, 0, sega.timer)
+		break
+
+	case SEGA_PEEKSEGA
+		temp0 = screen.xcenter
+		temp0 += 112
+		if sega.peekPos < temp0
+			sega.peekPos += 4
+		else
+			object.alpha = 0
+			object.state++
+		end if
+		break
+
+	case SEGA_REVEALSEGA
+		if object.alpha < 0xD0
+			object.alpha += 8
+		else
+			object.alpha = 0xFF
+			object.state++
+		end if
+
+		break
+
+	case SEGA_FADEOUT
+			stage.activeList = PRESENTATION_STAGE
+			stage.listPos = 4
+			inputPress.start = 0	
+			inputPress.up = 0		
+			inputPress.down = 0	
+			if sega.timer < 256
+				sega.timer += 8
+				music.volume -= 2
+				SetScreenFade(0, 0, 0, sega.timer)
+			else
+				LoadStage()
+				StopMusic()
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if	
+			break
+	case STAGESELECT_FADEOUT	
+			if sega.timer < 256
+				sega.timer += 8
+				music.volume -= 2
+				SetScreenFade(0, 0, 0, sega.timer)
+			else
+				ResetObjectEntity(object.entityPos, TypeName[Stage Select], 0, object.xpos, object.ypos)
+				StopMusic()
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if	
+			break
+	end switch
+	if inputPress.up == 1
+		KEH.menusel += 1
+		PlaySfx(SfxName[Score Add], 0)
+		KEH.menusel %= 4
+	end if
+	if inputPress.down == 1				
+		KEH.menusel -= 1
+		PlaySfx(SfxName[Score Add], 0)
+		while KEH.menusel < 0
+			KEH.menusel += 4
+		loop
+	end if
+	if inputPress.start == 1	
+		switch KEH.menusel
+		default
+			PlaySfx(SfxName[Fail], 0)
+			break
+		case 0
+			object.state = STAGESELECT_FADEOUT	
+			break
+		end switch
+	end if
+end event
+
+
+event ObjectDraw
+	//Random PlaceHolder
+	DrawRect(0, 0, screen.xsize, screen.ysize, 164, 161, 230, 255)
+
+	CallFunction(Sega_Background)
+
+	// Logo and Selections
+	DrawSpriteScreenXY(0, screen.xcenter, 16)
+	DrawSpriteScreenXY(1, screen.xcenter, 133)
+
+	// Little Knuckles
+	switch KEH.menusel
+		case 0
+			temp0 = 132
+			break
+		case 2
+			temp0 = 172
+			break
+		case 3
+			temp0 = 152
+			break
+		case 1
+			temp0 = 192
+			break
+	end switch
+
+	temp1 = screen.xcenter
+	temp1 -= 109
+
+	if object.value23 >= 30
+		DrawSpriteScreenXY(3, temp1, temp0)
+		object.value24++
+		if object.value24 >= 30
+			object.value23 = 0
+		end if
+	else
+		DrawSpriteScreenXY(4, temp1, temp0)
+		object.value23++
+		object.value24 = 0
+	end if
+
+	DrawSpriteScreenXY(5, screen.xcenter, 216)
+
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("KEHMenu/MainTitle.gif")
+	SpriteFrame(-120, 0, 240, 110, 33, 1)
+	SpriteFrame(-80, 0, 159, 77, 82, 112)
+	SpriteFrame(0, 0, 32, 128, 0, 1)
+	SpriteFrame(0, 0, 23, 22, 33, 112)
+	SpriteFrame(0, 0, 24, 22, 57, 112)
+	SpriteFrame(-144, 0, 288, 10, 0, 190)
+	options.touchControls = false
+	SetMusicTrack("Walkin.ogg", 1, 49689)
+	LoadPalette("MainTitle.act", 1, 0, 0, 256)
+end event
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+event RSDKLoad
+	LoadSpriteSheet("Title/Title.gif")
+	SpriteFrame(-93, -29, 188, 58, 323, 242)
+end event

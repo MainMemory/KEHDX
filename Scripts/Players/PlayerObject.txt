@@ -11,6 +11,7 @@ public alias  256 		: GROUP_PLAYERS
 public alias  65536 	: HITBOX_AUTO
 public alias  arrayPos6 : currentPlayer
 public alias  arrayPos7 : playerCount
+private alias 39 : ANI_VICTORY
 
 // Draw Order
 private alias -1 : DRAWORDER_PLAYER
@@ -1339,7 +1340,6 @@ function PlayerObject_HandleGround
 				switch object.propertyValue
 				case 0
 					if PlayerObject_SuperState == 1
-						object.animation = ANI_STOPPED
 						object.value1 = 0
 						if object.floorSensorC == 0
 							if object.floorSensorR == 0
@@ -1353,7 +1353,12 @@ function PlayerObject_HandleGround
 						end if
 					else
 						if object.value1 < 240
-							object.animation = ANI_STOPPED
+							CheckEqual(object[30].type, TypeName[Act Finish])
+							if checkResult == 1
+								object.animation = ANI_VICTORY
+							else
+								object.animation = ANI_STOPPED
+							end if
 							object.value1++
 						else
 							object.animation = ANI_WAITING
@@ -1404,7 +1409,12 @@ function PlayerObject_HandleGround
 					break
 				case 1
 					if object.value1 < 240
-						object.animation = ANI_STOPPED
+							CheckEqual(object[30].type, TypeName[Act Finish])
+							if checkResult == 1
+								object.animation = ANI_VICTORY
+							else
+								object.animation = ANI_STOPPED
+							end if
 						object.value1++
 					else
 						object.animation = ANI_WAITING
@@ -1424,7 +1434,12 @@ function PlayerObject_HandleGround
 					break
 				case 2
 					if object.value1 < 240
-						object.animation = ANI_STOPPED
+													CheckEqual(object[30].type, TypeName[Act Finish])
+							if checkResult == 1
+								object.animation = ANI_VICTORY
+							else
+								object.animation = ANI_STOPPED
+							end if
 						object.value1++
 					else
 						object.animation = ANI_WAITING
@@ -2891,6 +2906,16 @@ event ObjectMain
 				object[+playerCount].type = invincibilityType
 				object[+playerCount].propertyValue = 0
 			end if
+			if object[0].propertyValue == 2
+			LoadAnimation("Knuckles.ani")
+			object[0].propertyValue = 2
+			object[0].value30 = -5
+			object[0].value32 = PlayerObject_StartKnuxGlide
+			ANI_PEELOUT = ANI_RUNNING
+			if options.saveSlot > 0
+				stage.player2Enabled = 0
+			end if
+			end if
 		else
 			if object.gravity == GRAVITY_GROUND
 				object.value35 = 0
@@ -2988,6 +3013,9 @@ event ObjectMain
 			object.value34 = 0
 		end if
 	end if
+	if object.animation == ANI_VICTORY
+		object.value1 = 0
+	end if
 end event
 
 
@@ -3004,15 +3032,12 @@ end event
 
 event ObjectStartup
 	playerCount = 0
+
 	foreach (TypeName[Player Object], arrayPos0, ALL_ENTITIES)
 		screen.cameraEnabled = 1
 		screen.cameraStyle = 0
 		screen.cameraTarget = 0
 		currentPlayer = 0
-		if stage.playerListPos > 2
-			stage.playerListPos = 0
-			stage.player2Enabled = 1
-		end if
 		ResetObjectEntity(0, TypeName[Player Object], 0, object[arrayPos0].xpos, object[arrayPos0].ypos)
 		screen.cameraX = player[0].ixpos
 		screen.cameraY = player[0].iypos
@@ -3034,6 +3059,16 @@ event ObjectStartup
 		switch stage.playerListPos
 		case 0
 			LoadAnimation("Knuckles.ani")
+			object[0].propertyValue = 2
+			object[0].value30 = -5
+			object[0].value32 = PlayerObject_StartKnuxGlide
+			ANI_PEELOUT = ANI_RUNNING
+			if options.saveSlot > 0
+				stage.player2Enabled = 0
+			end if
+			break
+		case 1
+			LoadAnimation("Tikal.ani")
 			object[0].propertyValue = 2
 			object[0].value30 = -5
 			object[0].value32 = PlayerObject_StartKnuxGlide

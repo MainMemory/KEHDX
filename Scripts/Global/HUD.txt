@@ -176,7 +176,7 @@ function HUD_DrawPC
 	DrawNumbers(0, 80, 29, stage.seconds, 2, 8, 1)
 	DrawNumbers(0, 56, 29, stage.minutes, 1, 8, 1)
 
-	DrawNumbers(0, 80, 45, player[0].rings, 3, 8, 0)
+	DrawNumbers(0, 104, 45, player[0].rings, 3, 8, 0)
 
 	if stage.debugMode == true
 
@@ -230,6 +230,7 @@ function HUD_DrawPC
 	// The actual player lives number
 	DrawNumbers(24, 56, 220, player.lives, 2, 8, 0)
 
+	// duh emealds
 	temp1 = EmeraldManager_EmeraldCount
 	temp1 *= 20
 	temp1 -= 4
@@ -390,6 +391,7 @@ function sqrt
 end function
 
 event ObjectMain
+	// duh emealds
 	switch object.state
 	case 0
 		temp0 = 0

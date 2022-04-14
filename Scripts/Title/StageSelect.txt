@@ -1,0 +1,256 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Sega Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// Aliases
+
+private alias object.value1 : KEH.menusel
+
+// States
+
+reserve function Sega_Background
+
+function Sega_Background
+	//Background
+	object.value22++
+	object.value22 %= 1
+	if object.value22 == 0
+		object.value21++
+		object.value21 %= 128
+	end if
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 384
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 512
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+end function
+
+
+event ObjectMain
+	switch object.state
+	case 0
+		object.inkEffect = INK_ALPHA
+		object.value0 = 320
+		SetActivePalette(2, 0, screen.ysize)
+		SetScreenFade(0, 0, 0, object.value0)
+		object.state++
+		break
+
+	case 1
+		if object.value0 > 0
+			object.value0 -= 8
+		else
+			PlayMusic(2)
+			object.state++
+		end if
+
+		SetScreenFade(0, 0, 0, object.value0)
+		break
+	case 2
+		break
+
+
+
+	case 5
+			stage.activeList = PRESENTATION_STAGE
+			stage.listPos = 4
+			inputPress.start = 0	
+			inputPress.up = 0		
+			inputPress.down = 0	
+			if object.value0 < 256
+				object.value0 += 8
+				music.volume -= 2
+				SetScreenFade(0, 0, 0, object.value0)
+			else
+				LoadStage()
+				StopMusic()
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if	
+			break
+	case 6
+			if object.value0 < 256
+				object.value0 += 8
+				music.volume -= 2
+				SetScreenFade(0, 0, 0, object.value0)
+			else
+				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+				StopMusic()
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if	
+			break
+	end switch
+	if inputPress.up == 1
+		KEH.menusel -= 1
+		PlaySfx(SfxName[Score Add], 0)
+		if KEH.menusel < 0
+			KEH.menusel = 10
+		end if
+	end if
+	if inputPress.down == 1				
+		KEH.menusel += 1
+		PlaySfx(SfxName[Score Add], 0)
+		if KEH.menusel >= 10
+			KEH.menusel = 0
+		end if
+	end if
+	if inputPress.buttonB == 1				
+		object.state = 6
+	end if
+	if inputPress.start == 1	
+		switch KEH.menusel
+		default
+			PlaySfx(SfxName[Fail], 0)
+			break
+		case 0
+			object.state = 5
+			break
+		end switch
+	end if
+
+end event
+
+
+event ObjectDraw
+	CallFunction(Sega_Background)
+
+	//Add selections
+	temp1 = 32
+	while temp0 < 3
+		DrawSpriteScreenXY(0, screen.xcenter, temp1)
+		temp1 += 72
+		temp0++
+	loop
+
+	//Select Stage Header
+	DrawSpriteScreenXY(1, screen.xcenter, 17)
+
+	//Selector
+	temp1 = 32
+	temp0 = 0
+	while temp0 < KEH.menusel
+		temp1 += 72
+		temp0++
+	loop
+	DrawSpriteScreenXY(3, screen.xcenter, temp1)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("KEHMenu/StageSelect.gif")
+	SpriteFrame(-149, 0, 298, 58, 1, 130)
+	SpriteFrame(-71, 0, 142, 7, 33, 1)
+	SpriteFrame(0, 0, 32, 128, 0, 1)
+	SpriteFrame(-149, 0, 298, 58, 1, 372)
+	options.touchControls = false
+	SetMusicTrack("2D.ogg", 2, 108000)
+	LoadPalette("StageSelect.act", 2, 0, 0, 256)
+end event
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+event RSDKLoad
+	LoadSpriteSheet("Title/Title.gif")
+	SpriteFrame(-93, -29, 188, 58, 323, 242)
+end event
