@@ -165,6 +165,9 @@ event ObjectMain
 				end if
 			else
 				CallFunction(PlayerObject_BadnikBreak)
+				if object.type == TypeName[Blank Object]
+					CallFunction(EmeraldManager_AwardEmerald)
+				end if
 			end if
 		end if
 	next
@@ -194,6 +197,7 @@ event ObjectStartup
 	foreach (TypeName[Crawl], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].value1 = object[arrayPos0].xpos
 		object[arrayPos0].value2 = object[arrayPos0].ypos
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Crawl], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Crawl_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

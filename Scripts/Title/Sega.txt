@@ -107,6 +107,7 @@ event ObjectMain
 		object.alpha = 0
 		object.inkEffect = INK_ALPHA
 		sega.fadeValue = 320
+		SetActivePalette(0, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, sega.fadeValue)
 		object.state++
 		break

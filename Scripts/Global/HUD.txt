@@ -19,6 +19,9 @@ private alias object.value0 : player.rings
 
 private alias 102400 : min_dist
 
+public alias saveRAM[200] : saved.radar
+public alias saveRAM[201] : saved.radarstyle
+
 // Function declarations
 reserve function HUD_DrawPC
 reserve function HUD_DrawMobile
@@ -26,6 +29,7 @@ reserve function EmeraldManager_AddEntity
 reserve function EmeraldManager_AddType
 reserve function EmeraldManager_AwardEmerald
 reserve function EmeraldManager_AwardBonus
+reserve function EmeraldManager_HUD
 reserve function sqrt
 
 // Static Values
@@ -153,6 +157,37 @@ function EmeraldManager_DeleteEmerald
 	EmeraldManager_GotEmeralds--
 end function
 
+function EmeraldManager_HUD
+	// duh emealds
+	temp1 = EmeraldManager_EmeraldCount
+	temp1 *= 20
+	temp1 -= 4
+	temp1 >>= 1
+	temp0 = screen.xcenter
+	temp0 -= temp1
+	temp1 = screen.ysize
+	temp1 -= 16
+	temp2 = 0
+	while temp2 < EmeraldManager_EmeraldCount
+		GetTableValue(temp3, temp2, EmeraldManager_RadarSprites)
+		switch temp3
+		case -1
+			break
+		case 38
+			DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
+			break
+		default
+			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
+			object.scale *= 5
+			object.scale += 512
+			DrawSpriteScreenFX(temp3, FX_SCALE, temp0, temp1)
+			break
+		end switch
+		temp0 += 20
+		temp2++
+	loop
+end function
+
 function HUD_DrawPC
 
 	DrawSpriteScreenXY(10, 17, 13)
@@ -230,34 +265,9 @@ function HUD_DrawPC
 	// The actual player lives number
 	DrawNumbers(24, 56, 220, player.lives, 2, 8, 0)
 
-	// duh emealds
-	temp1 = EmeraldManager_EmeraldCount
-	temp1 *= 20
-	temp1 -= 4
-	temp1 >>= 1
-	temp0 = screen.xcenter
-	temp0 -= temp1
-	temp1 = screen.ysize
-	temp1 -= 16
-	temp2 = 0
-	while temp2 < EmeraldManager_EmeraldCount
-		GetTableValue(temp3, temp2, EmeraldManager_RadarSprites)
-		switch temp3
-		case -1
-			break
-		case 38
-			DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
-			break
-		default
-			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
-			object.scale *= 5
-			object.scale += 512
-			DrawSpriteScreenFX(temp3, FX_SCALE, temp0, temp1)
-			break
-		end switch
-		temp0 += 20
-		temp2++
-	loop
+	if saved.radar == 0
+		CallFunction(EmeraldManager_HUD)
+	end if
 
 	temp0 = screen.xsize
 	temp0 -= 24
@@ -517,7 +527,9 @@ event ObjectMain
 				temp1 -= temp0
 				SetTableValue(temp1, temp4, EmeraldManager_RadarScale)
 				EmeraldManager.pingTimer = 0
-				PlaySfx(SfxName[Radar Ping], 0)
+				if saved.radar == 0
+					PlaySfx(SfxName[Radar Ping], 0)
+				end if
 			end if
 		end if
 		CheckGreater(EmeraldManager_P1Collected, 2)
@@ -531,6 +543,15 @@ event ObjectMain
 			object.priority = PRIORITY_ACTIVE_PAUSED
 			stage.state = 3
 			object[0].controlMode = -1
+			object[0].interaction = 0
+			object[0].up = 0
+			object[0].down = 0
+			object[0].left = 0
+			object[0].right = 0
+			object[0].jumpPress = 0
+			object[0].jumpHold = 0
+			object[0].speed = 0
+			object[0].xvel = 0
 			EmeraldManager.fadeAmount = 0
 		end if
 		break
@@ -543,6 +564,7 @@ event ObjectMain
 				CallFunction(EmeraldManager_AwardBonus)
 			end if
 			object.state++
+			stage.timeEnabled = 0
 			stage.state = 1
 		end if
 		break
@@ -659,12 +681,20 @@ event ObjectStartup
 	temp0 = 0
 	temp1 = 1
 	while temp0 < 6
-		SpriteFrame(-8, -8, 16, 16, temp1, 256) 	// 38-43 - Emerald Radar
+		if saved.radarstyle == 0
+			SpriteFrame(-8, -8, 16, 16, temp1, 256) 	// 38-43 - New Emerald Radar
+		else 
+			SpriteFrame(-8, -8, 16, 16, temp1, 358) 	// 38-43 - Old Emerald Radar
+		end if
 		temp1 += 17
 		temp0++
 	loop
 
-	SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - Got Emerald
+	if saved.radarstyle == 0
+		SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - New Got Emerald
+	else
+		SpriteFrame(0, 0, 16, 16, temp1, 358) 	// 44 - Old Got Emerald
+	end if
 
 	temp0 = 0
 	temp1 = 273

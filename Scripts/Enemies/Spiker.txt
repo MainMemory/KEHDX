@@ -112,6 +112,9 @@ event ObjectMain
 			BoxCollisionTest(C_TOUCH, object.entityPos, -8, -10, 8, 10, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 			if checkResult == 1
 				CallFunction(PlayerObject_BadnikBreak)
+				if object.type == TypeName[Blank Object]
+					CallFunction(EmeraldManager_AwardEmerald)
+				end if
 			end if
 			if object.type != TypeName[Blank Object]
 				if object.value2 == 1
@@ -172,6 +175,7 @@ event ObjectStartup
 			object[arrayPos0].ypos -= 0x80000
 		end if
 		CallFunction(Spiker_Function121)
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Spiker], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Spiker_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

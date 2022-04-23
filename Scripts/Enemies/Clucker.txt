@@ -125,6 +125,9 @@ event ObjectMain
 		if checkResult == 1
 			CallFunction(PlayerObject_BadnikBreak)
 		end if
+		if object.type == TypeName[Blank Object]
+			CallFunction(EmeraldManager_AwardEmerald)
+		end if
 	next
 	if object.outOfBounds == 1
 		temp1 = object.ypos
@@ -171,7 +174,8 @@ event ObjectStartup
 	foreach (TypeName[Clucker], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].ypos += 0x200000
 		object[arrayPos0].value0 = object[arrayPos0].ypos
-		CallFunction(Clucker_Function128)
+		CallFunction(Clucker_Function128)	
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Clucker], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Clucker_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

@@ -128,6 +128,9 @@ event ObjectMain
 			BoxCollisionTest(C_TOUCH, object.entityPos, -24, -12, 24, 12, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 			if checkResult == 1
 				CallFunction(PlayerObject_BadnikBreak)
+				if object.type == TypeName[Blank Object]
+					CallFunction(EmeraldManager_AwardEmerald)
+				end if
 			end if
 		end if
 	next
@@ -189,6 +192,7 @@ event ObjectStartup
 			object[arrayPos0].direction = FLIP_X
 			object[arrayPos0].xvel = 0x10000
 		end if
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Bee], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Bee_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

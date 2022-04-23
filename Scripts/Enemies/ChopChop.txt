@@ -145,6 +145,9 @@ event ObjectMain
 		BoxCollisionTest(C_TOUCH, object.entityPos, -16, -12, 16, 12, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 		if checkResult == 1
 			CallFunction(PlayerObject_BadnikBreak)
+			if object.type == TypeName[Blank Object]
+				CallFunction(EmeraldManager_AwardEmerald)
+			end if
 		end if
 	next
 end event
@@ -169,6 +172,7 @@ event ObjectStartup
 	foreach (TypeName[Chop Chop], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].value2 = object[arrayPos0].xpos
 		CallFunction(ChopChop_Function148)
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Chop Chop], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(ChopChop_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

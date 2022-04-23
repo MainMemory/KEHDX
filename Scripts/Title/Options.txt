@@ -22,9 +22,12 @@ private alias 1 : STATE_FADEIN
 private alias 2 : STATE_MAIN
 private alias 3 : STATE_LOADLEVEL
 private alias 4 : STATE_LOADSPECIAL
+private alias 5 : STATE_BACKHOME
 
 // Function declarations
 
+public alias saveRAM[200] : saved.radar
+public alias saveRAM[201] : saved.radarstyle
 
 // Static Values
 public value MenuControl_value1 = 0;
@@ -44,30 +47,7 @@ private alias MenuControl_value6 : MenuControl_PPZCodeCounter
 
 // Tables
 
-// Code to open the options menu
-public table MenuControl_OptionsMenu
-	0, 0, 0
-end table
 
-// Code to enable debug mode
-public table MenuControl_SecretDebugMode
-	1, 9, 9, 2, 1, 1, 2, 4
-end table
-
-// Code to give all emeralds
-public table MenuControl_SecretEmeralds
-	4, 1, 2, 6
-end table
-
-// Code to give 14 continues
-public table MenuControl_SecretContinues
-	1, 1, 2, 4
-end table
-
-// Code to replace Hidden Palace Zone with Proto Palace Zone
-public table MenuControl_SecretPPZ
-	3, 3, 3, 11, 16, 16, 16, 4
-end table
 
 
 // This table holds data for every stage with six values for every stage, 
@@ -79,20 +59,125 @@ end table
 // -> Sixth is the icon the entry uses
 
 public table MenuControl_EntryTable
-	MENU_1, 0,  REGULAR_STAGE, 0, 14, 1		// Emerald Hill 1
-	MENU_1, 1,  REGULAR_STAGE, 1, 17, 2	// Emerald Hill 2
-	MENU_1, 2,  REGULAR_STAGE, 2, 18, 3		// Chemical Plant 1
-	MENU_1, 3,  REGULAR_STAGE, 3, 19, 4		// Chemical Plant 2
-	MENU_1, 4,  REGULAR_STAGE, 4, 20, 5		// Aquatic Ruin 1
-	MENU_1, 5,  REGULAR_STAGE, 5, 21, 6		// Aquatic Ruin 2
-	MENU_1, 6,  REGULAR_STAGE, 6, 22, 8		// Casino Night 1
-	MENU_1, 7, REGULAR_STAGE, 7, 23, 9		// Casino Night 2
-	MENU_1, 8, REGULAR_STAGE, 8, 24, 11	// Hill Top 1
-	MENU_1, 9, REGULAR_STAGE, 9, 25, 7	// Hill Top 2
+	MENU_1, 2,  REGULAR_STAGE, 0, 14, 1		
+	MENU_1, 8,  REGULAR_STAGE, 1, 17, 2	
+	MENU_1, 14,  REGULAR_STAGE, 2, 18, 3		
+	MENU_1, 20,  REGULAR_STAGE, 3, 19, 4		
+	MENU_1, 26,  REGULAR_STAGE, 3, 19, 5		
 end table
 
 
+function Sega_Background
+	//Background
+	object.value22++
+	object.value22 %= 1
+	if object.value22 == 0
+		object.value21++
+		object.value21 %= 128
+	end if
 
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 128
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 -= 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 256
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 384
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+	temp0 = object.value21
+	temp1 = object.value21
+	temp1 -= 10000
+	temp1 += 512
+	while temp1 < 999
+		while temp0 < screen.ysize
+			DrawSpriteScreenXY(2, temp1, temp0)
+			temp0 += 32
+			temp1 += 32
+		loop
+	//temp0 = object.value21
+
+	temp0 -= 10000
+	loop
+end function
 
 
 event ObjectMain
@@ -124,24 +209,18 @@ event ObjectMain
 		// Don't do any of this if the options menu is open
 		if MenuControl_optionsMenuOpen == 0
 
-			if inputDown.down == true
+			if inputpress.down == true
 
-				menuControl.scrollDelayUp = 0
-				menuControl.scrollDelayDown++
-				if menuControl.scrollDelayDown == 1
+
 					menuControl.currentSelection++
-				end if
-				menuControl.scrollDelayDown %= 12
+	
+				menuControl.scrollDelayDown %= 4
 
 			else
 
-				if inputDown.up == true
-					menuControl.scrollDelayDown = 0
-					menuControl.scrollDelayUp++
-					if menuControl.scrollDelayUp == 1
+				if inputpress.up == true
 						menuControl.currentSelection--
-					end if
-					menuControl.scrollDelayUp %= 12
+					menuControl.scrollDelayUp %= 4
 				else
 					menuControl.scrollDelayUp = 0
 					menuControl.scrollDelayDown = 0
@@ -149,13 +228,94 @@ event ObjectMain
 
 			end if
 
-			if menuControl.currentSelection > 9
+			if menuControl.currentSelection > 4
 				menuControl.currentSelection = 0
 			end if
 
 			if menuControl.currentSelection < 0
-				menuControl.currentSelection = 9
+				menuControl.currentSelection = 4
 			end if
+
+
+			switch menuControl.currentSelection
+			case 0
+				if inputpress.left == true
+					stage.playerListPos--
+					while stage.playerListPos < 0
+						stage.playerListPos += 2
+					loop
+					temp1 = 1
+				end if
+				if inputpress.right == true
+					stage.playerListPos++
+					stage.playerListPos %= 2
+					temp1 = 1
+				end if
+				if temp1 == 1
+					switch stage.playerListPos
+						case 0
+							EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
+							break
+						case 1
+							EditMenuEntry(MENU_1, "TIKAL", 2, 1)
+							break
+					end switch
+				end if
+				break
+			case 1
+				if inputpress.left == true
+					saved.radar--
+					while saved.radar < 0
+						saved.radar += 1
+					loop
+					temp1 = 1
+				end if
+				if inputpress.right == true
+					saved.radar++
+					saved.radar %= 2
+					temp1 = 1
+				end if
+				if temp1 == 1
+					switch saved.radar
+						case 0
+							EditMenuEntry(MENU_1, " ON ", 8, 1)
+							WriteSaveRAM()
+							break
+						case 1
+							EditMenuEntry(MENU_1, "OFF", 8, 1)
+							WriteSaveRAM()
+							break
+					end switch
+				end if
+				break
+			case 4
+				if inputpress.left == true
+					saved.radarstyle--
+					while saved.radarstyle < 0
+						saved.radarstyle += 1
+					loop
+					temp1 = 1
+				end if
+				if inputpress.right == true
+					saved.radarstyle ++
+					saved.radarstyle %= 2
+					temp1 = 1
+				end if
+				if temp1 == 1
+					switch saved.radarstyle
+						case 0
+							EditMenuEntry(MENU_1, "NEW", 26, 1)
+							WriteSaveRAM()
+							break
+						case 1
+							EditMenuEntry(MENU_1, "OLD", 26, 1)
+							WriteSaveRAM()
+							break
+					end switch
+				end if
+				break
+			end switch
+
 
 			temp0 = menuControl.currentSelection
 			temp0 *= 6
@@ -181,21 +341,6 @@ event ObjectMain
 
 			// Set the preview image to what it should be
 			temp0 += 4
-			GetTableValue(BGAnimation_currentPreview, temp0, MenuControl_EntryTable)
-
-			// Player selected the option?
-			if inputPress.start == true
-
-
-						// Normal stage - let the player proceed
-						object.state = STATE_LOADLEVEL
-
-					end if
-
-
-
-		
-
 		end if
 		break
 
@@ -238,20 +383,45 @@ event ObjectMain
 			SetScreenFade(208, 255, 224, 255)
 		end if
 		break
+	case STATE_BACKHOME
+			if menuControl.fadeValue < 768
+				music.volume -= 2
+				menuControl.fadeValue += 8
+				SetScreenFade(0, 0, 0, menuControl.fadeValue)
+			else
+				StopMusic()
+				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+				SetScreenFade(0, 0, 0, 255)
+			end if
+		break
 
 	end switch
-
+	if inputPress.buttonB == 1
+		object.state = STATE_BACKHOME
+	end if
 end event
 
 
 event ObjectDraw
-
+	CallFunction(Sega_Background)
 	temp0 = screen.xcenter
-temp0 += 60
-	DrawMenu(MENU_1, temp0, 16)
+	DrawMenu(MENU_1, screen.xcenter, 12)
+	SetActivePalette(3, 0, screen.ysize)
+	temp1 = 3
+	temp0 = 0
+	while temp0 < 5
+		DrawSpriteScreenXY(0, screen.xcenter, temp1)
+		temp1 += 48
+		temp0++
+	loop
 
-
-
+	temp1 = 3
+	temp0 = 0
+	while temp0 < menuControl.currentSelection
+		temp1 += 48
+		temp0++
+	loop
+	DrawSpriteScreenXY(1, screen.xcenter, temp1)
 end event
 
 
@@ -259,16 +429,12 @@ event ObjectStartup
 
 	// Load the sprite sheet
 	// No need to setup sprite frames since the menu will handle them automatically
-	LoadSpriteSheet("LevelSelect/Text.gif")
+	LoadSpriteSheet("KEHMenu/Options.gif")
+	SpriteFrame(-141, 0, 282, 42, 129, 1)
+	SpriteFrame(-141, 0, 282, 42, 129, 173)
+	SpriteFrame(0, 0, 32, 128, 129, 44)
 
-	// All Menu Control objects should be active
-	// -> Note that there should only ever be one of them in a scene, though
-	foreach (TypeName[Menu Control], arrayPos0, ALL_ENTITIES)
-		object[arrayPos0].priority = PRIORITY_ACTIVE
-	next
-	foreach (TypeName[Hex No], arrayPos0, ALL_ENTITIES)
-		object[arrayPos0].type = TypeName[Blank Object]
-	next
+	LoadPalette("Options.act", 3, 0, 0, 256)
 
 	if stage.actNum < 3
 		options.stageSelectFlag = true
@@ -277,26 +443,67 @@ event ObjectStartup
 	options.touchControls = 0
 
 	SetMusicTrack("Options.ogg", 0, 1)
-
+	
 	// Setup menu 1 (left column)
-	SetupMenu(MENU_1, 0, 3, 1)
+	SetupMenu(MENU_1, 0, 1, 2)
 
 	// Add the entries
-	AddMenuEntry(MENU_1, "EMERALD HILL@@", 1)
-	AddMenuEntry(MENU_1, "CHEMICAL PLANT", 1)
-	AddMenuEntry(MENU_1, "AQUATIC RUIN@@", 1)
-	AddMenuEntry(MENU_1, "CASINO NIGHT@@", 1)
-	AddMenuEntry(MENU_1, "HILL TOP@@@@@@", 1)
-	AddMenuEntry(MENU_1, "MYSTIC CAVE@@@", 1)
-	AddMenuEntry(MENU_1, "OIL OCEAN@@@@@", 1)
-	AddMenuEntry(MENU_1, "METROPOLIS@@@@", 1)
-	AddMenuEntry(MENU_1, "WING FORTRESS ", 1)
-	AddMenuEntry(MENU_1, "HIDDEN PALACE ", 1)
+	AddMenuEntry(MENU_1, "*@@PLAYER SELECT@@*", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "KNUCKLES", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "*@@RADAR@@*", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ON ", 1)
+	AddMenuEntry(MENU_1, "    ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "*@@SOUND TEST@@*", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "00                                ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "*@@MUSIC SWITCH@@*", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "PRESS START", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "*@@RADAR SPRITES@@*", 1)
+	AddMenuEntry(MENU_1, " ", 1)
+	AddMenuEntry(MENU_1, "NEW", 1)
 
+	menu1.selection = 1
 
+	switch stage.playerListPos
+		case 0
+			EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
+			break
+		case 1
+			EditMenuEntry(MENU_1, "TIKAL", 2, 1)
+			break
+	end switch
 
-	menu1.selection = 0
-	menu2.selection = -1
+	switch saved.radar
+		case 0
+			EditMenuEntry(MENU_1, " ON ", 8, 1)
+			break
+		case 1
+			EditMenuEntry(MENU_1, "OFF", 8, 1)
+			break
+	end switch
+
+	switch saved.radarstyle
+		case 0
+			EditMenuEntry(MENU_1, "NEW", 26, 1)
+			break
+		case 1
+			EditMenuEntry(MENU_1, "OLD", 26, 1)
+			break
+	end switch
 
 end event
 

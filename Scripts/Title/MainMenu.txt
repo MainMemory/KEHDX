@@ -204,12 +204,30 @@ event ObjectMain
 			end if	
 			break
 	case STAGESELECT_FADEOUT	
+			stage.listPos = 4
+			inputPress.start = 0	
+			inputPress.up = 0		
+			inputPress.down = 0
 			if sega.timer < 256
 				sega.timer += 8
 				music.volume -= 2
 				SetScreenFade(0, 0, 0, sega.timer)
 			else
-				ResetObjectEntity(object.entityPos, TypeName[Stage Select], 0, object.xpos, object.ypos)
+				LoadStage()
+				StopMusic()
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if	
+			break
+	case OPTIONS_FADEOUT	
+			inputPress.start = 0	
+			inputPress.up = 0		
+			inputPress.down = 0	
+			if sega.timer < 256
+				sega.timer += 8
+				music.volume -= 2
+				SetScreenFade(0, 0, 0, sega.timer)
+			else
+				ResetObjectEntity(object.entityPos, TypeName[Options], 0, object.xpos, object.ypos)
 				StopMusic()
 				SetScreenFade(0, 0, 0, 0xFF)
 			end if	
@@ -234,6 +252,9 @@ event ObjectMain
 			break
 		case 0
 			object.state = STAGESELECT_FADEOUT	
+			break
+		case 2
+			object.state = OPTIONS_FADEOUT	
 			break
 		end switch
 	end if

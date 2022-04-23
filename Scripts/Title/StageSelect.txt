@@ -8,10 +8,27 @@
 // Aliases
 
 private alias object.value1 : KEH.menusel
+private alias object.value2 : KEH.scroll 
+private alias object.value3 : KEH.scroll2 
+
+
 
 // States
 
 reserve function Sega_Background
+reserve function scrolling
+
+function scrolling
+	if KEH.menusel > 2
+		temp1 -= 216
+	end if
+	if KEH.menusel > 5
+		temp1 -= 216
+	end if
+	if KEH.menusel > 8
+		temp1 -= 216
+	end if
+end function
 
 function Sega_Background
 	//Background
@@ -131,7 +148,7 @@ event ObjectMain
 	case 0
 		object.inkEffect = INK_ALPHA
 		object.value0 = 320
-		SetActivePalette(2, 0, screen.ysize)
+		SetActivePalette(0, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, object.value0)
 		object.state++
 		break
@@ -152,8 +169,8 @@ event ObjectMain
 
 
 	case 5
-			stage.activeList = PRESENTATION_STAGE
-			stage.listPos = 4
+			stage.activeList = REGULAR_STAGE
+			stage.listPos = KEH.menusel
 			inputPress.start = 0	
 			inputPress.up = 0		
 			inputPress.down = 0	
@@ -168,12 +185,16 @@ event ObjectMain
 			end if	
 			break
 	case 6
+			inputPress.start = 0	
+			inputPress.up = 0		
+			inputPress.down = 0
+			stage.listPos = 0
 			if object.value0 < 256
 				object.value0 += 8
 				music.volume -= 2
 				SetScreenFade(0, 0, 0, object.value0)
 			else
-				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+				LoadStage()
 				StopMusic()
 				SetScreenFade(0, 0, 0, 0xFF)
 			end if	
@@ -183,13 +204,13 @@ event ObjectMain
 		KEH.menusel -= 1
 		PlaySfx(SfxName[Score Add], 0)
 		if KEH.menusel < 0
-			KEH.menusel = 10
+			KEH.menusel = 9
 		end if
 	end if
 	if inputPress.down == 1				
 		KEH.menusel += 1
 		PlaySfx(SfxName[Score Add], 0)
-		if KEH.menusel >= 10
+		if KEH.menusel > 9
 			KEH.menusel = 0
 		end if
 	end if
@@ -197,14 +218,7 @@ event ObjectMain
 		object.state = 6
 	end if
 	if inputPress.start == 1	
-		switch KEH.menusel
-		default
-			PlaySfx(SfxName[Fail], 0)
-			break
-		case 0
-			object.state = 5
-			break
-		end switch
+		object.state = 5
 	end if
 
 end event
@@ -212,10 +226,27 @@ end event
 
 event ObjectDraw
 	CallFunction(Sega_Background)
+	//Scrolling
+	if KEH.menusel > 2
+		KEH.scroll += 72
+	else
+		KEH.scroll = 0
+	end if
 
-	//Add selections
+	if KEH.menusel > 5
+		KEH.scroll += 72
+	else
+	end if
+
+	if KEH.menusel > 8
+		KEH.scroll += 72
+	else
+	end if
+
+	//Add stages
 	temp1 = 32
-	while temp0 < 3
+	temp1 -= KEH.scroll
+	while temp0 < 10 
 		DrawSpriteScreenXY(0, screen.xcenter, temp1)
 		temp1 += 72
 		temp0++
@@ -231,7 +262,32 @@ event ObjectDraw
 		temp1 += 72
 		temp0++
 	loop
+	CallFunction(scrolling)
 	DrawSpriteScreenXY(3, screen.xcenter, temp1)
+
+	// Stage Names
+	temp0 = 0
+	temp1 = 48
+	temp2 = 16
+	CallFunction(scrolling)
+	while temp0 < 12
+		DrawSpriteScreenXY(temp2, 72, temp1)
+		temp1 += 72
+		temp2++
+		temp0++
+	loop
+
+	// Stage Icons
+	temp0 = 0
+	temp1 = 48
+	temp2 = 4
+	CallFunction(scrolling)
+	while temp0 < 14
+		DrawSpriteScreenXY(temp2, 72, temp1)
+		temp1 += 72
+		temp2++
+		temp0++
+	loop
 end event
 
 
@@ -241,9 +297,40 @@ event ObjectStartup
 	SpriteFrame(-71, 0, 142, 7, 33, 1)
 	SpriteFrame(0, 0, 32, 128, 0, 1)
 	SpriteFrame(-149, 0, 298, 58, 1, 372)
+	temp0 = 0
+	temp1 = 33
+	while temp0 < 8
+		SpriteFrame(0, 0, 32, 24, temp1, 9)
+		temp1 += 33
+		temp0++
+	loop
+	temp0 = 0
+	temp1 = 33
+	while temp0 < 2
+		SpriteFrame(0, 0, 32, 24, temp1, 34)
+		temp1 += 33
+		temp0++
+	loop
+	temp0 = 0
+	while temp0 < 2
+		SpriteFrame(0, 0, 32, 25, 66, 59)
+		temp0++
+	loop
+	temp0 = 0
+	temp1 = 34
+	while temp0 < 10
+		SpriteFrame(40, -7, 112, 7, 99, temp1)//16
+		temp1 += 8
+		temp0++
+	loop
+	temp0 = 0
+	while temp0 < 2
+		SpriteFrame(40, -7, 112, 7, 99, 122)
+		temp0++
+	loop
 	options.touchControls = false
 	SetMusicTrack("2D.ogg", 2, 108000)
-	LoadPalette("StageSelect.act", 2, 0, 0, 256)
+	LoadPalette("StageSelect.act", 0, 0, 0, 256)
 end event
 
 event RSDKDraw
