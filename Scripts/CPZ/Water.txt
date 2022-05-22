@@ -419,16 +419,12 @@ end event
 
 
 event ObjectStartup
-	if options.vsMode == 1
-		foreach (TypeName[Water], arrayPos0, ALL_ENTITIES)
-			object[arrayPos0].type = TypeName[Blank Object]
-		next
-	end if
 	foreach (TypeName[Water], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].priority = PRIORITY_ACTIVE
 		object[arrayPos0].drawOrder = 5
 		object[arrayPos0].inkEffect = INK_ALPHA
 		object[arrayPos0].alpha = 160
+		OriginalWaterLevel = object[arrayPos0].ypos
 		if credits.screen == 0
 			stage.newWaterLevel = object[arrayPos0].ypos
 		else

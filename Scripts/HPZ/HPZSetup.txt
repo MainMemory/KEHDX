@@ -15,12 +15,12 @@ reserve function HPZSetup_InitSuperTailsPal
 reserve function HPZSetup_InitSuperKnuxPal
 reserve function HPZSetup_SpeedUpMusic
 reserve function HPZSetup_SlowDownMusic
-
 // Static Values
 public value HPZSetup_value33 = 0;
 public value HPZSetup_value34 = 0;
 public value HPZSetup_value35 = 0;
 public value HPZSetup_value36 = 0;
+public value HPZSetup_value39 = 0;
 
 private alias HPZSetup_value33 : HPZSetup_flashTimer
 private alias HPZSetup_value34 : HPZSetup_bossEncounterFlag
@@ -171,6 +171,7 @@ end function
 
 
 event ObjectMain
+
 	if stage.actNum == 1
 		if object[0].xpos > 0xE800000
 			stage.newWaterLevel = 0x6140000
@@ -355,23 +356,15 @@ end event
 
 event ObjectStartup
 
-	if stage.actNum == 1
-
-		// Normal Hidden Palace Zone
-		SetMusicTrack("MysticCave2.ogg", 0, 0x48EF)
-		SpeedUpMusic = HPZSetup_SpeedUpMusic
-		SlowDownMusic = HPZSetup_SlowDownMusic
-
-	else
-
-		// Proto Palace Zone
-		SetMusicTrack("Extra.ogg", 0, 0xE9CC)
-
-	end if
+	SetMusicTrack("MysticCave2.ogg", 0, 0x48EF)
+	SpeedUpMusic = HPZSetup_SpeedUpMusic
+	SlowDownMusic = HPZSetup_SlowDownMusic
 
 	if stage.player2Enabled == true
 		object[1].xpos = object[0].xpos
 	end if
+
+	HPZCheck = true
 
 	animalType1 = TypeName[Rocky]
 	animalType2 = TypeName[Mocky]
@@ -387,18 +380,11 @@ event ObjectStartup
 	// Load the water palette
 	LoadPalette("HPZ_WaterPal.act", 1, 0, 0, 256)
 
-	// Initialize the Super palettes
-
-
 	// Load the electric flash palette in case the player gets an eletric shield
 	LoadPalette("ElectricFlash.act", 2, 0, 0, 256)
 
 	HPZSetup_flashTimer = 0
 	HPZSetup_bossEncounterFlag = false
-
-	// MAke the next stage OOZ
-	stage.listPos = 20
-	stage.activeList = REGULAR_STAGE
 
 	SetLayerDeformation(1, 64, 2, 0, 0, 0)
 

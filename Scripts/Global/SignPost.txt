@@ -13,6 +13,12 @@
 
 // Tables
 
+event ObjectMain
+		temp0 = object.xpos
+		temp0 += screen.xcenter
+		stage.newXBoundary2 = temp0
+end event
+
 event ObjectStartup
 	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
 		CallFunction(EmeraldManager_AddEntity)

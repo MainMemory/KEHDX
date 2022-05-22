@@ -1,0 +1,532 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: GHZ Setup Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// Aliases
+private alias 39 : TYPE_GHZSETUP
+
+// Function declarations
+reserve function GHZSetup_SpeedUpMusic
+reserve function GHZSetup_SlowDownMusic
+
+// Static Values
+public value GHZSetup_value29 = 0;
+public value GHZSetup_value30 = 0;
+public value GHZSetup_value31 = 0;
+
+private alias GHZSetup_value29 : GHZSetup_spikeLogsCounter
+private alias GHZSetup_value30 : GHZSetup_waterfallFlag
+private alias GHZSetup_value31 : GHZSetup_waterfallPan
+
+// Tables
+public table GHZSetup_replay_GHZS_1
+	0x500000, 0x3B00000
+	0b00000000, 11
+	0b00001000, 91
+	0b00111000, 1
+	0b00101000, 7
+	0b00001000, 87
+	0b00111000, 1
+	0b00101000, 8
+	0b00001000, 47
+	0b00111000, 1
+	0b00101000, 7
+	0b00001000, 204
+	0b00111000, 1
+	0b00101000, 7
+	0b00001000, 32
+	0b00111000, 1
+	0b00101000, 9
+	0b00001000, 43
+	0b00111000, 1
+	0b00101000, 28
+	0b00001000, 61
+	0b00111000, 1
+	0b00101000, 24
+	0b00001000, 30
+	0b00111000, 1
+	0b00101000, 44
+	0b00001000, 22
+	0b00111000, 1
+	0b00101000, 21
+	0b00001000, 42
+	0b00111000, 1
+	0b00101000, 107
+	0b00001000, 255
+	0b00001000, 33
+	0b00000000, 203
+	0b00000100, 44
+	0b00000000, 12
+	0b00000100, 11
+	0b00000000, 23
+	0b00001000, 20
+	0b00000000, 15
+	0b00000100, 4
+	0b00000000, 19
+	0b00001000, 16
+	0b00111000, 1
+	0b00101000, 10
+	0b00001000, 39
+	0b00111000, 1
+	0b00101000, 8
+	0b00001000, 42
+	0b00111000, 1
+end table
+
+public table GHZSetup_replay_GHZT_1
+	0x500000, 0x3B40000
+	0b00000000,  11
+	0b00001000,  91
+	0b00111000,  1
+	0b00101000,  10
+	0b00001000,  75
+	0b00000100,  12
+	0b00110100,  1
+	0b00100100,  24
+	0b00000100,  19
+	0b00110100,  1
+	0b00100100,  7
+	0b00000100,  8
+	0b00000000,  27
+	0b00001000,  55
+	0b00111000,  1
+	0b00101000,  4
+	0b00100000,  5
+	0b00000000,  29
+	0b00000100,  25
+	0b00000000,  11
+	0b00001000,  34
+	0b00000000,  11
+	0b00001000,  30
+	0b00111000,  1
+	0b00101000,  9
+	0b00001000,  202
+	0b00111000,  1
+	0b00101000,  9
+	0b00001000,  35
+	0b00111000,  1
+	0b00101000,  8
+	0b00001000,  45
+	0b00111000,  1
+	0b001010000, 14
+	0b00001000,  17
+	0b00000000,  7
+	0b00001000,  52
+	0b00111000,  1
+	0b00101000,  17
+	0b00001000,  33
+	0b00111000,  1
+	0b00101000,  33
+	0b00001000,  2
+	0b00000000,  29
+	0b00001000,  14
+	0b00111000,  1
+	0b00101000,  6
+	0b00001000,  5
+	0b00000000,  13
+	0b00000100,  9
+	0b00000000,  11
+	0b00110000,  1
+	0b00100000,  6
+	0b00001000,  6
+	0b00111000,  1
+	0b00101000,  6
+	0b00001000,  16
+	0b00111000,  1
+	0b00101000,  5
+	0b00001000,  33
+	0b00000000,  8
+	0b00000100,  11
+	0b00000000,  21
+	0b00001000,  9
+	0b00000000,  31
+	0b00110000,  1
+	0b00100000,  6
+	0b00000000,  2
+	0b00001000,  28
+	0b00000000,  28
+	0b00000100,  5
+	0b00000000,  5
+	0b00001000,  25
+	0b00111000,  1
+	0b00101000,  2
+	0b00001000,  28
+	0b00000000,  6
+	0b00000100,  9
+	0b00000000,  6
+	0b00001000,  31
+	0b00000000,  45
+	0b00111000,  1
+	0b00101000,  5
+	0b00000000,  2
+	0b00001000,  9
+	0b00000000,  7
+	0b00001000,  10
+	0b00000000,  30
+	0b00001000,  12
+	0b00000000,  37
+	0b00000100,  17
+	0b00000000,  22
+	0b00001000,  20
+	0b00111000,  1
+	0b00101000,  11
+	0b00001000,  52
+	0b00111000,  1
+	0b00101000,  12
+end table
+
+public table GHZSetup_replay_GHZK_1
+	0x500000, 0x3B00000
+	0b00000000, 11
+	0b00001000, 92
+	0b00111000, 1
+	0b00101000, 12
+	0b00001000, 82
+	0b00000010, 12
+	0b00000000, 24
+	0b00110000, 1
+	0b00100000, 26
+	0b00000000, 3
+	0b00001000, 2
+	0b00111000, 1
+	0b00101000, 88
+	0b00001000, 2
+	0b00000000, 28
+	0b00000010, 16
+	0b00110010, 1
+	0b00100010, 7
+	0b00000010, 5
+	0b00110010, 1
+	0b00100010, 2
+	0b00000010, 5
+	0b00110010, 1
+	0b00100010, 3
+	0b00000010, 3
+	0b00110010, 1
+	0b00100010, 2
+	0b00000010, 4
+	0b00001000, 105
+	0b00000000, 109
+	0b00001000, 12
+	0b00111000, 1
+	0b00101000, 44
+	0b00001000, 51
+	0b00111000, 1
+	0b00101000, 33
+	0b00001000, 17
+	0b00111000, 1
+	0b00101000, 40
+	0b00001000, 31
+	0b00111000, 1
+	0b00101000, 39
+	0b00001000, 24
+	0b00111000, 1
+	0b00101000, 64
+	0b00001000, 17
+	0b00111000, 1
+	0b00101000, 15
+	0b00001000, 241
+	0b00000000, 29
+	0b00110000, 1
+	0b00100000, 18
+	0b00000000, 4
+	0b00110000, 1
+	0b00100000, 30
+	0b00100001, 3
+	0b00000001, 171
+	0b00000000, 15
+	0b00000010, 12
+	0b00110010, 1
+	0b00100010, 7
+	0b00000010, 4
+	0b00110010, 1
+	0b00100010, 2
+	0b00000010, 6
+	0b00110010, 1
+	0b00100010, 2
+	0b00000010, 4
+	0b00110010, 1
+	0b00100010, 5
+	0b00000010, 22
+	0b00000000, 2
+	0b00001000, 47
+	0b00000000, 6
+end table
+
+public table GHZSetup_replay_GHZ_2
+	0x500000, 0x3B00000
+	0b00001000, 91
+	0b00111000, 1
+	0b00101000, 9
+	0b00001000, 83
+	0b00111000, 1
+	0b00101000, 5
+	0b00001000, 52
+	0b00111000, 1
+	0b00101000, 8
+	0b00001000, 160
+	0b00000000, 8
+	0b00001000, 26
+	0b00111000, 1
+	0b00101000, 3
+	0b00100000, 2
+	0b00000000, 6
+	0b00000100, 5
+	0b00000000, 13
+	0b00001000, 44
+	0b00111000, 1
+	0b00101000, 5
+	0b00001000, 17
+	0b00000000, 16
+	0b00001000, 13
+	0b00001000, 5
+	0b00001000, 42
+	0b00000000, 52
+	0b00001000, 30
+end table
+
+public table GHZSetup_replay_GHZ_3
+	0x13E80000, 0x2AC0000
+	0b00000000, 17
+	0b00001000, 255
+	0b00001000, 31
+	0b00000000, 219
+end table
+
+
+function GHZSetup_SpeedUpMusic
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x78B1)
+			SwapMusicTrack("GreenHill_F.ogg", 0, 502294, 7920)
+			break
+		case 2
+			SetMusicTrack("GreenHill_F.ogg", 0, 502294)
+			SwapMusicTrack("Invincibility_F.ogg", 2, 0x78B1, 7920)
+			break
+		case 4
+			SetMusicTrack("GreenHill_F.ogg", 0, 502294)
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x78B1)
+			break
+		end switch
+	else
+		stage.musicFlag = 1
+	end if
+end function
+
+
+function GHZSetup_SlowDownMusic
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility.ogg", 2, 0x9717)
+			SwapMusicTrack("GreenHill.ogg", 0, 0x9B0AA, 0x316A)
+			break
+		case 2
+			SetMusicTrack("GreenHill.ogg", 0, 0x9B0AA)
+			SwapMusicTrack("Invincibility.ogg", 2, 0x9717, 0x316A)
+			break
+		case 4
+			SetMusicTrack("GreenHill.ogg", 0, 0x9B0AA)
+			SetMusicTrack("Invincibility.ogg", 2, 0x9717)
+			break
+		end switch
+	else
+		stage.musicFlag = 2
+	end if
+end function
+
+
+event ObjectMain
+	if GHZSetup_waterfallFlag != 0
+		GHZSetup_waterfallFlag = 0
+		object.value4--
+		if object.value4 <= 0
+			object.value4 = 31
+			if object.value5 == 0
+				if credits.screen == 0
+					PlaySfx(SfxName[Waterfall], false)
+					StopSfx(SfxName[Waterfall Loop])
+				end if
+				object.value5 = 1
+			else
+				if credits.screen == 0
+					StopSfx(SfxName[Waterfall])
+					PlaySfx(SfxName[Waterfall Loop], false)
+				end if
+			end if
+		end if
+		SetSfxAttributes(SfxName[Waterfall], -1, GHZSetup_waterfallPan)
+		SetSfxAttributes(SfxName[Waterfall Loop], -1, GHZSetup_waterfallPan)
+	else
+		object.value5 = 0
+		object.value4 = 0
+	end if
+
+	if object.state < 5
+		object.value3++
+		if object.value3 == 6
+			object.value3 = 0
+			RotatePalette(0, 168, 171, 1)
+			GHZSetup_spikeLogsCounter++
+			GHZSetup_spikeLogsCounter &= 15
+		end if
+	end if
+
+	if object.value0 == 0
+		object.value0 = 20
+		temp0 = 768
+		temp0 += object.frame
+		Copy16x16Tile(427, temp0)
+		temp0++
+		Copy16x16Tile(428, temp0)
+		temp0++
+		Copy16x16Tile(429, temp0)
+		temp0++
+		Copy16x16Tile(430, temp0)
+		object.frame += 4
+		object.frame &= 7
+	else
+		object.value0--
+	end if
+
+	if object.value1 == 0
+		switch object.value2
+		case 0
+			object.value1 = 160
+			temp0 = 0
+			break
+		case 1
+			object.value1 = 10
+			temp0 = 6
+			break
+		case 2
+			object.value1 = 160
+			temp0 = 12
+			break
+		case 3
+			object.value1 = 10
+			temp0 = 6
+			break
+		end switch
+		temp0 += 776
+		Copy16x16Tile(431, temp0)
+		temp0++
+		Copy16x16Tile(432, temp0)
+		temp0++
+		Copy16x16Tile(433, temp0)
+		temp0++
+		Copy16x16Tile(434, temp0)
+		temp0++
+		Copy16x16Tile(435, temp0)
+		temp0++
+		Copy16x16Tile(436, temp0)
+		object.value2++
+		object.value2 &= 3
+	else
+		object.value1--
+	end if
+end event
+
+
+event ObjectStartup
+	SetMusicTrack("GreenHill.ogg", 0, 635050)
+	SpeedUpMusic = GHZSetup_SpeedUpMusic
+	SlowDownMusic = GHZSetup_SlowDownMusic
+	animalType1 = TypeName[Pocky]
+	animalType2 = TypeName[Flicky]
+	Abs(tileLayer[1].parallaxFactor)
+	FlipSign(tileLayer[1].parallaxFactor)
+	tileLayer[1].scrollPos = 0x180000
+	object[10].type = TypeName[GHZ Setup]
+	object[10].priority = PRIORITY_ACTIVE
+	GHZSetup_spikeLogsCounter = 0
+
+	if options.attractMode == true
+		switch stage.playerListPos
+		case 0
+			switch credits.screen
+			case 0
+				PlayerObject_ReplayTable = GHZSetup_replay_GHZS_1
+				PlayerObject_ReplaySize = 102
+				PlayerObject_ReplayLength = 1800
+				break
+			case 1
+				PlayerObject_ReplayTable = GHZSetup_replay_GHZ_2
+				PlayerObject_ReplaySize = 58
+				PlayerObject_ReplayLength = 540
+				break
+			case 8
+				PlayerObject_ReplayTable = GHZSetup_replay_GHZ_3
+				PlayerObject_ReplaySize = 10
+				PlayerObject_ReplayLength = 540
+				break
+			end switch
+			break
+		case 1
+			switch credits.screen
+			case 0
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZT_1
+				PlayerObject_ReplaySize 	= 198
+				PlayerObject_ReplayLength 	= 1800
+				break
+			case 1
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZ_2
+				PlayerObject_ReplaySize 	= 58
+				PlayerObject_ReplayLength 	= 540
+				break
+			case 8
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZ_3
+				PlayerObject_ReplaySize 	= 10
+				PlayerObject_ReplayLength 	= 540
+				break
+			end switch
+			break
+		case 2
+			switch credits.screen
+			case 0
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZK_1
+				PlayerObject_ReplaySize 	= 150
+				PlayerObject_ReplayLength 	= 1800
+				break
+			case 1
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZ_2
+				PlayerObject_ReplaySize 	= 58
+				PlayerObject_ReplayLength 	= 540
+				break
+			case 8
+				PlayerObject_ReplayTable 	= GHZSetup_replay_GHZ_3
+				PlayerObject_ReplaySize 	= 10
+				PlayerObject_ReplayLength 	= 540
+				break
+			end switch
+			break
+		end switch
+		CallFunction(PlayerObject_InitReplay)
+	end if
+end event
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 143)
+end event

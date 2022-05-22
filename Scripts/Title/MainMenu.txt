@@ -234,16 +234,16 @@ event ObjectMain
 			break
 	end switch
 	if inputPress.up == 1
-		KEH.menusel += 1
-		PlaySfx(SfxName[Score Add], 0)
-		KEH.menusel %= 4
-	end if
-	if inputPress.down == 1				
 		KEH.menusel -= 1
 		PlaySfx(SfxName[Score Add], 0)
 		while KEH.menusel < 0
-			KEH.menusel += 4
-		loop
+			KEH.menusel = 3
+		end if
+	end if
+	if inputPress.down == 1				
+		KEH.menusel += 1
+		PlaySfx(SfxName[Score Add], 0)
+		KEH.menusel %= 4
 	end if
 	if inputPress.start == 1	
 		switch KEH.menusel
@@ -276,13 +276,13 @@ event ObjectDraw
 		case 0
 			temp0 = 132
 			break
+		case 1
+			temp0 = 152
+			break
 		case 2
 			temp0 = 172
 			break
 		case 3
-			temp0 = 152
-			break
-		case 1
 			temp0 = 192
 			break
 	end switch
@@ -301,6 +301,7 @@ event ObjectDraw
 		object.value23++
 		object.value24 = 0
 	end if
+
 
 	DrawSpriteScreenXY(5, screen.xcenter, 216)
 

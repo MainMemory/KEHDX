@@ -11,7 +11,8 @@ private alias object.value1 : KEH.menusel
 private alias object.value2 : KEH.scroll 
 private alias object.value3 : KEH.scroll2 
 
-
+private alias 10 : KEH.menulimit
+private alias 72 : importantnumberthing
 
 // States
 
@@ -22,7 +23,7 @@ function scrolling
 	if KEH.menusel > 2
 		temp1 -= 216
 	end if
-	if KEH.menusel > 5
+	if KEH.menusel >= 6
 		temp1 -= 216
 	end if
 	if KEH.menusel > 8
@@ -204,13 +205,13 @@ event ObjectMain
 		KEH.menusel -= 1
 		PlaySfx(SfxName[Score Add], 0)
 		if KEH.menusel < 0
-			KEH.menusel = 9
+			KEH.menusel = KEH.menulimit
 		end if
 	end if
 	if inputPress.down == 1				
 		KEH.menusel += 1
 		PlaySfx(SfxName[Score Add], 0)
-		if KEH.menusel > 9
+		if KEH.menusel > KEH.menulimit
 			KEH.menusel = 0
 		end if
 	end if
@@ -228,27 +229,28 @@ event ObjectDraw
 	CallFunction(Sega_Background)
 	//Scrolling
 	if KEH.menusel > 2
-		KEH.scroll += 72
+		KEH.scroll += importantnumberthing
 	else
 		KEH.scroll = 0
 	end if
 
 	if KEH.menusel > 5
-		KEH.scroll += 72
+		KEH.scroll += importantnumberthing
 	else
 	end if
 
 	if KEH.menusel > 8
-		KEH.scroll += 72
+		KEH.scroll += importantnumberthing
 	else
 	end if
 
 	//Add stages
 	temp1 = 32
-	temp1 -= KEH.scroll
-	while temp0 < 10 
+	temp0 = 0
+	CallFunction(scrolling)
+	while temp0 < 11
 		DrawSpriteScreenXY(0, screen.xcenter, temp1)
-		temp1 += 72
+		temp1 += importantnumberthing
 		temp0++
 	loop
 
@@ -259,35 +261,75 @@ event ObjectDraw
 	temp1 = 32
 	temp0 = 0
 	while temp0 < KEH.menusel
-		temp1 += 72
+		temp1 += importantnumberthing
 		temp0++
 	loop
 	CallFunction(scrolling)
 	DrawSpriteScreenXY(3, screen.xcenter, temp1)
 
+	//Numbers	
+	temp0 = 0
+	temp1 = 32
+	CallFunction(scrolling)
+	temp2 = screen.xcenter
+	temp2 += 3
+	while temp0 < 11
+		temp1 += 25
+		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Score
+		temp1 += 16
+		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Rings
+		temp1 -= 34	
+		temp2 += 128
+		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Play Count
+		temp1 += 12
+		DrawSpriteScreenXY(50, temp2, temp1)
+		DrawNumbers(40, temp2, temp1, 59, 2, 8, 1) // Milliseconds
+		temp2 -= 27
+		DrawNumbers(40, temp2, temp1, 59, 2, 8, 1) // Seconds
+		temp2 -= 23
+		DrawNumbers(40, temp2, temp1, 9, 2, 8, 0) // Minutes
+		temp2 += 27	
+		temp2 += 23	
+		temp1 += 12
+		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Deaths
+		temp1 += 12
+		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Rank
+		temp2 -= 128
+		temp1 += 29
+		temp0++
+	loop
+
 	// Stage Names
 	temp0 = 0
 	temp1 = 48
 	temp2 = 16
+	temp3 = screen.xcenter
+	temp3 -= 141
 	CallFunction(scrolling)
-	while temp0 < 12
-		DrawSpriteScreenXY(temp2, 72, temp1)
+	while temp0 < KEH.menulimit
+		DrawSpriteScreenXY(temp2, temp3, temp1)
 		temp1 += 72
 		temp2++
 		temp0++
 	loop
+	if temp0 == 10
+		DrawSpriteScreenXY(34, temp3, temp1)
+	end if
 
 	// Stage Icons
 	temp0 = 0
 	temp1 = 48
 	temp2 = 4
 	CallFunction(scrolling)
-	while temp0 < 14
-		DrawSpriteScreenXY(temp2, 72, temp1)
-		temp1 += 72
+	while temp0 < KEH.menulimit
+		DrawSpriteScreenXY(temp2, temp3, temp1)
+		temp1 += importantnumberthing
 		temp2++
 		temp0++
 	loop
+	if temp0 == 10
+		DrawSpriteScreenXY(28, temp3, temp1)
+	end if
 end event
 
 
@@ -300,36 +342,61 @@ event ObjectStartup
 	temp0 = 0
 	temp1 = 33
 	while temp0 < 8
-		SpriteFrame(0, 0, 32, 24, temp1, 9)
+		SpriteFrame(0, 0, 32, 24, temp1, 9) // 4-12 - S2 Stage Icons
 		temp1 += 33
 		temp0++
 	loop
 	temp0 = 0
 	temp1 = 33
 	while temp0 < 2
-		SpriteFrame(0, 0, 32, 24, temp1, 34)
+		SpriteFrame(0, 0, 32, 24, temp1, 34) // 13 and 14 - WFZ + HPZ Icons
 		temp1 += 33
 		temp0++
 	loop
 	temp0 = 0
 	while temp0 < 2
-		SpriteFrame(0, 0, 32, 25, 66, 59)
+		SpriteFrame(0, 0, 32, 25, 66, 59) 
 		temp0++
 	loop
 	temp0 = 0
 	temp1 = 34
 	while temp0 < 10
-		SpriteFrame(40, -7, 112, 7, 99, temp1)//16
+		SpriteFrame(40, -7, 112, 7, 99, temp1)//16-26 - S2 Stage Names
 		temp1 += 8
 		temp0++
 	loop
 	temp0 = 0
 	while temp0 < 2
-		SpriteFrame(40, -7, 112, 7, 99, 122)
+		SpriteFrame(40, -7, 112, 7, 99, 122) 
 		temp0++
 	loop
+	temp0 = 0
+	temp1 = 1
+	while temp0 < 6
+		SpriteFrame(0, 0, 32, 24, temp1, 431) //28-34 - S1 Stage Icons
+		temp1 += 33
+		temp0++
+	loop
+	temp0 = 0
+	temp1 = 456
+	while temp0 < 6
+		SpriteFrame(40, -7, 88, 7, 1, temp1) //35-41 - S1 Stage Names
+		temp1 += 8
+		temp0++
+	loop
+	temp0 = 0
+	temp1 = 99
+	while temp0 < 10
+		SpriteFrame(0, 0, 8, 7, temp1, 114)//40-49 - Numbers
+		temp1 += 8
+		temp0++
+	loop
+
+	SpriteFrame(-58, 0, 64, 7, 33, 119) // 50 ' "
+
 	options.touchControls = false
 	SetMusicTrack("2D.ogg", 2, 108000)
+	stage.debugmode = 0
 	LoadPalette("StageSelect.act", 0, 0, 0, 256)
 end event
 

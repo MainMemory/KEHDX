@@ -170,6 +170,8 @@ public value PlayerObject_ReplayTablePos = 0;
 public value PlayerObject_ReplaySize = 0;
 public value PlayerObject_ReplayFrameCnt = 0;
 public value PlayerObject_ReplayLength = 0;
+public value PlayerObject_InitialX = 0;
+public value PlayerObject_InitialY = 0;
 private value value13 = 0;
 private value value14 = 0;
 private value value15 = 0;
@@ -1658,7 +1660,12 @@ function PlayerObject_HandleAir
 			end if
 		end if
 		if object.animation == ANI_TWIRL
-			if object.animationSpeed == 40
+			if stage.playerListPos == 0
+				temp0 = 40
+			else
+				temp0 = 20
+			end if
+			if object.animationSpeed == temp0
 				if object.frame >= 12
 					object.animation = ANI_WALKING
 					object.prevAnimation = ANI_WALKING
@@ -3041,6 +3048,8 @@ event ObjectStartup
 		ResetObjectEntity(0, TypeName[Player Object], 0, object[arrayPos0].xpos, object[arrayPos0].ypos)
 		screen.cameraX = player[0].ixpos
 		screen.cameraY = player[0].iypos
+		PlayerObject_InitialX = object[0].xpos 
+		PlayerObject_InitialY = object[0].ypos 
 		object[0].groupID = GROUP_PLAYERS
 		object[0].state = PlayerObject_HandleAir
 		object[0].priority = PRIORITY_ACTIVE
@@ -3069,6 +3078,17 @@ event ObjectStartup
 			break
 		case 1
 			LoadAnimation("Tikal.ani")
+			object[0].propertyValue = 2
+			object[0].value30 = -5
+			object[0].value32 = PlayerObject_StartKnuxGlide
+			ANI_PEELOUT = ANI_RUNNING
+			if options.saveSlot > 0
+				stage.player2Enabled = 0
+			end if
+			break
+		default
+			stage.playerListPos = 0
+			LoadAnimation("Knuckles.ani")
 			object[0].propertyValue = 2
 			object[0].value30 = -5
 			object[0].value32 = PlayerObject_StartKnuxGlide

@@ -97,7 +97,6 @@ event ObjectMain
 
 	if inputPress.start == 1
 		if object.state < 6
-			PlaySfx(SfxName[Sega Chant], 0)
 			object.state = 7
 		end if
 	end if
@@ -165,7 +164,6 @@ event ObjectMain
 		if sega.fadeValue == 2
 			PlaySfx(SfxName[Sega Chant], 0)
 		end if
-		CallFunction(Sega_CheckTouchCheat)
 		break
 	case 7
 		if sega.fadeValue < 256

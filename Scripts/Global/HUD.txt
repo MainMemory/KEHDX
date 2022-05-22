@@ -17,6 +17,8 @@ private alias object.xpos 	: player.xpos
 private alias object.ypos 	: player.ypos
 private alias object.value0 : player.rings
 
+private alias object.value10 : leave.xoffset
+
 private alias 102400 : min_dist
 
 public alias saveRAM[200] : saved.radar
@@ -35,7 +37,7 @@ reserve function sqrt
 // Static Values
 private value EmeraldManager_EntityCount = 0;
 private value EmeraldManager_EmeraldCount = 0;
-private value EmeraldManager_P1Collected = 0;
+public value EmeraldManager_P1Collected = 0;
 private value EmeraldManager_P2Collected = 0;
 private value EmeraldManager_EmeraldTimer = 0;
 private value EmeraldManager_BonusTimer = 0;
@@ -43,6 +45,7 @@ private value EmeraldManager_BonusFrame = -1;
 private value EmeraldManager_GotEmeralds = 0;
 private value EmeraldManager_EndX = 0;
 private value EmeraldManager_EndY = 0;
+
 
 // Tables
 private table EmeraldManager_EmeraldObjects
@@ -110,10 +113,15 @@ function EmeraldManager_AwardBonus
 end function
 
 function EmeraldManager_AwardEmerald
-	if EmeraldManager_P1Collected >= 3
+	if HPZCheck == true
+		temp1 = 5
+	else
+		temp1 = 3
+	end if
+	if EmeraldManager_P1Collected >= temp1 
 		return
 	end if
-	if EmeraldManager_P2Collected >= 3
+	if EmeraldManager_P2Collected >= temp1 
 		return
 	end if
 	temp1 = 0
@@ -130,6 +138,7 @@ function EmeraldManager_AwardEmerald
 			if currentPlayer == 1
 				EmeraldManager_P2Collected++
 			else
+				//EmeraldManager_P1Collected+=3 //Dev Command
 				EmeraldManager_P1Collected++
 			end if
 			if options.vsMode == 0
@@ -167,6 +176,7 @@ function EmeraldManager_HUD
 	temp0 -= temp1
 	temp1 = screen.ysize
 	temp1 -= 16
+	temp1 -= leave.xoffset
 	temp2 = 0
 	while temp2 < EmeraldManager_EmeraldCount
 		GetTableValue(temp3, temp2, EmeraldManager_RadarSprites)
@@ -174,9 +184,16 @@ function EmeraldManager_HUD
 		case -1
 			break
 		case 38
-			DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
+			if HPZCheck == true
+				DrawSpriteScreenFX(95, FX_INK, temp0, temp1)
+			else
+				DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
+			end if
 			break
 		default
+			if HPZCheck == true
+				temp3 += 57
+			end if
 			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
 			object.scale *= 5
 			object.scale += 512
@@ -189,29 +206,39 @@ function EmeraldManager_HUD
 end function
 
 function HUD_DrawPC
-
-	DrawSpriteScreenXY(10, 17, 13)
+	
+	temp0 = 17
+	temp0 -= leave.xoffset
+	DrawSpriteScreenXY(10, temp0, 13)
 
 	if stage.minutes == 9
 		if HUD.flashingTimer > 7
-			DrawSpriteScreenXY(11, 17, 29)
+			DrawSpriteScreenXY(11, temp0, 29)
 		end if
 	end if
 
 	if player[0].rings == 0
 		if HUD.flashingTimer > 7
-			DrawSpriteScreenXY(12, 17, 45)
+			DrawSpriteScreenXY(12, temp0, 45)
 		end if
 	end if
 
-	DrawNumbers(0, 104, 13, player.score, 6, 8, 0)
+	temp1 = 104
+	temp1 -= leave.xoffset
+	DrawNumbers(0, temp1, 13, player.score, 6, 8, 0)
 
-	DrawSpriteScreenXY(13, 67, 29)
-	DrawNumbers(0, 104, 29, stage.milliSeconds, 2, 8, 1)
-	DrawNumbers(0, 80, 29, stage.seconds, 2, 8, 1)
-	DrawNumbers(0, 56, 29, stage.minutes, 1, 8, 1)
+	temp0 = 67
+	temp0 -= leave.xoffset
+	DrawSpriteScreenXY(13, temp0, 29)
 
-	DrawNumbers(0, 104, 45, player[0].rings, 3, 8, 0)
+	DrawNumbers(0, temp1, 29, stage.milliSeconds, 2, 8, 1)
+	temp0 = 80
+	temp0 -= leave.xoffset
+	DrawNumbers(0, temp0, 29, stage.seconds, 2, 8, 1)
+	temp0 -= 24
+	DrawNumbers(0, temp0, 29, stage.minutes, 1, 8, 1)
+
+	DrawNumbers(0, temp1, 45, player[0].rings, 3, 8, 0)
 
 	if stage.debugMode == true
 
@@ -223,47 +250,59 @@ function HUD_DrawPC
 		Abs(temp0)
 		temp1 = screen.xsize
 		temp1 -= 24
-		DrawNumbers(0, temp1, 13, temp0, 5, 8, 1)
+		temp1 += leave.xoffset
+		if EmeraldManager_P1Collected > 0
+			temp2 = 28
+		else
+			temp2 = 13
+		end if
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
 
 		// YPos display
 		temp0 = player[0].ypos
 		temp0 >>= 16
 		Abs(temp0)
-		DrawNumbers(0, temp1, 29, temp0, 5, 8, 1)
+		temp2 += 16
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
 
 		// Move 42 pixels to the left
 		temp1 -= 42
 
 		// Draw the "X:" and "Y:" icons
-
+		temp2 -= 14
 		// Use red variant if player is in a negative pos
 		if player[0].xpos >= 0
-			DrawSpriteScreenXY(18, temp1, 15)
+			DrawSpriteScreenXY(18, temp1, temp2)
 		else
-			DrawSpriteScreenXY(36, temp1, 15)
+			DrawSpriteScreenXY(36, temp1, temp2)
 		end if
-
+		temp2 += 16
 		if player[0].ypos >= 0
-			DrawSpriteScreenXY(19, temp1, 31)
+			DrawSpriteScreenXY(19, temp1, temp2)
 		else
-			DrawSpriteScreenXY(37, temp1, 31)
+			DrawSpriteScreenXY(37, temp1, temp2)
 		end if
 	end if
 
 	// Lives icon
 	temp0 = stage.playerListPos
 	temp0 += 15
-	DrawSpriteScreenXY(temp0, 16, 212)
+	temp1 = 16
+	temp1 -= leave.xoffset
+	DrawSpriteScreenXY(temp0, temp1, 212)
 
 	// Character text
 	temp0 += 6
-	DrawSpriteScreenXY(temp0, 33, 213)
+	temp1 += 17
+	DrawSpriteScreenXY(temp0, temp1, 213)
 
 	// Small "x" inbetween icon and text
-	DrawSpriteScreenXY(20, 38, 222)
+	temp1 += 5
+	DrawSpriteScreenXY(20, temp1, 222)
 
 	// The actual player lives number
-	DrawNumbers(24, 56, 220, player.lives, 2, 8, 0)
+	temp1 += 18
+	DrawNumbers(24, temp1, 220, player.lives, 2, 8, 0)
 
 	if saved.radar == 0
 		CallFunction(EmeraldManager_HUD)
@@ -272,8 +311,14 @@ function HUD_DrawPC
 	temp0 = screen.xsize
 	temp0 -= 24
 	temp1 = 0
+	temp2 = 8
+	temp0 += leave.xoffset
 	while temp1 < EmeraldManager_P1Collected
-		DrawSpriteScreenXY(44, temp0, 8)
+		if HPZCheck == true
+			DrawSpriteScreenXY(101, temp0, temp2)
+		else
+			DrawSpriteScreenXY(44, temp0, temp2)
+		end if
 		temp0 -= 20
 		temp1++
 	loop
@@ -282,7 +327,11 @@ function HUD_DrawPC
 	temp0 -= 24
 	temp1 = 0
 	while temp1 < EmeraldManager_P2Collected
-		DrawSpriteScreenFX(44, FX_INK, temp0, 28)
+		if HPZCheck == true
+			DrawSpriteScreenXY(101, temp0, temp2)
+		else
+			DrawSpriteScreenXY(44, temp0, temp2)
+		end if
 		temp0 -= 20
 		temp1++
 	loop
@@ -401,11 +450,26 @@ function sqrt
 end function
 
 event ObjectMain
+
+	CheckEqual(object[30].type, TypeName[Act Finish])
+	if checkResult == 1
+		if leave.xoffset < screen.xsize
+			leave.xoffset += 5
+		end if
+		if leave.xoffset >= screen.xsize
+			leave.xoffset = screen.xsize
+		end if
+	end if
+
 	// duh emealds
 	switch object.state
 	case 0
 		temp0 = 0
-		EmeraldManager_EmeraldCount = 3
+		if HPZCheck == true
+			EmeraldManager_EmeraldCount = 5
+		else
+			EmeraldManager_EmeraldCount = 3
+		end if
 		while temp0 < EmeraldManager_EmeraldCount
 			arrayPos0 = -1
 			temp5 = 0
@@ -532,9 +596,14 @@ event ObjectMain
 				end if
 			end if
 		end if
-		CheckGreater(EmeraldManager_P1Collected, 2)
+		if HPZCheck == true
+			temp1 = 4
+		else
+			temp1 = 2
+		end if
+		CheckGreater(EmeraldManager_P1Collected, temp1)
 		temp0 = checkResult
-		CheckGreater(EmeraldManager_P2Collected, 2)
+		CheckGreater(EmeraldManager_P2Collected, temp1)
 		temp0 |= checkResult
 		CheckLower(EmeraldManager_GotEmeralds, 1)
 		temp0 &= checkResult
@@ -558,12 +627,26 @@ event ObjectMain
 	case 2
 		music.volume -= 2
 		EmeraldManager.fadeAmount += 8
+		StopSfx(0)
 		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
 		if EmeraldManager.fadeAmount == 0x200
 			if EmeraldManager_BonusFrame != -1
 				CallFunction(EmeraldManager_AwardBonus)
 			end if
 			object.state++
+			object[0].xpos = EmeraldManager_EndX
+			object[0].ypos = EmeraldManager_EndY
+			object[0].up = 0
+			object[0].down = 0
+			object[0].left = 0
+			object[0].right = 0
+			object[0].jumpPress = 0
+			object[0].jumpHold = 0
+			object[0].speed = 0
+			object[0].xvel = 0
+			object[0].yvel = 0
+			screen.cameraX = object[0].ixpos
+			screen.cameraY = object[0].iypos
 			stage.timeEnabled = 0
 			stage.state = 1
 		end if
@@ -579,7 +662,7 @@ event ObjectMain
 			object[30].priority = PRIORITY_ACTIVE
 		end if
 		break
-	endswitch
+	end switch
 	if EmeraldManager_BonusFrame != -1
 		EmeraldManager_BonusTimer--
 		if EmeraldManager_BonusTimer == 0
@@ -678,22 +761,38 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 8, 25, 98) 	// 36 - Debug red "X"
 	SpriteFrame(0, 0, 8, 8, 34, 98) 	// 37 - Debug red "Y"
 
-	temp0 = 0
-	temp1 = 1
-	while temp0 < 6
+	CheckCurrentStageFolder("GHZ")
+	if checkResult == true
+		temp0 = 0
+		temp1 = 1
+		while temp0 < 6
+			SpriteFrame(-8, -8, 16, 16, temp1, 375) 	// 38-43 - New Emerald Radar
+			temp1 += 17
+			temp0++
+		loop
+	
 		if saved.radarstyle == 0
-			SpriteFrame(-8, -8, 16, 16, temp1, 256) 	// 38-43 - New Emerald Radar
-		else 
-			SpriteFrame(-8, -8, 16, 16, temp1, 358) 	// 38-43 - Old Emerald Radar
+			SpriteFrame(0, 0, 16, 16, 120, 375) 	// 44 - New Got Emerald
+		else
+			SpriteFrame(0, 0, 16, 16, temp1, 375) 	// 44 - Old Got Emerald
 		end if
-		temp1 += 17
-		temp0++
-	loop
-
-	if saved.radarstyle == 0
-		SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - New Got Emerald
 	else
-		SpriteFrame(0, 0, 16, 16, temp1, 358) 	// 44 - Old Got Emerald
+		temp0 = 0
+		temp1 = 1
+		while temp0 < 6
+			if saved.radarstyle == 0
+				SpriteFrame(-8, -8, 16, 16, temp1, 256) 	// 38-43 - New Emerald Radar
+			else 
+				SpriteFrame(-8, -8, 16, 16, temp1, 358) 	// 38-43 - Old Emerald Radar
+			end if
+			temp1 += 17
+			temp0++
+		loop
+		if saved.radarstyle == 0
+			SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - New Got Emerald
+		else
+			SpriteFrame(0, 0, 16, 16, temp1, 358) 	// 44 - Old Got Emerald
+		end if
 	end if
 
 	temp0 = 0
@@ -721,6 +820,16 @@ event ObjectStartup
 	SpriteFrame(0, 0, 44, 11, 200, 280) 	// 93 - Great!
 	SpriteFrame(0, 0, 36, 11, 196, 256) 	// 94 - Good!
 
+	temp0 = 0
+	temp1 = 1
+	while temp0 < 6
+		SpriteFrame(-8, -8, 16, 16, temp1, 392) 	// 95-101 - HPZ Emerald Radar
+		temp1 += 17
+		temp0++
+	loop
+	
+	SpriteFrame(0, 0, 16, 16, temp1, 392) 	// 102 - HPZ Got Emerald
+
 	// Set the HUD's draw function based on the current platform
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
 		if engine.deviceType == RETRO_STANDARD
@@ -733,13 +842,15 @@ event ObjectStartup
 	next
 
 	EmeraldManager_EntityCount = 0
-	EmeraldManager_EmeraldCount = 3
+	EmeraldManager_EmeraldCount = 0
 	EmeraldManager_P1Collected = 0
 	EmeraldManager_P2Collected = 0
 	EmeraldManager_EmeraldTimer = 0
 	EmeraldManager_BonusTimer = 0
 	EmeraldManager_BonusFrame = -1
 	EmeraldManager_GotEmeralds = 0
+	HPZCheck = false
+
 	temp0 = 0
 	while temp0 < 5
 		SetTableValue(-1, temp0, EmeraldManager_EmeraldObjects)

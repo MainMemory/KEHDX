@@ -288,7 +288,7 @@ event ObjectStartup
 			object[arrayPos0].direction = FLIP_X
 			object[arrayPos0].xvel = 0x4000
 		end if
-CallFunction(EmeraldManager_AddEntity)
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Stegway], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Stegway_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

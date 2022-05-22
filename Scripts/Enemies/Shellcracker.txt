@@ -196,6 +196,9 @@ event ObjectMain
 					object[tempObjectPos].xvel = -0x40000
 				end if
 				CallFunction(PlayerObject_BadnikBreak)
+				if object.type == TypeName[Blank Object]
+					CallFunction(EmeraldManager_AwardEmerald)
+				end if
 			end if
 			if object.type == TypeName[Shellcracker]
 				if object.direction == FLIP_NONE
@@ -281,6 +284,7 @@ event ObjectStartup
 		object[arrayPos0].value2 = object[arrayPos0].ypos
 		object[arrayPos0].propertyValue ^= 1
 		CallFunction(Shellcracker_Function103)
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Shellcracker], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Shellcracker_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

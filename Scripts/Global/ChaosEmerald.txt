@@ -18,7 +18,11 @@ event ObjectMain
 
 		// Check interaction with players
 		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-			BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO)
+			if HPZCheck == true
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO)
+			else
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO)
+			end if
 			if checkResult == true
 				CallFunction(EmeraldManager_AwardEmerald)
 				ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
@@ -29,7 +33,11 @@ event ObjectMain
 		currentPlayer = object.propertyValue
 		object.xpos = object[currentPlayer].xpos
 		object.ypos = object[currentPlayer].ypos
-		object.ypos -= 2097152
+		if HPZCheck == true
+			object.ypos -= 2497152
+		else
+			object.ypos -= 2097152
+		end if
 		object.value0++
 		if object.value0 < 150
 			temp0 = object.value0
@@ -66,17 +74,39 @@ end event
 event ObjectDraw
 	switch object.state
 	case 1
-		if object.frame < 64
-			DrawSprite(0)
+		if HPZCheck == true
+			DrawSprite(9)
 		else
-			temp0 = object.frame
-			temp0 -= 60
-			temp0 >>= 2
-			DrawSprite(temp0)
+			if stage.listpos > 9
+				object.value1++
+				object.value1 &= 15
+				if object.value1 < 8
+					DrawSprite(10)
+				else
+					DrawSprite(11)
+				end if
+			else
+				if object.frame < 64
+					DrawSprite(0)
+				else
+					temp0 = object.frame
+					temp0 -= 60
+					temp0 >>= 2
+					DrawSprite(temp0)
+				end if
+			end if
 		end if
 		break
 	case 2
-		DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
+		if HPZCheck == true
+			DrawSpriteFX(9, FX_INK, object.xpos, object.ypos)
+		else
+			if stage.listpos > 9
+				DrawSpriteFX(10, FX_INK, object.xpos, object.ypos)
+			else
+				DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
+			end if
+		end if
 		break
 	endswitch
 end event
@@ -93,6 +123,16 @@ event ObjectStartup
 			temp1 += 17
 		loop
 		temp0 += 17
+	loop
+
+	SpriteFrame(-8, -16, 16, 32, 178, 159) // 9 HPZ Shard
+
+	temp1 = 126
+	temp0 = 0
+	while temp0 < 2
+		SpriteFrame(-8, -8, 16, 16, temp1, 158) // S1 Emerald
+		temp1 += 17
+		temp0++
 	loop
 
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)

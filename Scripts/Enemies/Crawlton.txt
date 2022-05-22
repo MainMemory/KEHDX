@@ -132,6 +132,9 @@ event ObjectMain
 		BoxCollisionTest(C_TOUCH, object.entityPos, -10, -8, 10, 8, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 		if checkResult == 1
 			CallFunction(PlayerObject_BadnikBreak)
+			if object.type == TypeName[Blank Object]
+				CallFunction(EmeraldManager_AwardEmerald)
+			end if
 		end if
 	next
 	if object.type == TypeName[Crawlton]
@@ -194,6 +197,9 @@ event ObjectStartup
 		SpriteFrame(-16, -8, 24, 16, 152, 114)
 		SpriteFrame(-8, -8, 16, 15, 135, 114)
 	end if
+	foreach (TypeName[Crawlton], arrayPos0, ALL_ENTITIES)
+		CallFunction(EmeraldManager_AddEntity)
+	next
 	SetTableValue(TypeName[Crawlton], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Crawlton_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
 	SetTableValue(Crawlton_DebugSpawn, DebugMode_ObjCount, DebugMode_SpawnTable)

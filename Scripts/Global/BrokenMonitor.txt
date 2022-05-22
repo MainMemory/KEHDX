@@ -49,7 +49,34 @@ end function
 
 
 event ObjectMain
-
+	if object.propertyValue == 13
+		temp0 = object.ixpos
+		temp0 += 30
+		stage.newXBoundary2 = temp0
+		object[arrayPos0].priority = PRIORITY_XBOUNDS
+	end if
+	if object[9].state == 3
+		if object.propertyValue == 13
+			object.type = TypeName[Blank Object}
+		end if	
+	end if
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		if object.propertyValue == 13
+			temp0 = object[currentPlayer].collisionRight
+			temp0 <<= 16
+			temp0 += object[currentPlayer].xpos
+			temp1 = stage.curXBoundary2
+			temp1 <<= 16
+			if temp0 > temp1
+				object[currentPlayer].xvel = 0
+				object[currentPlayer].speed = 0
+				object[currentPlayer].xpos = temp1
+				temp0 = object[currentPlayer].collisionRight
+				temp0 <<= 16
+				object[currentPlayer].xpos -= temp0
+			end if
+		end if
+	next
 	switch object.state
 	case 0
 		if object.value1 < 0
@@ -117,9 +144,16 @@ event ObjectMain
 				CallFunction(PlayerObject_Hit)
 				break
 			case 13
-				CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
-				object[tempObjectPos].state = 1
-				PlaySfx(SfxName[Teleport], 0)
+				if HPZCheck == true
+					temp1 = 4
+				else
+					temp1 = 2
+				end if
+				if EmeraldManager_P1Collected != temp1
+					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
+					object[tempObjectPos].state = 1
+					PlaySfx(SfxName[Teleport], 0)
+				end if
 				break
 			case 14
 				PlaySfx(SfxName[Spike], 0)
@@ -191,6 +225,11 @@ event ObjectStartup
 	SpriteFrame(-8, -9, 16, 14, 18, 171)
 	SpriteFrame(-8, -9, 16, 14, 35, 171)
 	BrokenMonitor_value27 = BrokenMonitor_DummyFunction
+	foreach (TypeName[Broken Monitor], arrayPos0, ALL_ENTITIES)
+		if object[arrayPos0].propertyValue == 13
+			object[arrayPos0].priority = PRIORITY_XBOUNDS
+		end if
+	next
 end event
 
 event RSDKDraw
