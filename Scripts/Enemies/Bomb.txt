@@ -177,7 +177,7 @@ event ObjectStartup
 
 	// Load sprites depending on current scene folder
 
-	CheckCurrentStageFolder("Zone05")
+	CheckCurrentStageFolder("SLZ")
 	if checkResult == true
 		LoadSpriteSheet("SLZ/Objects.gif")
 		SpriteFrame(-10, -21, 20, 37, 53, 131)
@@ -192,7 +192,7 @@ event ObjectStartup
 		SpriteFrame(-4, -25, 8, 16, 58, 170)
 	end if
 
-	CheckCurrentStageFolder("Zone06")
+	CheckCurrentStageFolder("SBZ")
 	if checkResult == true
 		LoadSpriteSheet("SBZ/Objects.gif")
 		SpriteFrame(-10, -21, 20, 37, 52, 40)

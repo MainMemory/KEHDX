@@ -50,9 +50,9 @@ event ObjectMain
 		SetScreenFade(208, 255, 224, object.value0)
 		break
 	case 2
-			if stage.listPos == 1
-				stage.waterLevel = OriginalWaterLevel
-			end if
+		if stage.listPos == 1
+			stage.waterLevel = OriginalWaterLevel
+		end if
 		if object.value0 > 0
 			object.value0 -= 16
 		else

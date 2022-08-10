@@ -11,7 +11,7 @@ private alias object.value1 : KEH.menusel
 private alias object.value2 : KEH.scroll 
 private alias object.value3 : KEH.scroll2 
 
-private alias 10 : KEH.menulimit
+private alias 15 : KEH.menulimit
 private alias 72 : importantnumberthing
 
 // States
@@ -20,13 +20,19 @@ reserve function Sega_Background
 reserve function scrolling
 
 function scrolling
-	if KEH.menusel > 2
+	if KEH.menusel >= 3
 		temp1 -= 216
 	end if
 	if KEH.menusel >= 6
 		temp1 -= 216
 	end if
-	if KEH.menusel > 8
+	if KEH.menusel >= 9
+		temp1 -= 216
+	end if
+	if KEH.menusel >= 12
+		temp1 -= 216
+	end if
+	if KEH.menusel >= 15
 		temp1 -= 216
 	end if
 end function
@@ -227,28 +233,12 @@ end event
 
 event ObjectDraw
 	CallFunction(Sega_Background)
-	//Scrolling
-	if KEH.menusel > 2
-		KEH.scroll += importantnumberthing
-	else
-		KEH.scroll = 0
-	end if
-
-	if KEH.menusel > 5
-		KEH.scroll += importantnumberthing
-	else
-	end if
-
-	if KEH.menusel > 8
-		KEH.scroll += importantnumberthing
-	else
-	end if
 
 	//Add stages
 	temp1 = 32
 	temp0 = 0
 	CallFunction(scrolling)
-	while temp0 < 11
+	while temp0 < 16
 		DrawSpriteScreenXY(0, screen.xcenter, temp1)
 		temp1 += importantnumberthing
 		temp0++
@@ -273,7 +263,7 @@ event ObjectDraw
 	CallFunction(scrolling)
 	temp2 = screen.xcenter
 	temp2 += 3
-	while temp0 < 11
+	while temp0 < 16
 		temp1 += 25
 		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Score
 		temp1 += 16
@@ -306,30 +296,46 @@ event ObjectDraw
 	temp3 = screen.xcenter
 	temp3 -= 141
 	CallFunction(scrolling)
-	while temp0 < KEH.menulimit
+	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
 		temp1 += 72
 		temp2++
 		temp0++
 	loop
-	if temp0 == 10
-		DrawSpriteScreenXY(34, temp3, temp1)
-	end if
+	temp0 = 0
+	temp1 = 624
+	temp2 = 32
+	temp3 = screen.xcenter
+	temp3 -= 141
+	CallFunction(scrolling)
+	while temp0 < 8
+		DrawSpriteScreenXY(temp2, temp3, temp1)
+		temp1 += 72
+		temp2++
+		temp0++
+	loop
 
 	// Stage Icons
 	temp0 = 0
 	temp1 = 48
-	temp2 = 4
 	CallFunction(scrolling)
-	while temp0 < KEH.menulimit
+	temp2 = 4
+	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
 		temp1 += importantnumberthing
 		temp2++
 		temp0++
 	loop
-	if temp0 == 10
-		DrawSpriteScreenXY(28, temp3, temp1)
-	end if
+	temp0 = 0
+	temp1 = 624
+	CallFunction(scrolling)
+	temp2 = 26
+	while temp0 < 8
+		DrawSpriteScreenXY(temp2, temp3, temp1)
+		temp1 += importantnumberthing
+		temp2++
+		temp0++
+	loop
 end event
 
 

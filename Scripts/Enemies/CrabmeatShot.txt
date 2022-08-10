@@ -52,7 +52,7 @@ event ObjectStartup
 		SpriteFrame(-6, -6, 12, 12, 179, 127)
 		SpriteFrame(-6, -6, 12, 12, 179, 140)
 	end if
-	CheckCurrentStageFolder("Zone03")
+	CheckCurrentStageFolder("SYZ")
 	if checkResult == 1
 		LoadSpriteSheet("SYZ/Objects.gif")
 		SpriteFrame(-6, -6, 12, 12, 227, 1)

@@ -55,13 +55,13 @@ end event
 
 
 event ObjectStartup
-	CheckCurrentStageFolder("Zone05")
+	CheckCurrentStageFolder("SLZ")
 	if checkResult == 1
 		LoadSpriteSheet("SLZ/Objects.gif")
 		SpriteFrame(-4, -4, 8, 8, 67, 170)
 		SpriteFrame(-4, -4, 8, 8, 67, 179)
 	end if
-	CheckCurrentStageFolder("Zone06")
+	CheckCurrentStageFolder("SBZ")
 	if checkResult == 1
 		LoadSpriteSheet("SBZ/Objects.gif")
 		SpriteFrame(-4, -4, 8, 8, 66, 79)

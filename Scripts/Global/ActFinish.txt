@@ -268,7 +268,7 @@ event ObjectMain
 		object.timer++
 		if object.timer == 160
 			object.timer = 0
-			if stage.listPos == 10
+			if stage.listPos == 15
 				object.state = ACTFINISH_LOADNEXTSTAGE
 				object.NEXTSTAGE = 4
 				object.STAGETYPE = PRESENTATION_STAGE

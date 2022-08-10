@@ -149,7 +149,7 @@ event ObjectMain
 				else
 					temp1 = 2
 				end if
-				if EmeraldManager_P1Collected != temp1
+				if EmeraldManager_P1Collected < temp1
 					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
 					object[tempObjectPos].state = 1
 					PlaySfx(SfxName[Teleport], 0)
@@ -227,7 +227,7 @@ event ObjectStartup
 	BrokenMonitor_value27 = BrokenMonitor_DummyFunction
 	foreach (TypeName[Broken Monitor], arrayPos0, ALL_ENTITIES)
 		if object[arrayPos0].propertyValue == 13
-			object[arrayPos0].priority = PRIORITY_XBOUNDS
+			object[arrayPos0].priority = PRIORITY_ACTIVE_PAUSED
 		end if
 	next
 end event

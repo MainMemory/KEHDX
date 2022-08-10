@@ -1660,12 +1660,7 @@ function PlayerObject_HandleAir
 			end if
 		end if
 		if object.animation == ANI_TWIRL
-			if stage.playerListPos == 0
-				temp0 = 40
-			else
-				temp0 = 20
-			end if
-			if object.animationSpeed == temp0
+			if object.animationSpeed == 40
 				if object.frame >= 12
 					object.animation = ANI_WALKING
 					object.prevAnimation = ANI_WALKING
@@ -2127,6 +2122,22 @@ function PlayerObject_KnuxGlideDrop
 		object.frame = 2
 		if object.value1 < 16
 			object.value1++
+			if object.up == 1
+				CallFunction(PlayerObject_ResetOnFloor)
+				object.state = PlayerObject_LookingUp
+				object.value14 = 0
+			else
+				if object.down == 1
+					CallFunction(PlayerObject_ResetOnFloor)
+					object.state = PlayerObject_Crouching
+					object.value14 = 0
+				else
+					if object.jumpPress == 1
+						object.value14 = 0
+						CallFunction(PlayerObject_StartJump)
+					end if
+				end if
+			end if
 		else
 			object.state = PlayerObject_HandleGround
 			CallFunction(PlayerObject_ResetOnFloor)
@@ -2914,14 +2925,14 @@ event ObjectMain
 				object[+playerCount].propertyValue = 0
 			end if
 			if object[0].propertyValue == 2
-			LoadAnimation("Knuckles.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
+				LoadAnimation("Knuckles.ani")
+				object[0].propertyValue = 2
+				object[0].value30 = -5
+				object[0].value32 = PlayerObject_StartKnuxGlide
+				ANI_PEELOUT = ANI_RUNNING
+				if options.saveSlot > 0
+					stage.player2Enabled = 0
+				end if
 			end if
 		else
 			if object.gravity == GRAVITY_GROUND
@@ -3020,9 +3031,25 @@ event ObjectMain
 			object.value34 = 0
 		end if
 	end if
+
+	//Victory Code
 	if object.animation == ANI_VICTORY
 		object.value1 = 0
 	end if
+	if object[9].state >= 2
+		object[0].up = 0
+		object[0].down = 0
+		object[0].left = 0
+		object[0].right = 0
+		object[0].jumpPress = 0
+		object[0].jumpHold = 0
+		object[0].speed = 0
+		object[0].xvel = 0
+		object[0].yvel = 0
+		object.state = PlayerObject_HandleAir
+		screen.cameraX = object[0].ixpos
+		screen.cameraY = object[0].iypos
+	end if 
 end event
 
 

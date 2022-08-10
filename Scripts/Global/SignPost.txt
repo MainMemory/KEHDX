@@ -10,19 +10,18 @@
 // Function declarations
 
 // Static Values
+public value EmeraldManager_EndX = 0;
+public value EmeraldManager_EndY = 0;
 
 // Tables
 
 event ObjectMain
-		temp0 = object.xpos
-		temp0 += screen.xcenter
-		stage.newXBoundary2 = temp0
 end event
 
 event ObjectStartup
 	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
-		CallFunction(EmeraldManager_AddEntity)
-		object[arrayPos0].type = TypeName[Chaos Emerald]
+		EmeraldManager_EndX = object[arrayPos0].xpos
+		EmeraldManager_EndY = object[arrayPos0].ypos
 		stage.newXBoundary2 = object[arrayPos0].xpos
 		stage.newXBoundary2 >>= 16
 		stage.newXBoundary2 += screen.xcenter

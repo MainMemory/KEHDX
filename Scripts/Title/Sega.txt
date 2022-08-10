@@ -162,7 +162,14 @@ event ObjectMain
 			object.state = 7
 		end if
 		if sega.fadeValue == 2
-			PlaySfx(SfxName[Sega Chant], 0)
+			switch stage.playerListPos
+			case 0
+				PlaySfx(SfxName[Sega Chant], 0)
+				break
+			case 1
+				PlaySfx(SfxName[Tikal Chant], 0)
+				break
+			end switch
 		end if
 		break
 	case 7
