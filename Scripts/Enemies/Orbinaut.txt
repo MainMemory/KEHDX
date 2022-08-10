@@ -303,7 +303,7 @@ end event
 
 
 event ObjectStartup
-	CheckCurrentStageFolder("Zone04")
+	CheckCurrentStageFolder("LZ")
 	if checkResult == 1
 		LoadSpriteSheet("LZ/Objects.gif")
 		SpriteFrame(-10, -10, 20, 20, 50, 105)
@@ -311,7 +311,7 @@ event ObjectStartup
 		SpriteFrame(-10, -10, 20, 20, 50, 154)
 		SpriteFrame(-8, -8, 16, 16, 107, 1)
 	end if
-	CheckCurrentStageFolder("Zone05")
+	CheckCurrentStageFolder("SLZ")
 	if checkResult == 1
 		LoadSpriteSheet("SLZ/Objects.gif")
 		SpriteFrame(-10, -10, 20, 20, 51, 1)
@@ -319,7 +319,7 @@ event ObjectStartup
 		SpriteFrame(-10, -10, 20, 20, 93, 1)
 		SpriteFrame(-8, -8, 16, 16, 114, 1)
 	end if
-	CheckCurrentStageFolder("Zone06")
+	CheckCurrentStageFolder("SBZ")
 	if checkResult == 1
 		LoadSpriteSheet("SBZ/Objects.gif")
 		SpriteFrame(-10, -10, 20, 20, 1, 138)
