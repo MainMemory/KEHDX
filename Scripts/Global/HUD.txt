@@ -36,7 +36,7 @@ reserve function sqrt
 
 // Static Values
 private value EmeraldManager_EntityCount = 0;
-private value EmeraldManager_EmeraldCount = 0;
+public value EmeraldManager_EmeraldCount = 0;
 public value EmeraldManager_P1Collected = 0;
 private value EmeraldManager_P2Collected = 0;
 private value EmeraldManager_EmeraldTimer = 0;
@@ -47,7 +47,7 @@ public value EmeraldManager_EndX = 0;
 public value EmeraldManager_EndY = 0;
 
 // Tables
-private table EmeraldManager_EmeraldObjects
+public table EmeraldManager_EmeraldObjects
 	-1, -1, -1, -1, -1
 end table
 
@@ -133,7 +133,7 @@ function EmeraldManager_AwardEmerald
 			if currentPlayer == 1
 				EmeraldManager_P2Collected++
 			else
-				//EmeraldManager_P1Collected+=3 //Dev Command
+				//EmeraldManager_P1Collected += 3 //Dev Command for checking the results or smth
 				EmeraldManager_P1Collected++
 			end if
 			if options.vsMode == 0
@@ -541,6 +541,7 @@ event ObjectMain
 				object[arrayPos0].propertyValue = 9
 				object[arrayPos0].frame = 11
 				break
+
 			endswitch
 			temp0++
 		loop

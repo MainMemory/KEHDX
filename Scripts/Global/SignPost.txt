@@ -22,9 +22,6 @@ event ObjectStartup
 	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
 		EmeraldManager_EndX = object[arrayPos0].xpos
 		EmeraldManager_EndY = object[arrayPos0].ypos
-		stage.newXBoundary2 = object[arrayPos0].xpos
-		stage.newXBoundary2 >>= 16
-		stage.newXBoundary2 += screen.xcenter
 	next
 end event
 

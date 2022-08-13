@@ -9,16 +9,34 @@
 private alias 41 : TYPE_BOMB
 
 private alias object.value0 : object.timer
+public value EmeraldManager_EmeraldCount = 0;
+
+public table EmeraldManager_EmeraldObjects
+	-1, -1, -1, -1, -1
+end table
 
 // Function declarations
 reserve function Bomb_DebugDraw
 reserve function Bomb_DebugSpawn
+reserve function Bomb_BecomeEmerald
 
 function Bomb_DebugDraw
 	DrawSpriteFX(0, FX_FLIP, object.xpos, object.ypos)
 	DrawSpriteFX(8, FX_FLIP, object.xpos, object.ypos)
 end function
 
+function Bomb_BecomeEmerald
+	temp1 = 0
+	while temp1 < EmeraldManager_EmeraldCount
+		GetTableValue(arrayPos1, temp1, EmeraldManager_EmeraldObjects)
+		if arrayPos1 == object.entityPos
+			arrayPos0 = object.entityPos
+			ResetObjectEntity(object.entityPos, TypeName[Chaos Emerald], 1, object[arrayPos0].xpos, object[arrayPos0].ypos)
+			object.state = 1
+		end if
+		temp1++
+	loop
+end function
 
 function Bomb_DebugSpawn
 
@@ -77,6 +95,9 @@ event ObjectMain
 		object.timer--
 		if object.timer == 0
 			ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, object.xpos, object.ypos)
+			if object.type == TypeName[Blank Object]
+				CallFunction(Bomb_BecomeEmerald)
+			end if
 			CreateTempObject(TypeName[Explosion], 0, object.xpos, object.ypos)
 			CreateTempObject(TypeName[Bomb Shrapnel], 0, object.xpos, object.ypos)
 			object[tempObjectPos].xvel = -0x20000
@@ -130,7 +151,19 @@ event ObjectMain
 		end if
 		BoxCollisionTest(C_TOUCH, object.entityPos, -12, -18, 12, 18, currentPlayer, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO, HITBOX_AUTO)
 		if checkResult == 1
-			CallFunction(PlayerObject_Hit)
+
+			CallFunction(PlayerObject_BadnikBreak)
+
+			CheckNotEqual(object.state, 2)
+			temp0 = checkResult
+			CheckEqual(object.timer, 0)
+			temp0 &= checkResult
+			if temp0 == 1
+				if object.type == TypeName[Blank Object]
+					CallFunction(EmeraldManager_AwardEmerald)
+				end if
+			end if
+
 		end if
 	next
 	switch object.animation
@@ -174,6 +207,7 @@ end event
 
 
 event ObjectStartup
+
 
 	// Load sprites depending on current scene folder
 
@@ -236,8 +270,9 @@ event ObjectStartup
 		object[arrayPos0].timer = 0x600
 		object[arrayPos0].animation = 0
 		object[arrayPos0].frame = 0
+		CallFunction(EmeraldManager_AddEntity)
 	next
-	
+
 	// Add the object to the debug item list
 	SetTableValue(TypeName[Bomb], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Bomb_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)

@@ -140,7 +140,7 @@ event ObjectStartup
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].drawOrder = 4
 		object[arrayPos0].value0 = object[arrayPos0].ypos
-		CallFunction(EmeraldManager_AddEntity)
+		CallFunction(EmeraldManager_AddEntity) 
 	next
 end event
 
