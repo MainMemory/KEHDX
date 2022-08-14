@@ -9,11 +9,6 @@
 private alias 41 : TYPE_BOMB
 
 private alias object.value0 : object.timer
-public value EmeraldManager_EmeraldCount = 0;
-
-public table EmeraldManager_EmeraldObjects
-	-1, -1, -1, -1, -1
-end table
 
 // Function declarations
 reserve function Bomb_DebugDraw
