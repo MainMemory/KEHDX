@@ -26,9 +26,9 @@ private alias 7 : OPTIONS_FADEOUT
 private alias 8 : COMPETITION_FADEOUT
 
 // Function declarations
-reserve function Sega_Background
+reserve function KEH_Background
 
-function Sega_Background
+function KEH_Background
 	//Background
 	object.value22++
 	object.value22 %= 1
@@ -236,7 +236,7 @@ event ObjectMain
 	if inputPress.up == 1
 		KEH.menusel -= 1
 		PlaySfx(SfxName[Score Add], 0)
-		while KEH.menusel < 0
+		if KEH.menusel < 0
 			KEH.menusel = 3
 		end if
 	end if
@@ -265,7 +265,7 @@ event ObjectDraw
 	//Random PlaceHolder
 	DrawRect(0, 0, screen.xsize, screen.ysize, 164, 161, 230, 255)
 
-	CallFunction(Sega_Background)
+	CallFunction(KEH_Background)
 
 	// Logo and Selections
 	DrawSpriteScreenXY(0, screen.xcenter, 16)
@@ -310,12 +310,12 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/MainTitle.gif")
-	SpriteFrame(-120, 0, 240, 110, 33, 1)
+	SpriteFrame(-142, -3, 284, 113, 0, 201)
 	SpriteFrame(-80, 0, 159, 77, 82, 112)
 	SpriteFrame(0, 0, 32, 128, 0, 1)
 	SpriteFrame(0, 0, 23, 22, 33, 112)
 	SpriteFrame(0, 0, 24, 22, 57, 112)
-	SpriteFrame(-144, 0, 288, 10, 0, 190)
+	SpriteFrame(-152, 0, 304, 10, 0, 190)
 	options.touchControls = false
 	SetMusicTrack("Walkin.ogg", 1, 49689)
 	LoadPalette("MainTitle.act", 1, 0, 0, 256)
