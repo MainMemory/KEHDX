@@ -667,6 +667,7 @@ function PlayerObject_ProcessPlayer
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
 					stage.state = STAGE_PAUSED
+					PauseMusic()
 				end if
 			end if
 			if inputPress.start == 1
@@ -675,6 +676,8 @@ function PlayerObject_ProcessPlayer
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
 					stage.state = STAGE_PAUSED
+					PauseMusic()
+					inputPress.start = 0
 				end if
 			end if
 		end if

@@ -94,6 +94,7 @@ event ObjectMain
 		if inputPress.start == 1
 			PlaySfx(SfxName[Menu Back], 0)
 			stage.state = STAGE_RUNNING
+			ResumeMusic()
 		end if
 		temp0 = inputPress.buttonA
 		temp0 |= inputPress.buttonB
@@ -103,6 +104,7 @@ event ObjectMain
 			case 0
 				PlaySfx(SfxName[Menu Back], 0)
 				stage.state = STAGE_RUNNING
+				ResumeMusic()
 				break
 			case 1
 				PlaySfx(SfxName[Menu Back], 0)
@@ -111,7 +113,7 @@ event ObjectMain
 			case 2
 				PlaySfx(SfxName[Menu Back], 0)
 				stage.activeList = PRESENTATION_STAGE
-				stage.listPos = StageName[LEVEL SELECT]
+				stage.listPos = 4
 				LoadStage()
 				break
 			end switch
