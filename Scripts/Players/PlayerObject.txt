@@ -666,7 +666,7 @@ function PlayerObject_ProcessPlayer
 					PlaySfx(SfxName[Menu Back], 0)
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
-					engine.state = 5
+					stage.state = STAGE_PAUSED
 				end if
 			end if
 			if inputPress.start == 1
@@ -674,7 +674,7 @@ function PlayerObject_ProcessPlayer
 					PlaySfx(SfxName[Menu Back], 0)
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
-					engine.state = 5
+					stage.state = STAGE_PAUSED
 				end if
 			end if
 		end if
