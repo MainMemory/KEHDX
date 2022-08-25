@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Image="motobug">
+  <Images>
+    <ImageFromSheet id="motobug" sheet="GHZ/Objects.gif" sourcex="98" sourcey="127" width="40" height="28">
+      <Offset X="-21" Y="-13"/>
+    </ImageFromSheet>
+  </Images>
+  <ImageSets>
+    <ImageSet id="facingl">
+      <ImageRef image="motobug" xflip="NeverFlip"/>
+    </ImageSet>
+    <ImageSet id="facingr">
+      <ImageRef image="motobug" xflip="AlwaysFlip"/>
+    </ImageSet>
+  </ImageSets>
+  <DefaultImage>
+    <ImageSetRef set="facingl" />
+  </DefaultImage>
+  <Subtypes>
+    <Subtype id="00" name="Facing Left">
+      <ImageSetRef set="facingl" />
+    </Subtype>
+    <Subtype id="01" name="Facing Right">
+      <ImageSetRef set="facingr" />
+    </Subtype>
+  </Subtypes>
+</ObjDef>
