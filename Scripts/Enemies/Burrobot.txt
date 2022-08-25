@@ -191,6 +191,9 @@ event ObjectMain
 		BoxCollisionTest(C_TOUCH, object.entityPos, -12, -18, 12, 18, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 		if checkResult == 1
 			CallFunction(PlayerObject_BadnikBreak)
+			if object.type == TypeName[Blank Object]
+				CallFunction(EmeraldManager_AwardEmerald)
+			end if
 		end if
 	next
 	object.frame = object.animationTimer
@@ -221,7 +224,7 @@ end event
 
 
 event ObjectStartup
-	CheckCurrentStageFolder("Zone04")
+	CheckCurrentStageFolder("LZ")
 	if checkResult == 1
 		LoadSpriteSheet("LZ/Objects.gif")
 		SpriteFrame(-16, -16, 28, 36, 34, 68)
@@ -247,6 +250,7 @@ event ObjectStartup
 		object[arrayPos0].value0 = object[arrayPos0].xpos
 		object[arrayPos0].value1 = object[arrayPos0].ypos
 		object[arrayPos0].value6 = 1
+		CallFunction(EmeraldManager_AddEntity)
 	next
 	SetTableValue(TypeName[Burrobot], DebugMode_ObjCount, DebugMode_TypesTable)
 	SetTableValue(Burrobot_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
