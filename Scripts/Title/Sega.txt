@@ -14,6 +14,8 @@ private alias object.value3 : sega.LSelCheat
 private alias object.value4 : sega.anyCheatDone
 private alias object.value5 : sega.reigonCheat
 
+public alias saveRAM[202] : saved.character
+
 // Function declarations
 reserve function Sega_CheckTouchCheat
 
@@ -162,7 +164,7 @@ event ObjectMain
 			object.state = 7
 		end if
 		if sega.fadeValue == 2
-			switch stage.playerListPos
+			switch saved.character 
 			case 0
 				PlaySfx(SfxName[Sega Chant], 0)
 				break
@@ -187,6 +189,9 @@ end event
 
 event ObjectDraw
 	DrawRect(0, 0, screen.xsize, screen.ysize, 224, 224, 224, 255)
+	if saved.character == 1
+		object.frame += 12
+	end if
 	switch object.state
 	case 2
 		temp0 = sega.spriteCounter
@@ -231,10 +236,14 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/SEGA.gif")
+
+	//Knuckles
 	SpriteFrame(-31, -36, 62, 72, 1, 226)
 	SpriteFrame(-31, -36, 62, 72, 64, 226)
 	SpriteFrame(-29, -36, 60, 72, 127, 226)
 	SpriteFrame(-31, -36, 62, 72, 188, 226)
+
+	//SEGA
 	SpriteFrame(-192, -35, 256, 70, 1, 299)
 	SpriteFrame(-384, -35, 192, 70, 1, 299)
 	SpriteFrame(-576, -35, 192, 70, 1, 299)
@@ -243,6 +252,14 @@ event ObjectStartup
 	SpriteFrame(384, -35, 192, 70, 1, 299)
 	SpriteFrame(-93, -29, 187, 58, 323, 297)
 	SpriteFrame(-93, -29, 187, 58, 323, 238)
+
+	//Tikal
+	SpriteFrame(-31, -36, 62, 72, 1, 153)
+	SpriteFrame(-31, -36, 62, 72, 64, 153)
+	SpriteFrame(-29, -36, 60, 72, 127, 153)
+	SpriteFrame(-31, -36, 62, 72, 188, 153)
+
+	//NO TOUCH CONTROLS
 	options.touchControls = 0
 end event
 

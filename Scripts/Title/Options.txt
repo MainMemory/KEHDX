@@ -28,6 +28,7 @@ private alias 5 : STATE_BACKHOME
 
 public alias saveRAM[200] : saved.radar
 public alias saveRAM[201] : saved.radarstyle
+public alias saveRAM[202] : saved.character
 
 // Static Values
 public value MenuControl_value1 = 0;
@@ -240,19 +241,19 @@ event ObjectMain
 			switch menuControl.currentSelection
 			case 0
 				if inputpress.left == true
-					stage.playerListPos--
-					while stage.playerListPos < 0
-						stage.playerListPos += 2
+					saved.character--
+					while saved.character < 0
+						saved.character += 2
 					loop
 					temp1 = 1
 				end if
 				if inputpress.right == true
-					stage.playerListPos++
-					stage.playerListPos %= 2
+					saved.character++
+					saved.character %= 2
 					temp1 = 1
 				end if
 				if temp1 == 1
-					switch stage.playerListPos
+					switch saved.character
 						case 0
 							EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
 							break
@@ -462,13 +463,13 @@ event ObjectStartup
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, "*@@SOUND TEST@@*", 1)
 	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "00                                ", 1)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", 1)
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, "*@@MUSIC SWITCH@@*", 1)
 	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "PRESS START", 1)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", 1)
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, " ", 1)
 	AddMenuEntry(MENU_1, " ", 1)
@@ -478,7 +479,7 @@ event ObjectStartup
 
 	menu1.selection = 1
 
-	switch stage.playerListPos
+	switch saved.character
 		case 0
 			EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
 			break

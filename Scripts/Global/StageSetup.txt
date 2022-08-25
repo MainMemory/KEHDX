@@ -30,6 +30,16 @@ public table StageSetup_oscillationTable
 	128, 0, 0x3848, 238, 0x2080, 180, 0x3080, 270, 0x5080, 450, 0x7080, 630, 128, 0, 0x4000, 254
 end table
 
+public table StageSetupS1_oscillationTable
+	128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0
+	128, 0, 0x50F0, 286, 0x2080, 180, 0x3080, 270, 0x5080, 450, 0x7080, 630, 128, 0, 128, 0
+end table
+
+public table StageSetupS1_oscillateLimits
+	2, 0x1000, 2, 0x1800, 2, 0x2000, 2, 0x3000, 4, 0x2000, 8, 0x800,  8, 0x4000, 4, 0x4000
+	2, 0x5000, 2, 0x5000, 2, 0x2000, 3, 0x3000, 5, 0x5000, 7, 0x7000, 2, 0x1000, 2, 0x1000
+end table
+
 public table StageSetup_oscillateLimits
 	2, 0x1000, 2, 0x1800, 2, 0x2000, 2, 0x3000, 4, 0x2000, 8, 0x800,  8, 0x4000, 4, 0x4000
 	2, 0x3800, 2, 0x3800, 2, 0x2000, 3, 0x3000, 5, 0x5000, 7, 0x7000, 2, 0x4000, 2, 0x4000
@@ -74,6 +84,44 @@ function StageSetup_HandleOscillationTable
 end function
 
 
+function StageSetup_HandleS1OscillationTable
+	temp0 = 0
+	temp1 = 0
+	while temp0 < 16
+		GetTableValue(temp4, temp1, StageSetupS1_oscillateLimits)		// temp4 = oscillateSpeed
+		GetTableValue(temp6, temp1, StageSetupS1_oscillationTable)	// temp6 = oscillatePos
+		temp1++
+
+		GetTableValue(temp5, temp1, StageSetupS1_oscillateLimits)		// temp5 = oscillateMax
+		GetTableValue(temp7, temp1, StageSetupS1_oscillationTable)	// temp7 = oscillateInc
+		temp1--
+
+		GetBit(temp2, StageSetup_oscillateFlipFlags, temp0)
+		if temp2 == false
+			temp7 += temp4
+			temp6 += temp7
+			if temp6 >= temp5
+				SetBit(StageSetup_oscillateFlipFlags, temp0, true)
+			end if
+		else
+			temp7 -= temp4
+			temp6 += temp7
+			if temp6 < temp5
+				SetBit(StageSetup_oscillateFlipFlags, temp0, false)
+			end if
+		end if
+
+		SetTableValue(temp6, temp1, StageSetupS1_oscillationTable)
+		temp1++
+
+		SetTableValue(temp7, temp1, StageSetupS1_oscillationTable)
+		temp1++
+
+		temp0++
+	loop
+end function
+
+
 event ObjectMain
 	switch stage.state
 	case STAGE_PAUSED
@@ -82,14 +130,14 @@ event ObjectMain
 			if object.value0 == -1
 				object.value0 = 2
 			end if
-			PlaySfx(SfxName[Score Add], 0)
+			PlaySfx(SfxName[Menu Move], 0)
 		end if
 		if inputPress.down == 1
 			object.value0++
 			if object.value0 == 3
 				object.value0 = 0
 			end if
-			PlaySfx(SfxName[Score Add], 0)
+			PlaySfx(SfxName[Menu Move], 0)
 		end if
 		if inputPress.start == 1
 			PlaySfx(SfxName[Menu Back], 0)
@@ -107,11 +155,11 @@ event ObjectMain
 				ResumeMusic()
 				break
 			case 1
-				PlaySfx(SfxName[Menu Back], 0)
+				PlaySfx(SfxName[Menu Select], 0)
 				LoadStage()
 				break
 			case 2
-				PlaySfx(SfxName[Menu Back], 0)
+				PlaySfx(SfxName[Menu Select], 0)
 				stage.activeList = PRESENTATION_STAGE
 				stage.listPos = 4
 				LoadStage()
@@ -152,7 +200,11 @@ event ObjectMain
 		// Handle Oscillations & Platform Array movements
 		oscillation++
 		oscillation &= 511
-		CallFunction(StageSetup_HandleOscillationTable)
+		if stage.listPos == 14
+			CallFunction(StageSetup_HandleS1OscillationTable)
+		else
+			CallFunction(StageSetup_HandleOscillationTable)
+		end if
 
 		// Handle Time overs
 		if stage.timeEnabled == true
@@ -210,17 +262,6 @@ event ObjectMain
 		next
 	end switch
 
-	// Handle Touch Controls
-	if options.attractMode == false
-		if object[0].controlMode > -1
-			options.touchControls = true
-		else
-			options.touchControls = false
-		end if
-	else
-		options.touchControls = false
-	end if
-
 	// Sort players, player 1 should always be on top of player 2
 	currentPlayer = playerCount
 	currentPlayer--
@@ -248,6 +289,17 @@ event ObjectMain
 		end if
 		currentPlayer--
 	loop
+
+	// Handle Touch Controls
+	if options.attractMode == false
+		if object[0].controlMode > -1
+			options.touchControls = true
+		else
+			options.touchControls = false
+		end if
+	else
+		options.touchControls = false
+	end if
 end event
 
 event ObjectDraw
@@ -311,7 +363,7 @@ event ObjectStartup
 	next
 	object[8].type = TypeName[Stage Setup]
 	object[8].priority = PRIORITY_ACTIVE_PAUSED
-	object[8].drawOrder 	= 6
+	object[8].drawOrder = 6
 
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].type = TypeName[Blank Object]

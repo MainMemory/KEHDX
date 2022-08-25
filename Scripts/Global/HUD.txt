@@ -479,7 +479,7 @@ event ObjectMain
 	CheckEqual(object[30].type, TypeName[Act Finish])
 	if checkResult == 1
 		if leave.xoffset < screen.xsize
-			leave.xoffset += 5
+			leave.xoffset += 7
 		end if
 		if leave.xoffset >= screen.xsize
 			leave.xoffset = screen.xsize
@@ -637,7 +637,6 @@ event ObjectMain
 			object.state++
 			object.priority = PRIORITY_ACTIVE_PAUSED
 			stage.state = 3
-			object[0].state = PlayerObject_HandleAir
 			object[0].controlMode = -1
 			object[0].interaction = 0
 			object[0].up = 0
@@ -646,7 +645,6 @@ event ObjectMain
 			object[0].right = 0
 			object[0].jumpPress = 0
 			object[0].jumpHold = 0
-			object[0].speed = 0
 			object[0].xvel = 0
 			object[0].yvel = 0
 			EmeraldManager.fadeAmount = 0
@@ -654,9 +652,21 @@ event ObjectMain
 		break
 	case 2
 		music.volume -= 2
+
+		object[0].state = PlayerObject_HandleAir
+		object[0].value7 = 0
+		if object[0].value37 > 0
+			object[0].value37 = 0
+			currentPlayer = object.entityPos
+			arrayPos0 = currentPlayer
+			arrayPos0 += playerCount
+			CallFunction(PlayerObject_RestorePowerup)
+		end if
+
 		EmeraldManager.fadeAmount += 8
 		StopSfx(0)
 		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
+
 		if EmeraldManager.fadeAmount == 0x200
 			if EmeraldManager_BonusFrame != -1
 				CallFunction(EmeraldManager_AwardBonus)
@@ -664,6 +674,8 @@ event ObjectMain
 			object.state++
 			object[0].xpos = EmeraldManager_EndX
 			object[0].ypos = EmeraldManager_EndY
+			object[0].speed = 0
+			object[0].xvel = 0
 			object[0].up = 0
 			object[0].down = 0
 			object[0].left = 0
@@ -671,8 +683,6 @@ event ObjectMain
 			object[0].jumpPress = 0
 			object[0].jumpHold = 0
 			object[0].speed = 0
-			object[0].xvel = 0
-			object[0].yvel = 0
 			screen.cameraX = object[0].ixpos
 			screen.cameraY = object[0].iypos
 			stage.timeEnabled = 0
@@ -738,6 +748,9 @@ end event
 
 
 event ObjectStartup
+
+	//Reset the score 
+	player.score = 0
 
 	LoadSpriteSheet("Global/Display.gif")
 
@@ -879,7 +892,11 @@ event ObjectStartup
 		temp0++
 	loop
 	
-	SpriteFrame(0, 0, 16, 16, temp1, 392) 	// 101 - HPZ Got Emerald
+	if saved.radarstyle == 0
+		SpriteFrame(0, 0, 16, 16, 120, 392) 	// 101 - New HPZ Got Emerald
+	else
+		SpriteFrame(0, 0, 16, 16, temp1, 392) 	// 101 - Old HPZ Got Emerald
+	end if
 
 	SpriteFrame(0, 0, 34, 27, 157, 35)		// 102 - Best and Rank Text
 

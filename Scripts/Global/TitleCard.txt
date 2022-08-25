@@ -62,6 +62,7 @@ event ObjectMain
 					CallNativeFunction2(ReceiveEntity, 0x400, 1)
 					// we're ready to start if we got the other entity's 'sendReadyFlag'
 					object.vsReady = object[0x400].sentReadyFlag
+					stage.pauseEnabled = 1
 					ResetObjectEntity(0x400, TypeName[Blank Object], 0, 0, 0)
 				end if
 			end if
@@ -209,7 +210,6 @@ event ObjectMain
 			object.type = TypeName[Blank Object]
 		end if
 		break
-
 	end switch
 end event
 

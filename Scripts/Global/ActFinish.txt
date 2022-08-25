@@ -1,4 +1,4 @@
-// ----------------------------------
+7\// ----------------------------------
 // RSDK Project: Sonic 1/Sonic 2
 // Script Description: Act Finish Object
 // Script Author: Christian Whitehead/Simon Thomley
@@ -248,6 +248,38 @@ event ObjectMain
 			else
 				object.state++
 			end if
+
+			//Save Stuff here
+			arrayPos1 = 200
+			arrayPos1 *= stage.listPos	
+			if player.score > saveRAM[arrayPos1]
+				saveRAM[arrayPos1] = player.score
+			end if	
+			arrayPos1++
+			if object[0].value0 > saveRAM[arrayPos1]
+				saveRAM[arrayPos1] = object[0].value0
+			end if
+			arrayPos1++
+			saveRAM[arrayPos1]++
+			arrayPos1++
+
+			timeAttack.result = stage.seconds
+			timeAttack.result *= 100
+			temp0 = stage.minutes
+			temp0 *= 6000
+			timeAttack.result += temp0
+			timeAttack.result += stage.milliSeconds
+
+			if timeAttack.result < saveRAM[arrayPos1]
+				saveRAM[arrayPos1] = timeAttack.result
+			end if
+
+			arrayPos1++
+	
+			saveRAM[arrayPos1] += death.count
+
+			WriteSaveRAM()
+
 			object.timer = 0
 			PlaySfx(SfxName[Score Total], false)
 		end if
@@ -279,15 +311,18 @@ event ObjectMain
 		break
 
 	case ACTFINISH_CHOOSEWHERETOGO
-		temp3 = inputPress.left
-		temp3 |= inputPress.right
-		if temp3 == 1
-			if object.menuselection == 1
-				object.menuselection = 0
-			else
-				object.menuselection = 1
+		death.count = 0
+		if inputPress.left == 1
+			object.menuselection -= 1
+			PlaySfx(SfxName[Score Add], 0)
+			if object.menuselection < 0
+				object.menuselection = 2
 			end if
-			PlaySfx(SfxName[Score Add], false)
+		end if
+		if inputPress.right == 1				
+			object.menuselection += 1
+			PlaySfx(SfxName[Score Add], 0)
+			object.menuselection %= 3
 		end if
 		temp0 = inputpress.start
 		temp0 |= inputpress.buttonA
@@ -301,6 +336,10 @@ event ObjectMain
 			case 1
 				object.NEXTSTAGE = 4
 				object.STAGETYPE = PRESENTATION_STAGE
+				break
+			case 2
+				object.NEXTSTAGE = stage.listPos
+				object.STAGETYPE = REGULAR_STAGE
 				break
 			end switch
 			object.state = ACTFINISH_LOADNEXTSTAGE
@@ -398,20 +437,25 @@ event ObjectDraw
 		switch object.menuselection
 		case 0
 			temp0 += 5
-			temp0 -= 80
-			DrawSpriteScreenXY(24, temp0, 228)
+			temp0 -= 160
 			break
 		case 1
 			temp0 += 36
-			temp0 += 80
-			DrawSpriteScreenXY(24, temp0, 228)
+			temp0 += 0
+			break
+		case 2
+			temp0 += 16
+			temp0 += 160
 			break
 		end switch
+		DrawSpriteScreenXY(24, temp0, 228)
 		temp0 = screen.xcenter
-		temp0 -= 80
+		temp0 -= 160
 		DrawSpriteScreenXY(25, temp0, 228)
 		temp0 += 160
 		DrawSpriteScreenXY(26, temp0, 228)
+		temp0 += 160
+		DrawSpriteScreenXY(29, temp0, 228)
 	end if
 
 end event
@@ -472,6 +516,7 @@ event ObjectStartup
 	SpriteFrame(-47, -13, 95, 11, 154, 328)			// #26 Stage Select
 	SpriteFrame(-72, 0, 44, 48, 182, 340) 			// #27 "SCORE, TIME, RINGS" Text with results Triangle
 	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 Timer ticks
+	SpriteFrame(-28, -13, 56, 11, 189, 316) 			// #29 Restart
 
 end event
 

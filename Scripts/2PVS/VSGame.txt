@@ -34,7 +34,7 @@ event ObjectMain
 				end if
 			next
 			object.state = 2
-			object[0].collisionPlane = object[0].collisionPlane
+			object[0].collisionPlane = 0
 			object[0].state = PlayerObject_HandleAir
 			object[0].xpos = PlayerObject_InitialX
 			object[0].ypos = PlayerObject_InitialY
@@ -51,6 +51,12 @@ event ObjectMain
 		break
 	case 2
 		if stage.listPos == 1
+			stage.waterLevel = OriginalWaterLevel
+		end if
+		if stage.listPos == 2
+			stage.waterLevel = OriginalWaterLevel
+		end if
+		if stage.listPos == 13
 			stage.waterLevel = OriginalWaterLevel
 		end if
 		if object.value0 > 0

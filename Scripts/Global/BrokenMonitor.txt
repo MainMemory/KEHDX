@@ -62,18 +62,20 @@ event ObjectMain
 	end if
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 		if object.propertyValue == 13
-			temp0 = object[currentPlayer].collisionRight
-			temp0 <<= 16
-			temp0 += object[currentPlayer].xpos
-			temp1 = stage.curXBoundary2
-			temp1 <<= 16
-			if temp0 > temp1
-				object[currentPlayer].xvel = 0
-				object[currentPlayer].speed = 0
-				object[currentPlayer].xpos = temp1
+			if stage.listPos != 13
 				temp0 = object[currentPlayer].collisionRight
 				temp0 <<= 16
-				object[currentPlayer].xpos -= temp0
+				temp0 += object[currentPlayer].xpos
+				temp1 = stage.curXBoundary2
+				temp1 <<= 16
+				if temp0 > temp1
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].speed = 0
+					object[currentPlayer].xpos = temp1
+					temp0 = object[currentPlayer].collisionRight
+					temp0 <<= 16
+					object[currentPlayer].xpos -= temp0
+				end if
 			end if
 		end if
 	next
@@ -133,11 +135,11 @@ event ObjectMain
 				CallFunction(BrokenMonitor_AddRing)
 				break
 			case 10
-				object[currentPlayer].value0 += 20
+				object[currentPlayer].value0 += 40
 				CallFunction(BrokenMonitor_AddRing)
 				break
 			case 11
-				object[currentPlayer].value0 += 40
+				object[currentPlayer].value0 += 20
 				CallFunction(BrokenMonitor_AddRing)
 				break
 			case 12
@@ -145,9 +147,9 @@ event ObjectMain
 				break
 			case 13
 				if HPZCheck == true
-					temp1 = 4
+					temp1 = 5
 				else
-					temp1 = 2
+					temp1 = 3
 				end if
 				if EmeraldManager_P1Collected < temp1
 					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)

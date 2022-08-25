@@ -18,6 +18,13 @@ private alias 72 : importantnumberthing
 
 reserve function Sega_Background
 reserve function scrolling
+reserve function saveram_stuff
+
+function saveram_stuff
+	arrayPos1 = 200
+	arrayPos1 *= temp0
+end function
+
 
 function scrolling
 	if KEH.menusel >= 3
@@ -264,26 +271,60 @@ event ObjectDraw
 	temp2 = screen.xcenter
 	temp2 += 3
 	while temp0 < 16
+		arrayPos1 = 200
+		arrayPos1 *= temp0
+
 		temp1 += 25
-		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Score
+		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 6, 8, 0) // Score
+
+		arrayPos1++
 		temp1 += 16
-		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Rings
+		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 3, 8, 0) // Rings
+
+		arrayPos1++
 		temp1 -= 34	
 		temp2 += 128
-		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Play Count
+		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 3, 8, 0) // Play Count
+
+		arrayPos1++
+
+		object.value10 = saveRAM[arrayPos1]
+		object.value11 = 0
+		object.value12 = 0
+		while object.value10 >= 6000
+			object.value12++
+			object.value10 -= 6000
+		loop
+		
+		while object.value10 >= 100
+			object.value11++
+			object.value10 -= 100
+		loop
+
+		if saveRAM[arrayPos1] == 0
+			saveRAM[arrayPos1] = 59999
+		end if
+
 		temp1 += 12
 		DrawSpriteScreenXY(50, temp2, temp1)
-		DrawNumbers(40, temp2, temp1, 59, 2, 8, 1) // Milliseconds
+		DrawNumbers(40, temp2, temp1, object.value10, 2, 8, 1) // Milliseconds
+
 		temp2 -= 27
-		DrawNumbers(40, temp2, temp1, 59, 2, 8, 1) // Seconds
+		DrawNumbers(40, temp2, temp1, object.value11, 2, 8, 1) // Seconds
+
 		temp2 -= 23
-		DrawNumbers(40, temp2, temp1, 9, 2, 8, 0) // Minutes
+		DrawNumbers(40, temp2, temp1, object.value12, 2, 8, 0) // Minutes
+
+		arrayPos1++
 		temp2 += 27	
 		temp2 += 23	
 		temp1 += 12
-		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Deaths
+		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 3, 7, 0) // Deaths
+
+		arrayPos1++
 		temp1 += 12
-		DrawNumbers(40, temp2, temp1, 0, 3, 7, 0) // Rank
+		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 3, 7, 0) // Rank
+
 		temp2 -= 128
 		temp1 += 29
 		temp0++
