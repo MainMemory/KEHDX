@@ -250,7 +250,7 @@ event ObjectMain
 			end if
 
 			//Save Stuff here
-			arrayPos1 = 200
+			arrayPos1 = 300
 			arrayPos1 *= stage.listPos	
 			if player.score > saveRAM[arrayPos1]
 				saveRAM[arrayPos1] = player.score
@@ -436,25 +436,25 @@ event ObjectDraw
 		temp0 = screen.xcenter
 		switch object.menuselection
 		case 0
-			temp0 += 5
-			temp0 -= 160
+			temp0 = 58
 			break
 		case 1
 			temp0 += 36
 			temp0 += 0
 			break
 		case 2
-			temp0 += 16
-			temp0 += 160
+			temp0 = screen.xsize
+			temp0 -= 37
 			break
 		end switch
 		DrawSpriteScreenXY(24, temp0, 228)
 		temp0 = screen.xcenter
 		temp0 -= 160
-		DrawSpriteScreenXY(25, temp0, 228)
+		DrawSpriteScreenXY(25, 53, 228)
 		temp0 += 160
 		DrawSpriteScreenXY(26, temp0, 228)
-		temp0 += 160
+		temp0 = screen.xsize
+		temp0 -= 53
 		DrawSpriteScreenXY(29, temp0, 228)
 	end if
 
@@ -497,7 +497,7 @@ event ObjectStartup
 	SpriteFrame(-92, 1, 32, 11, 1, 33) 				// #9  - "RINGS" text (also cropped out from existing HUD set)
 	SpriteFrame(-104, 1, 56, 11, 66, 35)			// #10 - "PERFECT" text
 	SpriteFrame(-40, 0, 44, 16, 190, 1) 			// #11 - "BONUS" text
-	SpriteFrame(-71, 0, 43, 16, 146, 1) 			// #12 - "TOTAL" text
+	SpriteFrame(-71, 0, 40, 16, 141, 340) 			// #12 - "RANK" text
 	SpriteFrame(-52, 0, 44, 16, 190, 1) 			// #13 - "BONUS" text, but with different offset
 	SpriteFrame(0, 0, 8, 11, 1, 50) 				// #14 - Number 0
 	SpriteFrame(0, 0, 8, 11, 10, 50)				// #15 - Number 1
@@ -517,6 +517,16 @@ event ObjectStartup
 	SpriteFrame(-72, 0, 44, 48, 182, 340) 			// #27 "SCORE, TIME, RINGS" Text with results Triangle
 	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 Timer ticks
 	SpriteFrame(-28, -13, 56, 11, 189, 316) 			// #29 Restart
+
+	SpriteFrame(0, 1, 8, 8, 127, 64)		// #30 - -
+	SpriteFrame(0, 0, 8, 11, 28, 86)		// #31 - F
+	SpriteFrame(0, 0, 8, 11, 19, 86)		// #32 - E
+	SpriteFrame(0, 0, 8, 11, 10, 86)		// #33 - D
+	SpriteFrame(0, 0, 8, 11, 1, 86)		// #34 - C
+	SpriteFrame(0, 0, 8, 11, 28, 74)		// #35 - B
+	SpriteFrame(0, 0, 8, 11, 19, 74)		// #36 - A
+	SpriteFrame(0, 0, 8, 11, 120, 48)		// #37 - S
+	SpriteFrame(0, 1, 8, 8, 136, 64)		// #38 - +
 
 end event
 

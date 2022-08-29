@@ -20,10 +20,6 @@ reserve function Sega_Background
 reserve function scrolling
 reserve function saveram_stuff
 
-function saveram_stuff
-	arrayPos1 = 200
-	arrayPos1 *= temp0
-end function
 
 
 function scrolling
@@ -40,7 +36,7 @@ function scrolling
 		temp1 -= 216
 	end if
 	if KEH.menusel >= 15
-		temp1 -= 216
+		temp1 -= 72
 	end if
 end function
 
@@ -165,6 +161,7 @@ event ObjectMain
 		SetActivePalette(0, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, object.value0)
 		object.state++
+		object.value1 = saveRAM[251]
 		break
 
 	case 1
@@ -183,36 +180,42 @@ event ObjectMain
 
 
 	case 5
+		if KEH.menusel == 9
+			stage.activeList = BONUS_STAGE
+			stage.listPos = 0
+		else
 			stage.activeList = REGULAR_STAGE
 			stage.listPos = KEH.menusel
-			inputPress.start = 0	
-			inputPress.up = 0		
-			inputPress.down = 0	
-			if object.value0 < 256
-				object.value0 += 8
-				music.volume -= 2
-				SetScreenFade(0, 0, 0, object.value0)
-			else
-				LoadStage()
-				StopMusic()
-				SetScreenFade(0, 0, 0, 0xFF)
-			end if	
-			break
+		end if
+		stage.playerListPos = saveRAM[202]
+		inputPress.start = 0	
+		inputPress.up = 0		
+		inputPress.down = 0	
+		if object.value0 < 256
+			object.value0 += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.value0)
+		else
+			LoadStage()
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if	
+		break
 	case 6
-			inputPress.start = 0	
-			inputPress.up = 0		
-			inputPress.down = 0
-			stage.listPos = 0
-			if object.value0 < 256
-				object.value0 += 8
-				music.volume -= 2
-				SetScreenFade(0, 0, 0, object.value0)
-			else
-				LoadStage()
-				StopMusic()
-				SetScreenFade(0, 0, 0, 0xFF)
-			end if	
-			break
+		inputPress.start = 0	
+		inputPress.up = 0		
+		inputPress.down = 0
+		stage.listPos = 0
+		if object.value0 < 256
+			object.value0 += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.value0)
+		else
+			LoadStage()
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if	
+		break
 	end switch
 	if inputPress.up == 1
 		KEH.menusel -= 1
@@ -233,6 +236,7 @@ event ObjectMain
 	end if
 	if inputPress.start == 1	
 		object.state = 5
+		saveRAM[251] = KEH.menusel
 	end if
 
 end event
@@ -271,7 +275,7 @@ event ObjectDraw
 	temp2 = screen.xcenter
 	temp2 += 3
 	while temp0 < 16
-		arrayPos1 = 200
+		arrayPos1 = 300
 		arrayPos1 *= temp0
 
 		temp1 += 25

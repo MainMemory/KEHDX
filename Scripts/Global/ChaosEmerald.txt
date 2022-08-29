@@ -3,10 +3,11 @@
 // Script Description: Chaos Emerald Object
 // Script Author: MainMemory
 // ----------------------------------
+
 event ObjectMain
 	switch object.state
 	case 1
-		if object.propertyvalue == 0
+		if object.propertyvalue != 9
 			object.ypos = object.value0
 			Sin(temp0, object.angle)
 			temp0 <<= 10

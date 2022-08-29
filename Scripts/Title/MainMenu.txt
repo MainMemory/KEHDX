@@ -145,6 +145,7 @@ event ObjectMain
 	switch object.state
 	case SEGA_SETUP
 		object.alpha = 0x00
+		object.value1 = saveRAM[250]
 		object.inkEffect = INK_ALPHA
 		sega.timer = 320
 		SetActivePalette(1, 0, screen.ysize)
@@ -252,9 +253,11 @@ event ObjectMain
 			break
 		case 0
 			object.state = STAGESELECT_FADEOUT	
+			saveRAM[250] = KEH.menusel
 			break
 		case 2
 			object.state = OPTIONS_FADEOUT	
+			saveRAM[250] = KEH.menusel
 			break
 		end switch
 	end if

@@ -50,10 +50,11 @@ end function
 
 event ObjectMain
 	if object.propertyValue == 13
-		temp0 = object.ixpos
-		temp0 += 30
-		stage.newXBoundary2 = temp0
-		object[arrayPos0].priority = PRIORITY_XBOUNDS
+		if stage.listPos != 13
+			temp0 = object.ixpos
+			temp0 += 30	
+			stage.newXBoundary2 = temp0
+		end if
 	end if
 	if object[9].state == 3
 		if object.propertyValue == 13

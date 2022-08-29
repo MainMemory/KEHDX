@@ -256,9 +256,11 @@ event ObjectMain
 					switch saved.character
 						case 0
 							EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
+							WriteSaveRAM()
 							break
 						case 1
 							EditMenuEntry(MENU_1, "TIKAL", 2, 1)
+							WriteSaveRAM()
 							break
 					end switch
 				end if

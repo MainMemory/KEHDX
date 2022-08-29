@@ -15,6 +15,7 @@ reserve function Monitor_DebugSpawn
 // Static Values
 public value Monitor_value26 = 0;
 
+
 // Tables
 public table Monitor_RandomPool
 	1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13
@@ -74,7 +75,6 @@ event ObjectMain
 			temp0 = object.ixpos
 			temp0 += 30
 			stage.newXBoundary2 = temp0
-			object[arrayPos0].priority = PRIORITY_XBOUNDS
 		end if
 	end if
 	if object[9].state == 3
@@ -270,23 +270,6 @@ event ObjectStartup
 		object[arrayPos0].value31 >>= 4
 		object[arrayPos0].propertyValue &= 15
 	next
-	if options.vsMode == 1
-		if vs.itemMode == 1
-			foreach (TypeName[Monitor], arrayPos0, ALL_ENTITIES)
-				if object[arrayPos0].propertyValue != 13
-					object[arrayPos0].propertyValue = 14
-				end if
-			next
-		end if
-	else
-		if options.shieldType > 1
-			foreach (TypeName[Monitor], arrayPos0, ALL_ENTITIES)
-				if object[arrayPos0].propertyValue != 13
-					object[arrayPos0].propertyValue = 14
-				end if
-			next
-		end if
-	end if
 	foreach (TypeName[Monitor], arrayPos0, ALL_ENTITIES)
 		if object[arrayPos0].propertyValue != 13
 			CallFunction(EmeraldManager_AddEntity)
@@ -295,8 +278,8 @@ event ObjectStartup
 		object[arrayPos0].frame += 2
 	next
 	foreach (TypeName[Monitor], arrayPos0, ALL_ENTITIES)
-		if object[arrayPos0].propertyValue == 13
-			object[arrayPos0].priority = PRIORITY_XBOUNDS
+		if object[arrayPos0].propertyValue == 2
+			CallFunction(EmeraldManager_AddEntity)
 		end if
 	next
 end event

@@ -87,6 +87,9 @@ private alias object.value40 :	player.hitboxTop
 private alias object.value41 :	player.hitboxBottom
 private alias object.value42 :	player.prevGravity
 
+private alias object[8].value20 : pause.KEH
+private alias object[8].value21 : player.nodraw
+
 // Death Event related values
 private alias object.drawOrder : deathEvent.drawOrder
 private alias object.state	   : deathEvent.state
@@ -1358,13 +1361,8 @@ function PlayerObject_HandleGround
 						end if
 					else
 						if object.value1 < 240
-							CheckEqual(object[30].type, TypeName[Act Finish])
-							if checkResult == 1
-								object.animation = ANI_VICTORY
-							else
-								object.animation = ANI_STOPPED
-							end if
 							object.value1++
+							object.animation = ANI_STOPPED
 						else
 							object.animation = ANI_WAITING
 							object.value1++
@@ -1414,12 +1412,7 @@ function PlayerObject_HandleGround
 					break
 				case 1
 					if object.value1 < 240
-							CheckEqual(object[30].type, TypeName[Act Finish])
-							if checkResult == 1
-								object.animation = ANI_VICTORY
-							else
-								object.animation = ANI_STOPPED
-							end if
+						object.animation = ANI_STOPPED
 						object.value1++
 					else
 						object.animation = ANI_WAITING
@@ -1439,12 +1432,7 @@ function PlayerObject_HandleGround
 					break
 				case 2
 					if object.value1 < 240
-													CheckEqual(object[30].type, TypeName[Act Finish])
-							if checkResult == 1
-								object.animation = ANI_VICTORY
-							else
-								object.animation = ANI_STOPPED
-							end if
+						object.animation = ANI_STOPPED
 						object.value1++
 					else
 						object.animation = ANI_WAITING
@@ -2125,26 +2113,31 @@ function PlayerObject_KnuxGlideDrop
 		object.frame = 2
 		if object.value1 < 16
 			object.value1++
-			if object.up == 1
-				CallFunction(PlayerObject_ResetOnFloor)
-				object.state = PlayerObject_LookingUp
+			if object.jumpPress == 1
+				CallFunction(PlayerObject_StartJump)
 				object.value14 = 0
-			else
-				if object.down == 1
-					CallFunction(PlayerObject_ResetOnFloor)
-					object.state = PlayerObject_Crouching
-					object.value14 = 0
-				else
-					if object.jumpPress == 1
-						object.value14 = 0
-						CallFunction(PlayerObject_StartJump)
-					end if
-				end if
 			end if
 		else
 			object.state = PlayerObject_HandleGround
 			CallFunction(PlayerObject_ResetOnFloor)
 			object.value14 = 0
+			if object.up == 1
+				CallFunction(PlayerObject_ResetOnFloor)
+				object.state = PlayerObject_LookingUp
+				object.value14 = 0
+				object.animation = ANI_LOOKINGUP
+				object.prevAnimation = ANI_LOOKINGUP
+				object.frame = 1
+			else
+				if object.down == 1
+					CallFunction(PlayerObject_ResetOnFloor)
+					object.state = PlayerObject_Crouching
+					object.value14 = 0
+					object.animation = ANI_LOOKINGDOWN
+					object.prevAnimation = ANI_LOOKINGDOWN
+					object.frame = 0
+				end if
+			end if
 		end if
 	end if
 end function
@@ -3036,9 +3029,6 @@ event ObjectMain
 	end if
 
 	//Victory Code
-	if object.animation == ANI_VICTORY
-		object.value1 = 0
-	end if
 	if object[9].state >= 2
 		object[0].up = 0
 		object[0].down = 0
@@ -3048,8 +3038,8 @@ event ObjectMain
 		object[0].jumpHold = 0
 		object[0].speed = 0
 		object[0].xvel = 0
-		object[0].yvel = 0
-		object.state = PlayerObject_HandleAir
+		object[0].value1 = 0
+		object[0].animation = ANI_VICTORY
 		screen.cameraX = object[0].ixpos
 		screen.cameraY = object[0].iypos
 	end if 
