@@ -40,6 +40,23 @@ function Grabber_Function150
 end function
 
 
+function Grabber_BecomeEmerald
+	temp1 = 0
+	while temp1 < EmeraldManager_EmeraldCount
+		GetTableValue(temp2, temp1, EmeraldManager_EmeraldObjects)
+		if temp2 == object.entityPos
+			ResetObjectEntity(object.entityPos, TypeName[Chaos Emerald], 0, object.xpos, object.ypos)
+			object.value0 = object.ypos
+			object.state = 1
+			CreateTempObject(TypeName[Smoke Puff], 0, object.xpos, object.ypos)
+		else
+			ResetObjectEntity(object.entityPos, TypeName[Smoke Puff], 0, object.xpos, object.ypos)
+		end if
+		temp1++
+	loop
+end function
+
+
 function Grabber_DebugDraw
 	temp0 = object.ypos
 	temp0 -= 0xC0000
@@ -264,10 +281,10 @@ event ObjectMain
 				else
 					currentPlayer = object.value13
 				end if
-				ResetObjectEntity(object.entityPos, TypeName[Smoke Puff], 0, object.xpos, object.ypos)
 				object.drawOrder = 4
 				PlaySfx(SfxName[Destroy], 0)
-				CallFunction(EmeraldManager_AwardEmerald)
+				CallFunction(Grabber_BecomeEmerald)
+				return
 			end if
 		end if
 		break

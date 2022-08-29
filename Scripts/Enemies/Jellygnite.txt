@@ -181,6 +181,9 @@ event ObjectMain
 					if object.state == 0
 						if object[currentPlayer].ypos < object.ypos
 							CallFunction(PlayerObject_BadnikBreak)
+							if object.type == TypeName[Blank Object]
+								CallFunction(EmeraldManager_AwardEmerald)
+							end if
 						else
 							object.state = 1
 							object.animation = 1
