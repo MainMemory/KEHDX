@@ -177,22 +177,11 @@ event ObjectStartup
 	object[10].type = TypeName[ARZ Setup]
 	object[10].priority = PRIORITY_ACTIVE
 	object[10].drawOrder = 0
-	switch stage.actNum
-	case 1
-		stage.curYBoundary1 = 512
-		tileLayer[1].scrollPos = -0x1800000
-		tileLayer[2].scrollPos = -0x1800000
-		tileLayer[1].parallaxFactor = 256
-		tileLayer[2].parallaxFactor = 256
-		break
-	case 2
 		stage.curYBoundary1 = 384
 		tileLayer[3].scrollPos = -0x800000
 		tileLayer[4].scrollPos = -0x800000
 		tileLayer[3].parallaxFactor = 128
 		tileLayer[4].parallaxFactor = 128
-		break
-	end switch
 	LoadPalette("ARZ_WaterPal.act", 1, 0, 0, 256)
 	LoadPalette("ElectricFlash.act", 2, 0, 0, 256)
 	ARZSetup_flashTimer = 0

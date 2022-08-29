@@ -1,0 +1,529 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: LZ Setup Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// Aliases
+private alias 39 : TYPE_LZSETUP
+
+private alias object.value6 : LZSetup.C_Red
+private alias object.value7 : LZSetup.C_Green
+private alias object.value8 : LZSetup.C_Blue
+
+// Function declarations
+reserve function LZSetup_deformationDataA
+reserve function LZSetup_deformationDataB
+reserve function LZSetup_toneDownPalette
+reserve function LZSetup_InitSuperSonicPal
+reserve function LZSetup_InitSuperTailsPal
+reserve function LZSetup_InitSuperKnuxPal
+reserve function LZSetup_SpeedUpMusicLZ
+reserve function LZSetup_SlowDownMusicLZ
+reserve function LZSetup_SpeedUpMusicSBZ3
+reserve function LZSetup_SlowDownMusicSBZ3
+
+// Static Values
+public value LZSetup_value30 = 0;
+public value LZSetup_value29 = 0;
+
+private alias LZSetup_value29 : LZSetup_flashTimer
+
+// Tables
+public table LZSetup_palDelayTable
+	2, 2, 1
+end table
+
+public table LZSetup_demoTable
+	0xA000000, 0x62C0000, 8, 49, 0, 9, 8, 102, 0, 86, 2, 13, 0, 11, 2, 10, 0, 9, 2, 13, 0, 7, 8, 13, 56, 1, 40, 3, 8, 38, 0, 27, 1, 13, 0, 13, 2, 13, 0, 10, 2, 7, 8, 9, 56, 1, 40, 4, 8, 27, 0, 13, 2, 12, 0, 12, 2, 10, 0, 15, 2, 7, 0, 14, 2, 10, 0, 35, 48, 1, 32, 4, 0, 8, 2, 6, 
+end table
+
+function LZSetup_deformationDataA
+
+	stage[arrayPos0].deformationData1 = 1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = 1
+	arrayPos0++
+
+end function
+
+
+function LZSetup_deformationDataB
+
+	stage[arrayPos0].deformationData1 = -1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -3
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -2
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -1
+	arrayPos0++
+
+	stage[arrayPos0].deformationData1 = -1
+	arrayPos0++
+
+end function
+
+
+function LZSetup_toneDownPalette
+
+	// Wacky function to take a normal color and turn it into an underwater color
+
+	LZSetup.C_Red = temp1
+	LZSetup.C_Red >>= 16
+
+	LZSetup.C_Green = temp1
+	LZSetup.C_Green >>= 8
+	LZSetup.C_Green &= 255
+
+	LZSetup.C_Blue = temp1
+	LZSetup.C_Blue &= 255
+
+	object.value9 = temp2
+	object.value9 >>= 16
+
+	object.value10 = temp2
+	object.value10 >>= 8
+	object.value10 &= 255
+
+	object.value11 = temp2
+	object.value11 &= 255
+
+	// Minimum of 1
+	if object.value9 == 0
+		object.value9 = 1
+	end if
+
+	if object.value10 == 0
+		object.value10 = 1
+	end if
+
+	if object.value11 == 0
+		object.value11 = 1
+	end if
+
+	LZSetup.C_Red <<= 8
+	LZSetup.C_Green <<= 8
+	LZSetup.C_Blue <<= 8
+
+	LZSetup.C_Red /= object.value9
+	LZSetup.C_Green /= object.value10
+	LZSetup.C_Blue /= object.value11
+
+	if LZSetup.C_Red == 0
+		LZSetup.C_Red = 256
+	end if
+
+	if LZSetup.C_Green == 0
+		LZSetup.C_Green = 256
+	end if
+
+	if LZSetup.C_Blue == 0
+		LZSetup.C_Blue = 256
+	end if
+end function
+
+function LZSetup_SpeedUpMusicLZ
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x76E4)
+			SwapMusicTrack("Labyrinth_F.ogg", 0, 0x107D2, 0x1F40)
+			break
+		case 2
+			SetMusicTrack("Labyrinth_F.ogg", 0, 0x107D2)
+			SwapMusicTrack("Invincibility_F.ogg", 2, 0x76E4, 0x1F40)
+			break
+		case 4
+		case 6
+			SetMusicTrack("Labyrinth_F.ogg", 0, 0x107D2)
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x76E4)
+			break
+		end switch
+	else
+		stage.musicFlag = 1
+	end if
+end function
+
+
+function LZSetup_SlowDownMusicLZ
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility.ogg", 2, 0x9A68)
+			SwapMusicTrack("Labyrinth.ogg", 0, 0x149DC, 0x30D4)
+			break
+		case 2
+			SetMusicTrack("Labyrinth.ogg", 0, 0x149DC)
+			SwapMusicTrack("Invincibility.ogg", 2, 0x9A68, 0x30D4)
+			break
+		case 4
+		case 6
+			SetMusicTrack("Labyrinth.ogg", 0, 0x149DC)
+			SetMusicTrack("Invincibility.ogg", 2, 0x9A68)
+			break
+		end switch
+	else
+		stage.musicFlag = 2
+	end if
+end function
+
+
+function LZSetup_SpeedUpMusicSBZ3
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x76E4)
+			SwapMusicTrack("ScrapBrain_F.ogg", 0, 1, 0x1F40)
+			break
+		case 2
+			SetMusicTrack("ScrapBrain_F.ogg", 0, 1)
+			SwapMusicTrack("Invincibility_F.ogg", 2, 0x76E4, 0x1F40)
+			break
+		case 4
+		case 6
+			SetMusicTrack("ScrapBrain_F.ogg", 0, 1)
+			SetMusicTrack("Invincibility_F.ogg", 2, 0x76E4)
+			break
+		end switch
+	else
+		stage.musicFlag = 1
+	end if
+end function
+
+
+function LZSetup_SlowDownMusicSBZ3
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, 2)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, 0)
+	temp0 &= checkResult
+	if temp0 == 0
+		switch music.currentTrack
+		case 0
+			SetMusicTrack("Invincibility.ogg", 2, 0x9A68)
+			SwapMusicTrack("ScrapBrain.ogg", 0, 1, 0x30D4)
+			break
+		case 2
+			SetMusicTrack("ScrapBrain.ogg", 0, 1)
+			SwapMusicTrack("Invincibility.ogg", 2, 0x9A68, 0x30D4)
+			break
+		case 4
+		case 6
+			SetMusicTrack("ScrapBrain.ogg", 0, 1)
+			SetMusicTrack("Invincibility.ogg", 2, 0x9A68)
+			break
+		end switch
+	else
+		stage.musicFlag = 2
+	end if
+end function
+
+
+event ObjectMain
+
+	object.value0++
+	if object.value0 > 1
+		tileLayer[0].deformationOffsetW++
+		tileLayer[1].deformationOffsetW++
+		object.value0 = 0
+	end if
+
+	object.value1++
+	if object.value1 == 3
+		object.value1 = 0
+		RotatePalette(0, 171, 174, 0)
+		RotatePalette(1, 171, 174, 0)
+	end if
+
+	if object.value2 > 0
+		object.value2--
+	else
+		object.value3++
+		object.value3 %= 3
+		GetTableValue(object.value2, object.value3, LZSetup_palDelayTable)
+		RotatePalette(0, 187, 189, LZSetup_value30)
+		RotatePalette(1, 187, 189, LZSetup_value30)
+	end if
+
+	// Cycle through all players
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+		temp1 = object[currentPlayer].xpos
+		temp1 >>= 16
+
+		temp2 = object[currentPlayer].ypos
+		temp2 >>= 16
+
+		temp2 += object[currentPlayer].collisionBottom
+		temp2--
+
+		Get16x16TileInfo(temp0, temp1, temp2, TILEINFO_INDEX)
+
+		CheckEqual(temp0, 71)
+		temp3 = checkResult
+		CheckEqual(temp0, 72)
+		temp3 |= checkResult
+
+		if temp3 == true
+
+			CheckEqual(object[currentPlayer].state, PlayerObject_KnuxGlideLeft)
+			temp3 = checkResult
+			CheckEqual(object[currentPlayer].state, PlayerObject_KnuxGlideRight)
+			temp3 |= checkResult
+			CheckEqual(object[currentPlayer].state, PlayerObject_KnuxWallClimb)
+			temp3 |= checkResult
+			CheckEqual(object[currentPlayer].state, PlayerObject_KnuxLedgePullUp)
+			temp3 |= checkResult
+
+			if temp3 == true
+
+				if object[currentPlayer].state == PlayerObject_KnuxGlideLeft
+					FlipSign(object[currentPlayer].xvel)
+					FlipSign(object[currentPlayer].speed)
+				end if
+
+				object[currentPlayer].state = PlayerObject_KnuxGlideDrop
+				object[currentPlayer].animation = ANI_GLIDING_DROP
+
+			end if
+
+		end if
+
+
+		if object[currentPlayer].gravity == GRAVITY_GROUND
+
+			Get16x16TileInfo(temp0, temp1, temp2, TILEINFO_ANGLEB)
+
+			if temp0 == 1
+
+				object[currentPlayer].state = PlayerObject_WaterSlide
+
+				Get16x16TileInfo(temp0, temp1, temp2, TILEINFO_DIRECTION)
+
+				switch temp0
+				case 0
+				case 2
+					object[currentPlayer].direction = FLIP_X
+					break
+				case 1
+				case 3
+					object[currentPlayer].direction = FLIP_NONE
+				end switch
+
+			end if
+		end if
+	next
+
+	if object[0].state == PlayerObject_WaterSlide
+		if object.value4 == 0
+			if object.value5 == 0
+				PlaySfx(SfxName[Waterfall], 0)
+				StopSfx(SfxName[Waterfall Loop])
+				object.value5 = 1
+			else
+				StopSfx(SfxName[Waterfall])
+				PlaySfx(SfxName[Waterfall Loop], 0)
+			end if
+		end if
+		object.value4++
+		object.value4 &= 63
+	else
+		if object.value4 != 0
+			object.value4++
+			object.value4 &= 63
+		else
+			object.value4 = 0
+			object.value5 = 0
+		end if
+	end if
+	if LZSetup_flashTimer > 0
+		LZSetup_flashTimer--
+	end if
+end event
+
+
+event ObjectDraw
+
+	// Change the palette to the underwater one after the water level's Y Pos
+	temp0 = stage.waterLevel
+	temp0 -= screen.yoffset
+
+	// Minimum of 0
+	if temp0 < 0
+		temp0 = 0
+	end if
+
+	// Maximum of the screen's Y size
+	if temp0 > screen.ysize
+		temp0 = screen.ysize
+	end if
+
+	// Set the above water palette from the upper part of the screen
+	SetActivePalette(0, 0, temp0)
+
+	// Set the underwater palette for the bottom part of the screen
+
+	if LZSetup_flashTimer > 0
+
+		// Use the lightning palette if needed
+		SetActivePalette(2, temp0, screen.ysize)
+
+	else
+
+		// Otherwise use the normal UW palette
+		SetActivePalette(1, temp0, screen.ysize)
+
+	end if
+
+end event
+
+
+event ObjectStartup
+
+	// Set the speed up/slow down functions, too
+	SetMusicTrack("Labyrinth.ogg", 0, 0x149DC)
+	SpeedUpMusic = LZSetup_SpeedUpMusicLZ
+	SlowDownMusic = LZSetup_SlowDownMusicLZ
+
+	// Pecky and Rocky are the inhabitants of this labyrinth
+	animalType1 = TypeName[Pecky]
+	animalType2 = TypeName[Rocky]
+
+	// Set object slot 10 to be the LZ Setup object
+	object[10].type = TypeName[LZ Setup]
+	object[10].priority = PRIORITY_ACTIVE
+	object[10].drawOrder = 0
+
+	// Start the initial palette cycle stuff
+	GetTableValue(object[10].value2, 0, LZSetup_palDelayTable)
+
+
+	// Set stage deformation data
+	// (FG layer properties)
+
+	arrayPos0 = 0
+	CallFunction(LZSetup_deformationDataA)
+
+	arrayPos0 = 128
+	CallFunction(LZSetup_deformationDataA)
+
+	arrayPos0 = 160
+	CallFunction(LZSetup_deformationDataB)
+
+	arrayPos0 = 256
+
+	while arrayPos0 < 576
+		arrayPos1 = arrayPos0
+		arrayPos1 -= 256
+		stage[arrayPos0].deformationData1 = stage[arrayPos1].deformationData1
+		arrayPos0++
+	loop
+
+	SetLayerDeformation(3, 128, 4, 0, 0, 0)
+
+	LoadPalette("LZ_WaterPal.act", 1, 0, 0, 256)
+
+	// Load the eletric flash palette in case the player gets wet with a lightning shield
+	LoadPalette("ElectricFlash.act", 2, 0, 0, 256)
+
+	// Reset the flash timer
+	LZSetup_flashTimer = 0
+
+	if options.attractMode == true
+
+		if credits.screen > 0
+			PlayerObject_ReplayTable = LZSetup_demoTable
+			PlayerObject_ReplaySize = 76
+			PlayerObject_ReplayLength = 540
+		end if
+	
+		CallFunction(PlayerObject_InitReplay)
+	
+	end if
+
+end event
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 143)
+end event
