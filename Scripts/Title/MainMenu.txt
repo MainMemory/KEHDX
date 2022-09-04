@@ -320,7 +320,7 @@ event ObjectStartup
 	SpriteFrame(0, 0, 24, 22, 57, 112)
 	SpriteFrame(-152, 0, 304, 10, 0, 190)
 	options.touchControls = false
-	SetMusicTrack("Walkin.ogg", 1, 49689)
+	SetMusicTrack("SPPMenu.ogg", 1, 214596)
 	LoadPalette("MainTitle.act", 1, 0, 0, 256)
 end event
 
