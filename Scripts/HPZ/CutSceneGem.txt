@@ -6,7 +6,7 @@
 // ----------------------------------
 
 // Aliases
-private alias 59 : TYPE_BREAKGEM
+private alias 59 : TYPE_CUTSCENEGEM
 
 private alias 0 : STATE_INTACT
 private alias 1 : STATE_SHARD
@@ -17,19 +17,6 @@ private alias object.animation : player.animation
 private alias object.gravity : player.gravity
 private alias object.yvel : player.yvel
 private alias object.value19 : player.enemyChainCounter
-
-// Function declarations
-reserve function BreakGem_DebugDraw
-reserve function BreakGem_DebugSpawn
-
-function BreakGem_DebugDraw
-	DrawSprite(0)
-end function
-
-
-function BreakGem_DebugSpawn
-	CreateTempObject(TypeName[Break Gem], 0, object.xpos, object.ypos)
-end function
 
 
 event ObjectMain
@@ -200,12 +187,6 @@ event ObjectStartup
 
 	// Shard frames
 	SpriteFrame(-8, -16, 16, 32, 99, 123)
-
-	// Add this object to the debug mode object list
-	SetTableValue(TypeName[CutSceneGem], DebugMode_ObjCount, DebugMode_TypesTable)
-	SetTableValue(BreakGem_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
-	SetTableValue(BreakGem_DebugSpawn, DebugMode_ObjCount, DebugMode_SpawnTable)
-	DebugMode_ObjCount++
 
 end event
 

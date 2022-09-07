@@ -173,6 +173,14 @@ event ObjectMain
 				break
 			end switch
 		end if
+		temp0 = screen.xcenter
+		temp0 -= 50
+		temp1 = temp0
+		temp1 += 42
+		CheckTouchRect(temp0, 90, temp1, 150)
+		if checkResult > -1
+			specialMode = 1
+		end if
 		break
 	case 7
 		if sega.fadeValue < 256

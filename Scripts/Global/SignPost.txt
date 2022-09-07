@@ -9,10 +9,6 @@
 
 // Function declarations
 
-// Static Values
-public value EmeraldManager_EndX = 0;
-public value EmeraldManager_EndY = 0;
-
 // Tables
 
 event ObjectMain

@@ -117,26 +117,37 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("Global/Items.gif")
-	SpriteFrame(-8, -8, 16, 16, 109, 158)
-	temp0 = 175
-	while temp0 < 193
-		temp1 = 109
-		while temp1 < 161
-			SpriteFrame(-8, -8, 16, 16, temp1, temp0)
-			temp1 += 17
+	switch specialMode
+	case 0
+		SpriteFrame(-8, -8, 16, 16, 109, 158)
+		temp0 = 175
+		while temp0 < 193
+			temp1 = 109
+			while temp1 < 161
+				SpriteFrame(-8, -8, 16, 16, temp1, temp0)
+				temp1 += 17
+			loop
+			temp0 += 17
 		loop
-		temp0 += 17
-	loop
 
-	SpriteFrame(-8, -16, 16, 32, 178, 159) // 9 HPZ Shard
+		SpriteFrame(-8, -16, 16, 32, 178, 159) // 9 HPZ Shard
 
-	temp1 = 126
-	temp0 = 0
-	while temp0 < 2
-		SpriteFrame(-8, -8, 16, 16, temp1, 158) // S1 Emerald
-		temp1 += 17
-		temp0++
-	loop
+		temp1 = 126
+		temp0 = 0
+		while temp0 < 2
+			SpriteFrame(-8, -8, 16, 16, temp1, 158) // S1 Emerald
+			temp1 += 17
+			temp0++
+		loop
+		break
+	case 1
+		temp0 = 0
+		while temp0 < 12
+			SpriteFrame(-8, -8, 16, 16, 177, 192)
+			temp0++
+		loop
+		break
+	endswitch
 
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].drawOrder = 4
