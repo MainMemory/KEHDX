@@ -127,6 +127,9 @@ end function
 event ObjectMain
 	switch stage.state
 	case STAGE_PAUSED
+		foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+			return
+		next
 		switch pause.KEH
 		case 0
 			pause.KEH = 1
@@ -216,26 +219,6 @@ event ObjectMain
 			CallFunction(StageSetup_HandleS1OscillationTable)
 		else
 			CallFunction(StageSetup_HandleOscillationTable)
-		end if
-
-		// Handle Time overs
-		if stage.timeEnabled == true
-			if stage.minutes == 10
-				CheckEqual(stage.debugMode, true)
-				temp0 = checkResult
-				CheckEqual(options.gameMode, 2)
-				temp0 |= checkResult
-				if temp0 == 0
-					stage.timeOver = 1
-					currentPlayer = 0
-					object[0].type = TypeName[Player Object]
-					CallFunction(PlayerObject_Kill)
-				end if
-				stage.minutes 		= 9
-				stage.seconds 		= 59
-				stage.milliSeconds 	= 99
-				stage.timeEnabled 	= false
-			end if
 		end if
 
 		//Boundaries: Left & Bottom

@@ -206,12 +206,6 @@ function HUD_DrawPC
 	temp0 -= leave.xoffset
 	DrawSpriteScreenXY(10, temp0, 13)
 
-	if stage.minutes == 9
-		if HUD.flashingTimer > 7
-			DrawSpriteScreenXY(11, temp0, 29)
-		end if
-	end if
-
 	if player[0].rings == 0
 		if HUD.flashingTimer > 7
 			DrawSpriteScreenXY(12, temp0, 45)
@@ -399,12 +393,6 @@ end function
 function HUD_DrawMobile
 
 	DrawSpriteScreenXY(10, 17, 9)
-
-	if stage.minutes == 9
-		if HUD.flashingTimer > 7
-			DrawSpriteScreenXY(11, 17, 25)
-		end if
-	end if
 
 	if player[0].rings == 0
 		if HUD.flashingTimer > 7
