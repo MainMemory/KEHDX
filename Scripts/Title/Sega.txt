@@ -187,7 +187,7 @@ event ObjectMain
 			sega.fadeValue += 8
 			SetScreenFade(0, 0, 0, sega.fadeValue)
 		else
-			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+			ResetObjectEntity(object.entityPos, TypeName[SHC Splash], 0, object.xpos, object.ypos)
 			SetScreenFade(0, 0, 0, 255)
 		end if
 		break
