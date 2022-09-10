@@ -336,7 +336,6 @@ event ObjectMain
 	//Cutscene stuff and labels apperently
 	switch object.state
 	case 0 // Remove player control
-		object[0].controlmode = -1
 		object.alpha -= 8
 		if object.alpha < 1 //you can see
 			object.alpha = 0
@@ -350,30 +349,44 @@ event ObjectMain
 		object.value47++ // timer
 
 		//Stop that mf
-		if object.value47 == 175 
-			object.state++
+		if object.value47 >= 170
+			object.value46++ // just wait
+
+			//Stop him
 			object[0].right = 0
 			object[0].speed = 0
-			object.value47 = 0
+
+			if object.value46 == 10
+				object.state++
+				object.value46 = 0
+				object.value47 = 0
+			end if
 		end if
 		break
-	case 2 //wait a sec knuck
-		screen.camerax = object[34].ixpos //cam is on the emerald
+	case 2 //look at that rock
+		screen.cameraEnabled = 0 //no lock on the camera
 		object.value47++
-		if object.value47 == 50
+		screen.xoffset++ //move the camera
+
+		if object.value47 == 86 // next part
 			object.state++
 		end if 
 		break
 	case 3 //I'ma gonna break that cool rock
-		screen.camerax = object[34].ixpos //cam is still on the emerald
 		object[0].right = 1
 		object[0].state = PlayerObject_StartJump //gonna do the thing
+		object[0].jumpHold = 1
 		object.state++
 		break
 	case 4 // Ok I did it
-		screen.camerax = object[34].ixpos //you can guess
 		object[0].right = 1
-		if object[0].xpos > object[34].xpos //I need to stop
+
+		//No Jump Hold
+		if object.value47 == 0
+			object[0].jumpHold = 0
+		end if
+
+		if object[0].xpos >= object[34].xpos //I need to stop
 			object[0].right = 0
 			object[0].speed = 0
 			object.value47 = 0
@@ -381,7 +394,6 @@ event ObjectMain
 		end if
 		break
 	case 5// Time to celebrate 
-		screen.camerax = object[34].ixpos //idk
 		object.value47++
 
 		//Victory Screech
@@ -442,6 +454,8 @@ end event
 event ObjectStartup
 
 	SetMusicTrack("Extra.ogg", 0, 0xE9CC)
+
+	object[0].controlmode = -1
 
 	if stage.player2Enabled == true
 		object[1].xpos = object[0].xpos
