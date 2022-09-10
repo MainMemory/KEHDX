@@ -78,6 +78,9 @@ event ObjectMain
 		end if
 		break
 	end switch
+	if inputPress.start == 1
+		object.state = 3
+	end if
 end event
 
 event ObjectDraw
