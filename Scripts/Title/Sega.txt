@@ -237,6 +237,14 @@ event ObjectDraw
 	case 6
 	case 7
 		DrawSpriteScreenXY(11, screen.xcenter, screen.ycenter)
+		if specialMode == 1
+			temp0 = screen.xcenter
+			temp0 -= 93
+			DrawRect(temp0, 90, 42, 60, 224, 224, 224, 255)
+			temp0 = screen.xcenter
+			temp0 -= 6
+			DrawRect(temp0, 90, 100, 60, 224, 224, 224, 255)
+		end if
 		break
 	end switch
 end event
