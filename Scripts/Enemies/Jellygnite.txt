@@ -153,6 +153,7 @@ event ObjectMain
 			ResetObjectEntity(object.entityPos, TypeName[Smoke Puff], 0, object.xpos, object.ypos)
 			object.drawOrder = 4
 			PlaySfx(SfxName[Destroy], 0)
+			CallFunction(EmeraldManager_AwardEmerald)
 		end if
 		break
 	end switch
