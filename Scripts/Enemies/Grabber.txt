@@ -40,23 +40,6 @@ function Grabber_Function150
 end function
 
 
-function Grabber_BecomeEmerald
-	temp1 = 0
-	while temp1 < EmeraldManager_EmeraldCount
-		GetTableValue(temp2, temp1, EmeraldManager_EmeraldObjects)
-		if temp2 == object.entityPos
-			ResetObjectEntity(object.entityPos, TypeName[Chaos Emerald], 0, object.xpos, object.ypos)
-			object.value0 = object.ypos
-			object.state = 1
-			CreateTempObject(TypeName[Smoke Puff], 0, object.xpos, object.ypos)
-		else
-			ResetObjectEntity(object.entityPos, TypeName[Smoke Puff], 0, object.xpos, object.ypos)
-		end if
-		temp1++
-	loop
-end function
-
-
 function Grabber_DebugDraw
 	temp0 = object.ypos
 	temp0 -= 0xC0000
@@ -210,7 +193,6 @@ event ObjectMain
 							object.state = 4
 							object.animation = 0
 							object.value8 = currentPlayer
-							object.value13 = currentPlayer
 							object[currentPlayer].xvel = 0
 							object[currentPlayer].yvel = 0
 							object[currentPlayer].speed = 0
@@ -233,9 +215,6 @@ event ObjectMain
 						BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, object[currentPlayer].value40, object[currentPlayer].value38, object[currentPlayer].value41, object[currentPlayer].value39)
 						if checkResult == 1
 							CallFunction(PlayerObject_BadnikBreak)
-							if object.type == TypeName[Blank Object]
-								CallFunction(EmeraldManager_AwardEmerald)
-							end if
 						end if
 					end if
 				end if
@@ -278,13 +257,11 @@ event ObjectMain
 						object.value8 = -1
 						temp7 = -1
 					end if
-				else
-					currentPlayer = object.value13
 				end if
+				ResetObjectEntity(object.entityPos, TypeName[Smoke Puff], 0, object.xpos, object.ypos)
 				object.drawOrder = 4
+				CallFunction(EmeraldManager_AwardEmerald)
 				PlaySfx(SfxName[Destroy], 0)
-				CallFunction(Grabber_BecomeEmerald)
-				return
 			end if
 		end if
 		break
@@ -294,6 +271,9 @@ event ObjectMain
 			currentPlayer = temp7
 			object[currentPlayer].state = PlayerObject_HandleAir
 		end if
+	end if
+	if object.type == TypeName[Blank Object]
+		CallFunction(EmeraldManager_AwardEmerald)
 	end if
 end event
 
