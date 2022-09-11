@@ -1,7 +1,8 @@
 // ----------------------------------
 // RSDK Project: Sonic 2
 // Script Description: SHC Splash Object
-// Script Author: Lave sIime, for Sonic Hacking Contest 2022
+// Original Script Author: Lave sIime
+// KEXDX Modifications: MainMemory
 // ----------------------------------
 
 // ========================
