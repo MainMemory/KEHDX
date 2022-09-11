@@ -158,7 +158,7 @@ event ObjectMain
 	case 0
 		object.inkEffect = INK_ALPHA
 		object.value0 = 320
-		SetActivePalette(0, 0, screen.ysize)
+		SetActivePalette(5, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, object.value0)
 		object.state++
 		object.value1 = saveRAM[251]
@@ -327,7 +327,7 @@ event ObjectDraw
 
 		arrayPos1++
 		temp1 += 12
-		DrawNumbers(40, temp2, temp1, saveRAM[arrayPos1], 3, 7, 0) // Rank
+		DrawSpriteScreenXY(51, temp2, temp1) // Rank
 
 		temp2 -= 128
 		temp1 += 29
@@ -444,11 +444,12 @@ event ObjectStartup
 	loop
 
 	SpriteFrame(-58, 0, 64, 7, 33, 119) // 50 ' "
+	SpriteFrame(0, 0, 8, 7, 139, 34) // 51 L
 
 	options.touchControls = false
 	SetMusicTrack("2D.ogg", 2, 108000)
 	stage.debugmode = 0
-	LoadPalette("StageSelect.act", 0, 0, 0, 256)
+	LoadPalette("StageSelect.act", 5, 0, 0, 256)
 end event
 
 event RSDKDraw
