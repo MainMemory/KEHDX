@@ -427,10 +427,10 @@ event ObjectDraw
 	temp7 = object.totalPos
 	temp7 += screen.xcenter
 	temp6 += 15
-	DrawSpriteScreenXY(12, temp7, temp6)
+	//DrawSpriteScreenXY(12, temp7, temp6)
 	temp7 += 88
 	temp6++
-	DrawNumbers(14, temp7, temp6, object.totalScore, 6, 8, 0)
+	//DrawNumbers(14, temp7, temp6, object.totalScore, 6, 8, 0)
 
 	if object.state == ACTFINISH_CHOOSEWHERETOGO
 		temp0 = screen.xcenter

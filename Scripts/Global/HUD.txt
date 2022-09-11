@@ -385,7 +385,7 @@ function HUD_DrawPC
 	temp3 += 16
 	temp0 -= 10
 
-	DrawSpriteScreenXY(103, temp0, temp3)
+	DrawSpriteScreenXY(34, temp0, temp3)
 
 end function
 
@@ -803,7 +803,7 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 8, 100, 64) 	// 31 - Life icon number 7
 	SpriteFrame(0, 0, 8, 8, 109, 64) 	// 32 - Life icon number 8
 	SpriteFrame(0, 0, 8, 8, 118, 64) 	// 33 - Life icon number 9
-	SpriteFrame(-16, 0, 8, 8, 127, 64) 	// 34 - Debug minus icon
+	SpriteFrame(-1, 1, 8, 8, 127, 64) 	// 34 - Debug minus icon
 	SpriteFrame(8, 0, 8, 8, 136, 64) 	// 35 - Debug plus icon
 	SpriteFrame(0, 0, 8, 8, 25, 98) 	// 36 - Debug red "X"
 	SpriteFrame(0, 0, 8, 8, 34, 98) 	// 37 - Debug red "Y"
