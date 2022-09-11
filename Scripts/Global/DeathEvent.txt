@@ -41,13 +41,7 @@ event ObjectMain
 				recStage = stage.listPos
 				stage.activeList = PRESENTATION_STAGE
 				if options.vsMode == false
-					if player.continues == 0
-						stage.listPos = 0
-						engine.state = 8
-						CallNativeFunction2(ShowPromoPopup, 0, "GameOverPromo")
-					else
-						stage.listPos = 4
-					end if
+					stage.listPos = 4
 				else
 					stage.listPos = 3
 					if vs.playerID == 0
