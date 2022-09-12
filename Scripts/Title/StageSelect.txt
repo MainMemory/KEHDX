@@ -14,6 +14,8 @@ private alias object.value3 : KEH.scrollPosPrev
 private alias object.value4 : KEH.scrollPosTarget
 private alias object.value5 : KEH.scrollAngle
 
+private alias object.value10 : KEH.usingTouch
+
 private alias 0  : KEH_MIN
 private alias 15 : KEH_MAX
 

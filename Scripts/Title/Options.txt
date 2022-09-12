@@ -13,6 +13,7 @@ private alias object.value1 : menuControl.scrollDelayUp
 private alias object.value2 : menuControl.scrollDelayDown
 private alias object.value3 : menuControl.currentSelection
 private alias object.value4 : menuControl.soundTestCooldown
+private alias object.value5 : KEH.usingTouch
 
 private alias object.value0 : hexNo.number
 private alias object.value1 : hexNo.highlighted
@@ -190,6 +191,7 @@ event ObjectMain
 	switch object.state
 	case STATE_INIT
 		menuControl.fadeValue = 320
+		KEH.usingTouch = false
 		SetScreenFade(0, 0, 0, menuControl.fadeValue)
 		object[+1].ypos = 160
 		object[+1].priority = PRIORITY_ACTIVE
@@ -209,126 +211,256 @@ event ObjectMain
 	case STATE_MAIN
 		// Don't do any of this if the options menu is open
 		if MenuControl_optionsMenuOpen == 0
-
-			if inputpress.down == true
-
-
+			
+			if KEH.usingTouch == false
+				if inputpress.down == true
 					menuControl.currentSelection++
-	
-				menuControl.scrollDelayDown %= 4
-
-			else
-
-				if inputpress.up == true
-						menuControl.currentSelection--
-					menuControl.scrollDelayUp %= 4
+					menuControl.scrollDelayDown %= 4
 				else
-					menuControl.scrollDelayUp = 0
-					menuControl.scrollDelayDown = 0
-				end if
-
-			end if
-
-			if menuControl.currentSelection > 4
-				menuControl.currentSelection = 0
-			end if
-
-			if menuControl.currentSelection < 0
-				menuControl.currentSelection = 4
-			end if
-
-
-			switch menuControl.currentSelection
-			case 0
-				if inputpress.left == true
-					saved.character--
-					if saved.character < 0
-						saved.character = 1
+					if inputpress.up == true
+							menuControl.currentSelection--
+						menuControl.scrollDelayUp %= 4
+					else
+						menuControl.scrollDelayUp = 0
+						menuControl.scrollDelayDown = 0
 					end if
-					temp1 = 1
 				end if
-				if inputpress.right == true
-					saved.character++
-					saved.character %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.character
-						case 0
-							EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "TIKAL", 2, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			case 1
-				if inputpress.left == true
-					saved.radar--
-					if saved.radar < 0
-						saved.radar = 1
-					end if
-					temp1 = 1
-				end if
-				if inputpress.right == true
-					saved.radar++
-					saved.radar %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.radar
-						case 0
-							EditMenuEntry(MENU_1, " ON ", 8, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "OFF", 8, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			case 4
-				if inputpress.left == true
-					saved.radarstyle--
-					if saved.radarstyle < 0
-						saved.radarstyle = 1
-					end if
-					temp1 = 1
-				end if
-				if inputpress.right == true
-					saved.radarstyle ++
-					saved.radarstyle %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.radarstyle
-						case 0
-							EditMenuEntry(MENU_1, "NEW", 26, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "OLD", 26, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			end switch
 
+				if menuControl.currentSelection > 4
+					menuControl.currentSelection = 0
+				end if
 
+				if menuControl.currentSelection < 0
+					menuControl.currentSelection = 4
+				end if
+				
+				switch menuControl.currentSelection
+				case 0
+					if inputpress.left == true
+						saved.character--
+						if saved.character < 0
+							saved.character = 1
+						end if
+						temp1 = 1
+					end if
+					
+					if inputpress.right == true
+						saved.character++
+						saved.character %= 2
+						temp1 = 1
+					end if
+					
+					if temp1 == 1
+						switch saved.character
+							case 0
+								EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
+								WriteSaveRAM()
+								break
+							case 1
+								EditMenuEntry(MENU_1, "TIKAL", 2, 1)
+								WriteSaveRAM()
+								break
+						end switch
+					end if
+					break
+				case 1
+					if inputpress.left == true
+						saved.radar--
+						if saved.radar < 0
+							saved.radar = 1
+						end if
+						temp1 = 1
+					end if
+					if inputpress.right == true
+						saved.radar++
+						saved.radar %= 2
+						temp1 = 1
+					end if
+					if temp1 == 1
+						switch saved.radar
+							case 0
+								EditMenuEntry(MENU_1, " ON ", 8, 1)
+								WriteSaveRAM()
+								break
+							case 1
+								EditMenuEntry(MENU_1, "OFF", 8, 1)
+								WriteSaveRAM()
+								break
+						end switch
+					end if
+					break
+				case 4
+					if inputpress.left == true
+						saved.radarstyle--
+						if saved.radarstyle < 0
+							saved.radarstyle = 1
+						end if
+						temp1 = 1
+					end if
+					if inputpress.right == true
+						saved.radarstyle ++
+						saved.radarstyle %= 2
+						temp1 = 1
+					end if
+					if temp1 == 1
+						switch saved.radarstyle
+							case 0
+								EditMenuEntry(MENU_1, "NEW", 26, 1)
+								WriteSaveRAM()
+								break
+							case 1
+								EditMenuEntry(MENU_1, "OLD", 26, 1)
+								WriteSaveRAM()
+								break
+						end switch
+					end if
+					break
+				end switch
+				
+				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			
+				if checkResult > -1
+					// Activate touch controls, hide the Knuckles cursor
+					KEH.usingTouch = true
+					menuControl.currentSelection = -1
+				end if
+			else
+				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+				temp3 = checkResult
+				
+				// Touch inputs, repeating for every button (even the null ones!)
+				
+				CheckTouchRect(50, 3, 370, 51)
+				
+				if checkResult > -1
+					menuControl.currentSelection = 0
+				else
+					if temp3 < 0
+						if menuControl.currentSelection == 0
+							saved.character--
+							if saved.character < 0
+								saved.character = 1
+							end if
+							
+							switch saved.character
+							case 0
+								EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
+								WriteSaveRAM()
+								break
+							case 1
+								EditMenuEntry(MENU_1, "TIKAL", 2, 1)
+								WriteSaveRAM()
+								break
+							end switch
+							
+							menuControl.currentSelection = -1
+						end if
+					else
+						if menuControl.currentSelection == 0
+							menuControl.currentSelection = -1
+						end if
+					end if
+				end if
+				
+				CheckTouchRect(50, 51, 370, 99)
+				
+				if checkResult > -1
+					menuControl.currentSelection = 1
+				else
+					if temp3 < 0
+						if menuControl.currentSelection == 1
+							saved.radar++
+							saved.radar %= 2
+							
+							switch saved.radar
+							case 0
+								EditMenuEntry(MENU_1, " ON ", 8, 1)
+								WriteSaveRAM()
+								break
+							case 1
+								EditMenuEntry(MENU_1, "OFF", 8, 1)
+								WriteSaveRAM()
+								break
+							end switch
+							
+							menuControl.currentSelection = -1
+						end if
+					else
+						if menuControl.currentSelection == 1
+							menuControl.currentSelection = -1
+						end if
+					end if
+				end if
+				
+				CheckTouchRect(50, 195, 370, 243)
+				
+				if checkResult > -1
+					menuControl.currentSelection = 4
+				else
+					if temp3 < 0
+						if menuControl.currentSelection == 4
+							saved.radarstyle ++
+							saved.radarstyle %= 2
+							
+							switch saved.radarstyle
+								case 0
+									EditMenuEntry(MENU_1, "NEW", 26, 1)
+									WriteSaveRAM()
+									break
+								case 1
+									EditMenuEntry(MENU_1, "OLD", 26, 1)
+									WriteSaveRAM()
+									break
+							end switch
+							
+							menuControl.currentSelection = -1
+						end if
+					else
+						if menuControl.currentSelection == 4
+							menuControl.currentSelection = -1
+						end if
+					end if
+				end if
+				
+				CheckTouchRect(10, 190, 40, 210)
+				
+				if checkResult > -1
+					menuControl.currentSelection = 5
+				else
+					if temp3 < 0
+						if menuControl.currentSelection == 5
+							object.state = STATE_BACKHOME
+							menuControl.currentSelection = -1
+						end if
+					else
+						if menuControl.currentSelection == 5
+							menuControl.currentSelection = -1
+						end if
+					end if
+				end if
+				
+				checkEqual(inputPress.up, true)
+				temp0 = checkResult
+				checkEqual(inputPress.down, true)
+				temp0 |= checkResult
+				checkEqual(inputPress.left, true)
+				temp0 = checkResult
+				checkEqual(inputPress.right, true)
+				temp0 |= checkResult
+				checkEqual(inputPress.start, true)
+				temp0 |= checkResult
+				if temp0 == true
+					KEH.usingTouch = false
+				end if
+			end if
+			
 			temp0 = menuControl.currentSelection
 			temp0 *= 6
 			temp0++
 			GetTableValue(temp2, temp0, MenuControl_EntryTable)
 			temp0 += 3
 			GetTableValue(temp1, temp0, MenuControl_EntryTable)
-
-
-
+			
 			temp0 = menuControl.currentSelection
 			temp0 *= 6
 			GetTableValue(temp1, temp0, MenuControl_EntryTable)
@@ -399,6 +531,7 @@ event ObjectMain
 		break
 
 	end switch
+	
 	if inputPress.buttonB == 1
 		object.state = STATE_BACKHOME
 	end if
@@ -418,13 +551,19 @@ event ObjectDraw
 		temp0++
 	loop
 
-	temp1 = 3
-	temp0 = 0
-	while temp0 < menuControl.currentSelection
-		temp1 += 48
-		temp0++
-	loop
+	temp1 = menuControl.currentSelection
+	temp1 *= 48
+	temp1 += 3
 	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	
+	if KEH.usingTouch == true
+		DrawSpriteScreenXY(3, screen.xcenter, temp1)
+		DrawSpriteScreenXY(4, screen.xcenter, temp1)
+		
+		checkEqual(menuControl.currentSelection, 5)
+		checkResult += 7
+		DrawSpriteScreenXY(checkResult, 38, 202)
+	end if
 end event
 
 
@@ -433,9 +572,20 @@ event ObjectStartup
 	// Load the sprite sheet
 	// No need to setup sprite frames since the menu will handle them automatically
 	LoadSpriteSheet("KEHMenu/Options.gif")
-	SpriteFrame(-141, 0, 282, 42, 129, 1)
-	SpriteFrame(-141, 0, 282, 42, 129, 173)
-	SpriteFrame(0, 0, 32, 128, 129, 44)
+	SpriteFrame(-141, 0, 282, 42, 129, 1)   // 0 - Yellow box
+	SpriteFrame(-141, 0, 282, 42, 129, 173) // 1 - Red box
+	SpriteFrame(0, 0, 32, 128, 129, 44)     // 2 - Knuckles Strip
+	
+	// Touch control Frames
+	// (A third are unused, but may as well keep 'em)
+	SpriteFrame(-175, 12, 20, 20, 162, 44) // 3 - Left, Blue
+	SpriteFrame(165, 12, 20, 20, 183, 44)  // 4 - Right, Blue
+	
+	SpriteFrame(-175, 12, 20, 20, 162, 65) // 5 - Left, Red
+	SpriteFrame(165, 12, 20, 20, 183, 65)  // 6 - Right, Red
+	
+	SpriteFrame(-20, -10, 40, 20, 204, 44)  // 7 - Blue left right arrow
+	SpriteFrame(-20, -10, 40, 20, 204, 65)  // 8 - Red left right arrow
 
 	LoadPalette("Options.act", 3, 0, 0, 256)
 
@@ -443,7 +593,7 @@ event ObjectStartup
 		options.stageSelectFlag = true
 	end if
 
-	options.touchControls = 0
+	options.touchControls = false
 
 	SetMusicTrack("Options.ogg", 0, 1)
 	
