@@ -269,7 +269,7 @@ event ObjectMain
 				if inputpress.left == true
 					saved.radar--
 					while saved.radar < 0
-						saved.radar += 1
+						saved.radar += 2
 					loop
 					temp1 = 1
 				end if
@@ -295,7 +295,7 @@ event ObjectMain
 				if inputpress.left == true
 					saved.radarstyle--
 					while saved.radarstyle < 0
-						saved.radarstyle += 1
+						saved.radarstyle += 2
 					loop
 					temp1 = 1
 				end if
