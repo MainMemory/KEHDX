@@ -44,8 +44,6 @@ function scrolling
 	else
 		temp1 -= KEH.scrollPosTarget
 	end if
-	
-	DrawNumbers(40, 30, 30, KEH.menusel, 6, 8, 0) // Score
 end function
 
 function Sega_Background
