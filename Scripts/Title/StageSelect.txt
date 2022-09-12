@@ -284,6 +284,11 @@ end event
 event ObjectDraw
 	CallFunction(Sega_Background)
 
+	// Select Stage Header
+	temp1 = 16
+	CallFunction(scrolling)
+	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+
 	//Add stages
 	temp1 = 32
 	temp0 = 0
@@ -293,10 +298,7 @@ event ObjectDraw
 		temp1 += KEH_STAGEROWSIZE
 		temp0++
 	loop
-
-	//Select Stage Header
-	DrawSpriteScreenXY(1, screen.xcenter, 17)
-
+	
 	//Selector
 	temp1 = 32
 	temp0 = 0
