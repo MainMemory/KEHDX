@@ -362,7 +362,10 @@ event ObjectStartup
 		end if
 		CheckCurrentStageFolder("LZ")
 		if checkResult == 1
-			CallFunction(EmeraldManager_AddEntity)
+			CheckCurrentStageFolder("SLZ")
+			if checkResult == 0
+				CallFunction(EmeraldManager_AddEntity)
+			end if
 		end if
 	next
 	temp0 = 0
