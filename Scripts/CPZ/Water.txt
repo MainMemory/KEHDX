@@ -21,11 +21,11 @@ public value Water_value37 = 0;
 public value Water_value38 = 0;
 
 function Water_Function104
-	if object.state == 0
+	if temp0 <= 0x1200
 		stage.newWaterLevel = 0x7100000
+	else
 		if temp0 >= 0x1E80
 			stage.newWaterLevel = 0x5100000
-			object.state++
 		end if
 	end if
 end function
