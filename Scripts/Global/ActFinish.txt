@@ -332,6 +332,9 @@ event ObjectMain
 			case 0
 				object.NEXTSTAGE = stage.listPos
 				object.NEXTSTAGE++
+				if object.NEXTSTAGE == 13
+					object.NEXTSTAGE++
+				end if
 				object.STAGETYPE = REGULAR_STAGE
 				break
 			case 1
