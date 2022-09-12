@@ -7,6 +7,7 @@
 
 // Aliases
 
+private alias object.value0 : KEH.timer
 private alias object.value1 : KEH.menusel
 private alias object.value2 : KEH.scroll
 
@@ -14,10 +15,22 @@ private alias object.value3 : KEH.scrollPosPrev
 private alias object.value4 : KEH.scrollPosTarget
 private alias object.value5 : KEH.scrollAngle
 
-private alias object.value10 : KEH.usingTouch
+private alias object.value6 : KEH.bgPos
 
-private alias 0  : KEH_MIN
-private alias 15 : KEH_MAX
+private alias object.value7 : KEH.milliseconds
+private alias object.value8 : KEH.seconds
+private alias object.value9 : KEH.minutes
+
+private alias object.value10 : KEH.usingTouch
+private alias object.value11 : KEH.scrollOverride
+private alias object.value12 : KEH.dragging
+private alias object.value13 : KEH.dragposBase
+private alias object.value14 : KEH.dragposCur
+
+
+private alias 0   : KEH_MIN // EHZ
+private alias 15  : KEH_MAX // SBZ
+private alias 255 : KEH_NULL
 
 private alias 72 : KEH_STAGEROWSIZE
 
@@ -26,137 +39,144 @@ reserve function Sega_Background
 
 
 function scrolling
-	// Move the camera to the target
-	if KEH.scrollPosPrev != KEH.scrollPosTarget
-		Sin(temp7, KEH.scrollAngle)
-		
-		temp7 >>= 2
-		
-		if temp7 > KEH_STAGEROWSIZE
-			temp7 = KEH_STAGEROWSIZE
-		end if
-		
+	// This function is called to get the offset for vertical scrolling sprites
+	
+	// Preconditions:
+	// - temp1 is set to the base value of the sprite beforehand
+	//   - This is because relative subtraction is done here, rather than absolute assignment, so the previous value still matters
+	
+	// Different scrolling methods for Physical and Touch controls
+	if KEH.usingTouch == false
 		temp1 -= KEH.scrollPosPrev
 		
-		if KEH.scrollPosPrev > KEH.scrollPosTarget
-			temp1 += temp7
-		else
-			temp1 -= temp7
+		// Pan the camera to the target
+		if KEH.scrollPosPrev != KEH.scrollPosTarget
+			Sin(temp7, KEH.scrollAngle)
+			
+			temp7 >>= 2
+			if temp7 > KEH_STAGEROWSIZE
+				temp7 = KEH_STAGEROWSIZE
+			end if
+			
+			if KEH.scrollPosPrev > KEH.scrollPosTarget
+				temp1 += temp7
+			else
+				temp1 -= temp7
+			end if
 		end if
 	else
-		temp1 -= KEH.scrollPosTarget
+		temp1 -= KEH.scrollOverride
 	end if
 end function
 
 function Sega_Background
-	//Background
-	object.value22++
-	object.value22 %= 1
-	if object.value22 == 0
-		object.value21++
-		object.value21 %= 128
-	end if
-
-	temp0 = object.value21
-	temp1 = object.value21
+	// This function is caled to draw the Background
+	
+	KEH.bgPos++
+	KEH.bgPos &= 255
+	
+	temp3 = KEH.bgPos
+	temp3 >>= 1
+	
+	// Right bounds to stop drawing sprite, goes a little above just for good measure
+	temp4 = screen.xsize
+	temp4 += 64
+	
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
 
-	temp0 = object.value21
-	temp1 = object.value21
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 += 128
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
 
-	temp0 = object.value21
-	temp1 = object.value21
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 -= 128
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
-	temp0 = object.value21
-	temp1 = object.value21
+	
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 -= 256
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
 
-	temp0 = object.value21
-	temp1 = object.value21
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 += 256
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
 
-	temp0 = object.value21
-	temp1 = object.value21
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 += 384
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
-	temp0 = object.value21
-	temp1 = object.value21
+	
+	temp0 = temp3
+	temp1 = temp3
 	temp1 -= 10000
 	temp1 += 512
-	while temp1 < 999
+	while temp1 < temp4
 		while temp0 < screen.ysize
 			DrawSpriteScreenXY(2, temp1, temp0)
 			temp0 += 32
 			temp1 += 32
 		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
+		temp0 -= 10000
 	loop
 end function
 
@@ -165,120 +185,284 @@ event ObjectMain
 	switch object.state
 	case 0
 		object.inkEffect = INK_ALPHA
-		object.value0 = 320
+		KEH.timer = 320
 		SetActivePalette(5, 0, screen.ysize)
-		SetScreenFade(0, 0, 0, object.value0)
+		SetScreenFade(0, 0, 0, KEH.timer)
 		KEH.menusel = saveRAM[251]
 		
+		KEH.scrollAngle = 0
 		KEH.scrollPosTarget = KEH.menusel
 		KEH.scrollPosTarget *= KEH_STAGEROWSIZE
 		KEH.scrollPosPrev = KEH.scrollPosTarget
 		
-		KEH.scrollAngle = 0
+		KEH.usingTouch = false
+		KEH.scrollOverride = KEH.scrollPosTarget
+		
 		object.state++
 		break
 
 	case 1
-		if object.value0 > 0
-			object.value0 -= 8
+		if KEH.timer > 0
+			KEH.timer -= 8
 		else
 			PlayMusic(2)
 			object.state++
 		end if
 
-		SetScreenFade(0, 0, 0, object.value0)
+		SetScreenFade(0, 0, 0, KEH.timer)
 		break
 		
 	case 2
-		if inputPress.buttonB == 1				
+		if inputPress.buttonB == true
 			object.state = 6
 			return
 		end if
 		
-		// Move the camera to the target
-		if KEH.scrollAngle < 127
-			KEH.scrollAngle += 8
-			if KEH.scrollAngle > 127
-				KEH.scrollAngle = 127
+		if KEH.usingTouch == false
+			// Using Physical Controls
+			
+			// Move the camera to the target
+			if KEH.scrollAngle < 127
+				KEH.scrollAngle += 8
+				if KEH.scrollAngle > 127
+					KEH.scrollAngle = 127
+					KEH.scrollPosPrev = KEH.scrollPosTarget
+					KEH.scrollOverride = KEH.scrollPosTarget
+				end if
+			end if
+			
+			if KEH.scrollPosPrev != KEH.scrollPosTarget
+				return
+			end if
+			
+			if inputPress.up == true
+				if KEH.menusel > KEH_MIN
+					KEH.menusel--
+					
+					KEH.scrollAngle = 0
+					
+					temp0 = KEH_MAX
+					temp0 -= 2
+					
+					CheckLower(KEH.menusel, temp0)
+					checkResult *= 72
+					KEH.scrollPosTarget -= checkResult
+					
+					PlaySfx(SfxName[Score Add], false)
+				end if
+			end if
+			
+			if inputPress.down == true
+				if KEH.menusel < KEH_MAX
+					KEH.menusel++
+					
+					KEH.scrollAngle = 0
+					
+					CheckLower(KEH.scrollPosTarget, 936)
+					temp0 = checkResult
+					CheckLower(KEH.menusel, KEH_MAX)
+					temp0 &= checkResult
+					temp0 *= 72
+					KEH.scrollPosTarget += temp0
+					
+					PlaySfx(SfxName[Score Add], false)
+				end if
+			end if
+			
+			if inputPress.start == true	
+				object.state = 5
+				saveRAM[251] = KEH.menusel
+			end if
+			
+			// If the player's touched the screen at all...
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			
+			if checkResult > -1
+				// ... then activate touch controls, and hide the Knuckles cursor too
+				KEH.usingTouch = true
+				KEH.menusel = 255
+			end if
+		else
+			// Using Touch Controls
+			
+			// See if the screen's tapped at all
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Priority of controls
+			// - Exit (top)
+			// - Dragging (middle)
+			// - Selecting (least prio)
+			
+			if KEH.dragging == false
+				temp1 = 12
+				CallFunction(scrolling)
+				temp2 = temp1
+				temp2 += 40
+				CheckTouchRect(10, temp1, 50, temp2)
+				
+				temp4 = 0
+				
+				if checkResult > -1
+					KEH.menusel = 254
+					
+					temp4 = 5
+				else
+					if temp3 < 0
+						if KEH.menusel == 254
+							object.state = 6
+							KEH.menusel = 255
+							temp4 = 5
+							return
+						end if
+					else
+						if KEH.menusel == 254
+							KEH.menusel = 255
+						end if
+					end if
+				end if
+				
+				arrayPos0 = -1
+				
+				// Allow scrolling from both the left and right blank areas
+				CheckTouchRect(0, 0, 40, screen.ysize)
+				if checkResult > -1
+					arrayPos0 = checkResult
+				end if
+				
+				CheckTouchRect(340, 0, screen.xsize, screen.ysize)
+				if checkResult > -1
+					arrayPos0 = checkResult
+				end if
+				
+				arrayPos0 -= temp4
+				
+				if arrayPos0 > -1
+					KEH.dragging = true
+					KEH.menusel = 255
+					
+					KEH.dragposBase = touchScreen[arrayPos0].ypos
+				else
+					temp0 = 0
+					while temp0 <= KEH_MAX
+						temp1 = 32
+						CallFunction(scrolling)
+						temp2 = temp0
+						temp2 *= KEH_STAGEROWSIZE
+						temp1 += temp2
+						temp2 = temp1
+						temp2 += 58
+						CheckTouchRect(50, temp1, 350, temp2)
+						
+						if checkResult > -1
+							KEH.menusel = temp0
+							
+							temp0 = 255
+						else
+							if temp3 < 0
+								if KEH.menusel == temp0
+									object.state = 5
+									saveRAM[251] = KEH.menusel
+								end if
+							else
+								if KEH.menusel == temp0
+									KEH.menusel = 255
+								end if
+							end if
+						end if
+						
+						temp0++
+					loop
+				end if
+			else
+				// Scrolling is active
+				
+				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+				if checkResult > -1
+					arrayPos0 = checkResult
+					
+					KEH.dragposBase -= touchScreen[arrayPos0].ypos
+					KEH.scrollOverride += KEH.dragposBase
+					
+					// Enforce scroll limits
+					if KEH.scrollOverride < 0
+						KEH.scrollOverride = 0
+					end if
+					
+					if KEH.scrollOverride > 936
+						KEH.scrollOverride = 936
+					end if
+					
+					KEH.dragposBase = touchScreen[arrayPos0].ypos
+				else
+					// Screen's no longer held, disable scrolling
+					
+					KEH.dragging = false
+				end if
+			end if
+			
+			temp0 = inputPress.up
+			temp0 |= inputPress.down
+			temp0 |= inputPress.left
+			temp0 |= inputPress.right
+			temp0 |= inputPress.start
+			if temp0 == true
+				// Resume physical input
+				KEH.usingTouch = false
+				KEH.dragging = false
+				
+				KEH.scrollAngle = 0
+				
+				KEH.scrollPosTarget = KEH.scrollOverride
+				KEH.scrollPosTarget /= KEH_STAGEROWSIZE
+				KEH.scrollPosTarget++
+				KEH.menusel = KEH.scrollPosTarget
+				KEH.scrollPosTarget *= KEH_STAGEROWSIZE
+				
+				if KEH.scrollPosTarget > 936
+					KEH.scrollPosTarget = 936
+				end if
+				
 				KEH.scrollPosPrev = KEH.scrollPosTarget
 			end if
-		end if
-		
-		if KEH.scrollPosPrev != KEH.scrollPosTarget
-			return
-		end if
-		
-		if inputPress.up == true
-			if KEH.menusel > KEH_MIN
-				KEH.menusel--
-				
-				KEH.scrollAngle = 0
-				
-				temp0 = KEH_MAX
-				temp0 -= 2
-				
-				CheckLower(KEH.menusel, temp0)
-				checkResult *= 72
-				KEH.scrollPosTarget -= checkResult
-				
-				PlaySfx(SfxName[Score Add], 0)
-			end if
-		end if
-		
-		if inputPress.down == true		
-			if KEH.menusel < KEH_MAX
-				KEH.menusel++
-				
-				KEH.scrollAngle = 0
-				
-				CheckLower(KEH.scrollPosTarget, 936)
-				temp0 = checkResult
-				CheckLower(KEH.menusel, KEH_MAX)
-				temp0 &= checkResult
-				temp0 *= 72
-				KEH.scrollPosTarget += temp0
-				
-				PlaySfx(SfxName[Score Add], 0)
-			end if
-		end if
-		
-		if inputPress.start == true	
-			object.state = 5
-			saveRAM[251] = KEH.menusel
 		end if
 		break
 
 	case 5
-		if KEH.menusel == 9
-			stage.activeList = BONUS_STAGE
-			stage.listPos = 0
-		else
-			stage.activeList = REGULAR_STAGE
-			stage.listPos = KEH.menusel
-		end if
+		// If HPZ was selected, we should go to the special cutscene instead
+		CheckEqual(KEH.menusel, 9)
+		stage.listPos = checkResult
+		stage.listPos ^= 1
+		stage.listPos *= KEH.menusel
+		
+		stage.activeList = checkResult
+		stage.activeList++
+		
 		stage.playerListPos = saveRAM[202]
-		if object.value0 < 256
-			object.value0 += 8
+		if KEH.timer < 256
+			KEH.timer += 8
 			music.volume -= 2
-			SetScreenFade(0, 0, 0, object.value0)
+			SetScreenFade(0, 0, 0, KEH.timer)
 		else
 			LoadStage()
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
-		end if	
+		end if
 		break
+		
 	case 6
 		stage.listPos = 0
-		if object.value0 < 256
-			object.value0 += 8
+		if KEH.timer < 256
+			KEH.timer += 8
 			music.volume -= 2
-			SetScreenFade(0, 0, 0, object.value0)
+			SetScreenFade(0, 0, 0, KEH.timer)
 		else
 			LoadStage()
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
-		end if	
+		end if
 		break
+		
 	end switch
 end event
 
@@ -290,6 +474,13 @@ event ObjectDraw
 	temp1 = 16
 	CallFunction(scrolling)
 	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	
+	if KEH.usingTouch == true
+		temp1 += 4
+		checkEqual(KEH.menusel, 254)
+		checkResult += 52
+		DrawSpriteScreenXY(checkResult, 38, temp1)
+	end if
 
 	//Add stages
 	temp1 = 32
@@ -302,13 +493,6 @@ event ObjectDraw
 	loop
 	
 	//Selector
-	temp1 = 32
-	temp0 = 0
-	while temp0 < KEH.menusel
-		temp1 += KEH_STAGEROWSIZE
-		temp0++
-	loop
-	
 	temp1 = 32
 	CallFunction(scrolling)
 	temp0 = KEH.menusel
@@ -340,17 +524,17 @@ event ObjectDraw
 
 		arrayPos1++
 
-		object.value10 = saveRAM[arrayPos1]
-		object.value11 = 0
-		object.value12 = 0
-		while object.value10 >= 6000
-			object.value12++
-			object.value10 -= 6000
+		KEH.milliseconds = saveRAM[arrayPos1]
+		KEH.seconds = 0
+		KEH.minutes = 0
+		while KEH.milliseconds >= 6000
+			KEH.minutes++
+			KEH.milliseconds -= 6000
 		loop
 		
-		while object.value10 >= 100
-			object.value11++
-			object.value10 -= 100
+		while KEH.milliseconds >= 100
+			KEH.seconds++
+			KEH.milliseconds -= 100
 		loop
 
 		if saveRAM[arrayPos1] == 0
@@ -359,13 +543,13 @@ event ObjectDraw
 
 		temp1 += 12
 		DrawSpriteScreenXY(50, temp2, temp1)
-		DrawNumbers(40, temp2, temp1, object.value10, 2, 8, 1) // Milliseconds
+		DrawNumbers(40, temp2, temp1, KEH.milliseconds, 2, 8, 1) // Milliseconds
 
 		temp2 -= 27
-		DrawNumbers(40, temp2, temp1, object.value11, 2, 8, 1) // Seconds
+		DrawNumbers(40, temp2, temp1, KEH.seconds, 2, 8, 1) // Seconds
 
 		temp2 -= 23
-		DrawNumbers(40, temp2, temp1, object.value12, 2, 8, 0) // Minutes
+		DrawNumbers(40, temp2, temp1, KEH.minutes, 2, 8, 0) // Minutes
 
 		arrayPos1++
 		temp2 += 27	
@@ -497,10 +681,13 @@ event ObjectStartup
 
 	SpriteFrame(-58, 0, 64, 7, 33, 119) // 50 ' "
 	SpriteFrame(0, 0, 8, 7, 139, 34) // 51 L
+	
+	SpriteFrame(-20, -10, 40, 20, 212, 34)  // 52 - Blue back arrow
+	SpriteFrame(-20, -10, 40, 20, 212, 55)  // 53 - Red back arrow
 
 	options.touchControls = false
 	SetMusicTrack("2D.ogg", 2, 108000)
-	stage.debugmode = 0
+	stage.debugmode = false
 	LoadPalette("StageSelect.act", 5, 0, 0, 256)
 end event
 
@@ -509,6 +696,8 @@ event RSDKDraw
 end event
 
 event RSDKLoad
-	LoadSpriteSheet("Title/Title.gif")
-	SpriteFrame(-93, -29, 188, 58, 323, 242)
+	LoadSpriteSheet("KEHMenu/StageSelect.gif")
+	SpriteFrame(-71, 0, 142, 7, 33, 1)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

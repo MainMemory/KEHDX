@@ -207,7 +207,7 @@ event ObjectMain
 				SetScreenFade(0, 0, 0, 0xFF)
 			end if	
 			break
-	case STAGESELECT_FADEOUT	
+	case STAGESELECT_FADEOUT
 			stage.listPos = 4
 			inputPress.start = 0	
 			inputPress.up = 0		
@@ -222,7 +222,7 @@ event ObjectMain
 				SetScreenFade(0, 0, 0, 0xFF)
 			end if	
 			break
-	case OPTIONS_FADEOUT	
+	case OPTIONS_FADEOUT
 			inputPress.start = 0	
 			inputPress.up = 0		
 			inputPress.down = 0	
@@ -239,53 +239,74 @@ event ObjectMain
 	end switch
 	
 	if KEH.usingTouch == false
-		if inputPress.up == 1
+		// Assuming physical controls, this is the default
+		
+		if inputPress.up == true
 			KEH.menusel -= 1
-			PlaySfx(SfxName[Score Add], 0)
 			if KEH.menusel < 0
 				KEH.menusel = 3
 			end if
+			
+			PlaySfx(SfxName[Score Add], false)
 		end if
-		if inputPress.down == 1				
+		
+		if inputPress.down == true
 			KEH.menusel += 1
-			PlaySfx(SfxName[Score Add], 0)
 			KEH.menusel %= 4
+			
+			PlaySfx(SfxName[Score Add], false)
 		end if
-		if inputPress.start == 1	
+		
+		if inputPress.start == true
 			switch KEH.menusel
 			default
-				PlaySfx(SfxName[Fail], 0)
+				// Nope, not yet...
+				PlaySfx(SfxName[Fail], false)
 				break
+				
 			case 0
-				object.state = STAGESELECT_FADEOUT	
+				// Singleplayer Level Select
+				object.state = STAGESELECT_FADEOUT
 				saveRAM[250] = KEH.menusel
 				break
+				
 			case 2
-				object.state = OPTIONS_FADEOUT	
+				// Options Menu
+				object.state = OPTIONS_FADEOUT
 				saveRAM[250] = KEH.menusel
 				break
+				
 			end switch
 		end if
 		
+		// If the player's touched the screen at all...
 		CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 		
 		if checkResult > -1
-			// Activate touch controls, hide the Knuckles cursor
+			// ... then activate touch controls, and hide the Knuckles cursor too
 			KEH.usingTouch = true
 			KEH.menusel = -1
 		end if
 	else
+		// Seeing if the player's got a finger on the screen at all
 		CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 		temp3 = checkResult
-			
+		
+		// Get the base XPos of the button, center screen aligned
+		
+		// Left
 		temp0 = screen.xcenter
 		temp0 -= 80
 		
+		// Right
 		temp1 = temp0
 		temp1 += 180
 		
+		// Top/Bottom values are just regular constants, since screen ypos shouldn't change all that often
+		
 		// Touch Inputs for every individual button, lots of repetition here...
 		
+		// First, the singleplayer level select
 		CheckTouchRect(temp0, 130, temp1, 150)
 			
 		if checkResult > -1
@@ -293,7 +314,7 @@ event ObjectMain
 		else
 			if temp3 < 0
 				if KEH.menusel == 0
-					object.state = STAGESELECT_FADEOUT	
+					object.state = STAGESELECT_FADEOUT
 					saveRAM[250] = KEH.menusel
 				end if
 			else
@@ -303,6 +324,7 @@ event ObjectMain
 			end if
 		end if
 		
+		// Then, the Multiplayer option
 		CheckTouchRect(temp0, 150, temp1, 170)
 			
 		if checkResult > -1
@@ -321,6 +343,7 @@ event ObjectMain
 			end if
 		end if
 		
+		// After that comes the Options menu
 		CheckTouchRect(temp0, 170, temp1, 190)
 			
 		if checkResult > -1
@@ -328,7 +351,7 @@ event ObjectMain
 		else
 			if temp3 < 0
 				if KEH.menusel == 2
-					object.state = OPTIONS_FADEOUT	
+					object.state = OPTIONS_FADEOUT
 					saveRAM[250] = KEH.menusel
 				end if
 			else
@@ -338,6 +361,7 @@ event ObjectMain
 			end if
 		end if
 		
+		// And last (and kinda least) is the Credits menu, currently unavailable too
 		CheckTouchRect(temp0, 190, temp1, 210)
 			
 		if checkResult > -1
@@ -356,9 +380,14 @@ event ObjectMain
 			end if
 		end if
 		
+		// If the player's tapping around, then resume physical controls
 		checkEqual(inputPress.up, true)
 		temp0 = checkResult
 		checkEqual(inputPress.down, true)
+		temp0 |= checkResult
+		checkEqual(inputPress.left, true)
+		temp0 |= checkResult
+		checkEqual(inputPress.right, true)
 		temp0 |= checkResult
 		checkEqual(inputPress.start, true)
 		temp0 |= checkResult
@@ -370,7 +399,8 @@ end event
 
 
 event ObjectDraw
-	//Random PlaceHolder
+	
+	// Background PlaceHolder
 	DrawRect(0, 0, screen.xsize, screen.ysize, 164, 161, 230, 255)
 
 	CallFunction(KEH_Background)
@@ -382,9 +412,8 @@ event ObjectDraw
 	// Little Knuckles
 	switch KEH.menusel
 	case -1
-		// Null option
-		// (-100 is a dumb way to do it, but it works...)
-		temp0 = -100
+		// Null option, for touch controls
+		temp0 = -32
 		break
 	case 0
 		temp0 = 132
@@ -403,21 +432,17 @@ event ObjectDraw
 	temp1 = screen.xcenter
 	temp1 -= 109
 
-	if object.value23 >= 30
-		DrawSpriteScreenXY(3, temp1, temp0)
-		object.value24++
-		if object.value24 >= 30
-			object.value23 = 0
-		end if
-	else
-		DrawSpriteScreenXY(4, temp1, temp0)
-		object.value23++
-		object.value24 = 0
-	end if
-
-
+	object.animationTimer++
+	object.animationTimer %= 60
+	
+	object.frame = object.animationTimer
+	object.frame >>= 5
+	object.frame += 3
+	DrawSpriteScreenXY(3, temp1, temp0)
+	
+	// Website link
 	DrawSpriteScreenXY(5, screen.xcenter, 216)
-
+	
 end event
 
 
@@ -430,9 +455,10 @@ event ObjectStartup
 	SpriteFrame(0, 0, 24, 22, 57, 112)      // 4 - Tiny Knuckles, Frame 2
 	SpriteFrame(-152, 0, 304, 10, 0, 190)   // 5 - Webpage link
 	
-	options.touchControls = false
 	SetMusicTrack("SPPMenu.ogg", 1, 214596)
 	LoadPalette("MainTitle.act", 1, 0, 0, 256)
+	
+	options.touchControls = false
 end event
 
 event RSDKDraw
@@ -440,6 +466,8 @@ event RSDKDraw
 end event
 
 event RSDKLoad
-	LoadSpriteSheet("Title/Title.gif")
-	SpriteFrame(-93, -29, 188, 58, 323, 242)
+	LoadSpriteSheet("KEHMenu/MainTitle.gif")
+	SpriteFrame(-142, -3, 284, 113, 0, 201)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

@@ -7,10 +7,15 @@
 
 // Aliases
 
-private alias object.visible : player.visible
+private alias object.value0 : object.selection
+private alias object.value2 : object.timer
+
 private alias object.value18 : player.sortedDrawOrder
 private alias object.value20 : pause.KEH
 private alias object.value21 : player.nodraw
+private alias object.value22 : object.usingTouch
+
+private alias object.visible : player.visible
 
 // Function declarations
 reserve function StageSetup_HandleOscillationTable
@@ -129,69 +134,169 @@ event ObjectMain
 	case STAGE_PAUSED
 		foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
 			pause.KEH = 0
+			stage.state = STAGE_RUNNING
 			return
 		next
 		switch pause.KEH
 		case 0
 			pause.KEH = 1
 			break
+			
 		case 1
-			if inputPress.up == 1
-				object.value0--
-				if object.value0 == -1
-					object.value0 = 2
+			if object.usingTouch == false
+				if inputPress.up == true
+					object.selection--
+					if object.selection == -1
+						object.selection = 2
+					end if
+					PlaySfx(SfxName[Menu Move], 0)
 				end if
-				PlaySfx(SfxName[Menu Move], 0)
-			end if
-			if inputPress.down == 1
-				object.value0++
-				if object.value0 == 3
-					object.value0 = 0
+				
+				if inputPress.down == true
+					object.selection++
+					if object.selection == 3
+						object.selection = 0
+					end if
+					PlaySfx(SfxName[Menu Move], 0)
 				end if
-				PlaySfx(SfxName[Menu Move], 0)
-			end if
-			if inputPress.start == 1
-				PlaySfx(SfxName[Menu Back], 0)
-				stage.state = STAGE_RUNNING
-				ResumeMusic()
-			end if
-			temp0 = inputPress.buttonA
-			temp0 |= inputPress.buttonB
-			temp0 |= inputPress.buttonC
-			if temp0 == 1
-				switch object.value0
-				case 0
+				
+				if inputPress.start == true
 					PlaySfx(SfxName[Menu Back], 0)
 					stage.state = STAGE_RUNNING
-					player.nodraw = 0
 					ResumeMusic()
-					break
-				case 1
-					pause.KEH = 2
-					object.value2 = 0
-					PlaySfx(SfxName[Menu Select], 0)
-					break
-				case 2
-					pause.KEH = 3
-					object.value2 = 0
-					PlaySfx(SfxName[Menu Select], 0)
-					break
-				end switch
+				end if
+				
+				temp0 = inputPress.buttonA
+				temp0 |= inputPress.buttonB
+				temp0 |= inputPress.buttonC
+				if temp0 == 1
+					switch object.selection
+					case 0
+						PlaySfx(SfxName[Menu Back], 0)
+						stage.state = STAGE_RUNNING
+						player.nodraw = 0
+						ResumeMusic()
+						break
+					case 1
+						pause.KEH = 2
+						object.timer = 0
+						PlaySfx(SfxName[Menu Select], 0)
+						break
+					case 2
+						pause.KEH = 3
+						object.timer = 0
+						PlaySfx(SfxName[Menu Select], 0)
+						break
+					end switch
+				end if
+				
+				object.usingTouch = touchScreen[0].down
+			else
+				
+				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+				temp3 = checkResult
+				
+				// These buttons are really small, not much that can be done without redesigning the entire menu though
+				
+				// Continue
+				
+				temp0 = screen.xcenter
+				temp0 -= 40
+				temp1 = temp0
+				temp1 += 80
+				
+				temp4 = screen.ycenter
+				temp4 -= 14
+				temp5 = temp4
+				temp5 += 7
+				
+				CheckTouchRect(temp0, temp4, temp1, temp5)
+				
+				if checkResult > -1
+					object.selection = 0
+				else
+					if temp3 < 0
+						if object.selection == 0
+							PlaySfx(SfxName[Menu Back], false)
+							stage.state = STAGE_RUNNING
+							player.nodraw = 0
+							ResumeMusic()
+						end if
+					else
+						if object.selection == 0
+							object.selection = -1
+						end if
+					end if
+				end if
+				
+				// Restart
+				temp4 += 11
+				temp5 += 11
+				
+				CheckTouchRect(temp0, temp4, temp1, temp5)
+				
+				if checkResult > -1
+					object.selection = 1
+				else
+					if temp3 < 0
+						if object.selection == 1
+							pause.KEH = 2
+							object.timer = 0
+							PlaySfx(SfxName[Menu Select], false)
+						end if
+					else
+						if object.selection == 1
+							object.selection = -1
+						end if
+					end if
+				end if
+				
+				// Restart
+				temp4 += 11
+				temp5 += 11
+				
+				CheckTouchRect(temp0, temp4, temp1, temp5)
+				
+				if checkResult > -1
+					object.selection = 2
+				else
+					if temp3 < 0
+						if object.selection == 2
+							pause.KEH = 3
+							object.timer = 0
+							PlaySfx(SfxName[Menu Select], 0)
+						end if
+					else
+						if object.selection == 2
+							object.selection = -1
+						end if
+					end if
+				end if
+				
+				temp0 = inputPress.up
+				temp0 |= inputPress.down
+				temp0 |= inputPress.left
+				temp0 |= inputPress.right
+				temp0 |= inputPress.start
+				if temp0 == true
+					object.usingTouch = false
+					object.selection = 0
+				end if
 			end if
 			break
 		case 2
-			object.value2 += 4
-			if object.value2 == 384
+			object.timer += 4
+			if object.timer == 384
 				LoadStage()
-				object.value2 = 384
+				object.timer = 384
 			end if
 			break
 		case 3
-			object.value2 += 4
-			if object.value2 == 384
+			object.timer += 4
+			if object.timer == 384
 				stage.activeList = PRESENTATION_STAGE
 				stage.listPos = 4
-				object.value2 = 384
+				object.timer = 384
 				LoadStage()
 			end if
 			break
@@ -316,28 +421,25 @@ end event
 
 event ObjectDraw
 	if stage.state == STAGE_PAUSED
-		temp0 = screen.xsize
-		temp0 /= 2
-		temp1 = screen.ysize
-		temp1 /= 2
-		DrawSpriteScreenXY(0, temp0, temp1)
-		DrawSpriteScreenFX(1, FX_INK, temp0, temp1)
+		DrawSpriteScreenXY(0, screen.xcenter, screen.ycenter)
+		DrawSpriteScreenFX(1, FX_INK, screen.xcenter, screen.ycenter)
+		
 		temp2 = 2
-		if object.value0 == 0
-			temp2++
-		end if
-		DrawSpriteScreenXY(temp2, temp0, temp1)
+		checkEqual(object.selection, 0)
+		temp2 += checkResult
+		DrawSpriteScreenXY(temp2, screen.xcenter, screen.ycenter)
+		
 		temp2 = 4
-		if object.value0 == 1
-			temp2++
-		end if
-		DrawSpriteScreenXY(temp2, temp0, temp1)
+		checkEqual(object.selection, 1)
+		temp2 += checkResult
+		DrawSpriteScreenXY(temp2, screen.xcenter, screen.ycenter)
+		
 		temp2 = 6
-		if object.value0 == 2
-			temp2++
-		end if
-		DrawSpriteScreenXY(temp2, temp0, temp1)
-		DrawRect(0, 0, screen.xsize, screen.ysize, 0, 0, 0, object.value2)
+		checkEqual(object.selection, 2)
+		temp2 += checkResult
+		DrawSpriteScreenXY(temp2, screen.xcenter, screen.ycenter)
+		
+		DrawRect(0, 0, screen.xsize, screen.ysize, 0, 0, 0, object.timer)
 	end if
 end event
 

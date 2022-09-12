@@ -23,6 +23,8 @@ private alias object.value13 : object.menuselection
 private alias object.value14 : object.NEXTSTAGE
 private alias object.value15 : object.STAGETYPE
 
+private alias object.value16 : object.usingTouch
+
 // States
 private alias 0 : ACTFINISH_INIT
 private alias 1 : ACTFINISH_ENTERTEXT
@@ -312,38 +314,141 @@ event ObjectMain
 
 	case ACTFINISH_CHOOSEWHERETOGO
 		death.count = 0
-		if inputPress.left == 1
-			object.menuselection -= 1
-			PlaySfx(SfxName[Score Add], 0)
-			if object.menuselection < 0
-				object.menuselection = 2
+		
+		if object.usingTouch == false
+			if inputPress.left == true
+				object.menuselection--
+				if object.menuselection < 0
+					object.menuselection = 2
+				end if
+				
+				PlaySfx(SfxName[Score Add], false)
 			end if
-		end if
-		if inputPress.right == 1				
-			object.menuselection += 1
-			PlaySfx(SfxName[Score Add], 0)
-			object.menuselection %= 3
-		end if
-		temp0 = inputpress.start
-		temp0 |= inputpress.buttonA
-		temp0 |= inputpress.buttonC
-		if temp0 == 1
-			switch object.menuselection
-			case 0
-				object.NEXTSTAGE = stage.listPos
-				object.NEXTSTAGE++
-				object.STAGETYPE = REGULAR_STAGE
-				break
-			case 1
-				object.NEXTSTAGE = 4
-				object.STAGETYPE = PRESENTATION_STAGE
-				break
-			case 2
-				object.NEXTSTAGE = stage.listPos
-				object.STAGETYPE = REGULAR_STAGE
-				break
-			end switch
-			object.state = ACTFINISH_LOADNEXTSTAGE
+			
+			if inputPress.right == true			
+				object.menuselection++
+				object.menuselection %= 3
+				
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			temp0 = inputpress.start
+			temp0 |= inputpress.buttonA
+			temp0 |= inputpress.buttonC
+			if temp0 == true
+				switch object.menuselection
+				case 0
+					object.NEXTSTAGE = stage.listPos
+					object.NEXTSTAGE++
+					object.STAGETYPE = REGULAR_STAGE
+					break
+					
+				case 1
+					object.NEXTSTAGE = 4
+					object.STAGETYPE = PRESENTATION_STAGE
+					break
+					
+				case 2
+					object.NEXTSTAGE = stage.listPos
+					object.STAGETYPE = REGULAR_STAGE
+					break
+					
+				end switch
+				
+				object.state = ACTFINISH_LOADNEXTSTAGE
+			end if
+			
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > -1
+				// Activate touch controls if screen tapped
+				object.usingTouch = true
+				
+				object.menuselection = -1
+			end if
+		else
+			
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			temp0 = screen.xcenter
+			temp0 -= 180
+			temp1 = temp0
+			temp1 += 60
+			
+			CheckTouchRect(temp0, 200, temp1, 235)
+			
+			if checkResult > -1
+				object.menuselection = 0
+			else
+				if temp3 < 0
+					if object.menuselection == 0
+						object.NEXTSTAGE = stage.listPos
+						object.NEXTSTAGE++
+						object.STAGETYPE = REGULAR_STAGE
+						object.state = ACTFINISH_LOADNEXTSTAGE
+					end if
+				else
+					if object.menuselection == 0
+						object.menuselection = -1
+					end if
+				end if
+			end if
+			
+			temp0 = screen.xcenter
+			temp0 -= 50
+			temp1 = temp0
+			temp1 += 120
+			
+			CheckTouchRect(temp0, 200, temp1, 235)
+			
+			if checkResult > -1
+				object.menuselection = 1
+			else
+				if temp3 < 0
+					if object.menuselection == 1
+						object.NEXTSTAGE = 4
+						object.STAGETYPE = PRESENTATION_STAGE
+						object.state = ACTFINISH_LOADNEXTSTAGE
+					end if
+				else
+					if object.menuselection == 1
+						object.menuselection = -1
+					end if
+				end if
+			end if
+			
+			temp0 = temp1
+			temp0 += 50
+			temp1 = temp0
+			temp1 += 80
+			
+			CheckTouchRect(temp0, 200, temp1, 235)
+			
+			if checkResult > -1
+				object.menuselection = 2
+			else
+				if temp3 < 0
+					if object.menuselection == 2
+						object.NEXTSTAGE = stage.listPos
+						object.STAGETYPE = REGULAR_STAGE
+						object.state = ACTFINISH_LOADNEXTSTAGE
+					end if
+				else
+					if object.menuselection == 2
+						object.menuselection = -1
+					end if
+				end if
+			end if
+			
+			temp0 = inputPress.up
+			temp0 |= inputPress.down
+			temp0 |= inputPress.left
+			temp0 |= inputPress.right
+			temp0 |= inputPress.start
+			if temp0 == true
+				object.usingTouch = false
+				object.menuselection = 0
+			end if
 		end if
 		break
 
@@ -434,14 +539,16 @@ event ObjectDraw
 	//DrawNumbers(14, temp7, temp6, object.totalScore, 6, 8, 0)
 
 	if object.state == ACTFINISH_CHOOSEWHERETOGO
-		temp0 = screen.xcenter
 		switch object.menuselection
+		case -1
+			temp0 = -32
+			break
 		case 0
 			temp0 = 58
 			break
 		case 1
+			temp0 = screen.xcenter
 			temp0 += 36
-			temp0 += 0
 			break
 		case 2
 			temp0 = screen.xsize
@@ -449,6 +556,7 @@ event ObjectDraw
 			break
 		end switch
 		DrawSpriteScreenXY(24, temp0, 228)
+		
 		temp0 = screen.xcenter
 		temp0 -= 160
 		DrawSpriteScreenXY(25, 53, 228)

@@ -664,23 +664,20 @@ function PlayerObject_ProcessPlayer
 				touchDebug = inputDown.buttonB
 			end if
 			CheckTouchRect(240, 0, screen.xsize, 40)
-			if checkResult > -1
-				if options.vsMode == 0
-					PlaySfx(SfxName[Menu Back], 0)
+			CheckGreater(checkResult, -1)
+			checkResult |= inputPress.start
+			if checkResult == true
+				temp0 = options.vsMode
+				foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+					temp0 = true
+				next
+				
+				if temp0 == false
+					PlaySfx(SfxName[Menu Back], false)
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
 					stage.state = STAGE_PAUSED
 					PauseMusic()
-				end if
-			end if
-			if inputPress.start == 1
-				if options.vsMode == 0
-					PlaySfx(SfxName[Menu Back], 0)
-					StopSfx(SfxName[Flying])
-					StopSfx(SfxName[Tired])
-					stage.state = STAGE_PAUSED
-					PauseMusic()
-					inputPress.start = 0
 				end if
 			end if
 		end if
@@ -3087,6 +3084,7 @@ event ObjectStartup
 		PlayerObject_value3 = 0
 		switch stage.playerListPos
 		case 0
+		default
 			LoadAnimation("Knuckles.ani")
 			object[0].propertyValue = 2
 			object[0].value30 = -5
@@ -3098,17 +3096,6 @@ event ObjectStartup
 			break
 		case 1
 			LoadAnimation("Tikal.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
-			break
-		default
-			stage.playerListPos = 0
-			LoadAnimation("Knuckles.ani")
 			object[0].propertyValue = 2
 			object[0].value30 = -5
 			object[0].value32 = PlayerObject_StartKnuxGlide
