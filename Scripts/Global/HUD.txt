@@ -109,13 +109,13 @@ end function
 
 function EmeraldManager_AwardEmerald
 	if HPZCheck == true
-		temp1 = 5
+		temp2 = 5
 	else
-		temp1 = 3
+		temp2 = 3
 	end if
-	CheckEqual(EmeraldManager_P1Collected, temp1)
+	CheckEqual(EmeraldManager_P1Collected, temp2)
 	temp0 = checkResult
-	CheckEqual(EmeraldManager_P2Collected, temp1)
+	CheckEqual(EmeraldManager_P2Collected, temp2)
 	temp0 |= checkResult
 	temp0 *= 255
 	temp1 = temp0
@@ -134,6 +134,11 @@ function EmeraldManager_AwardEmerald
 			else
 				//EmeraldManager_P1Collected += 3 //Dev Command for checking the results or smth
 				EmeraldManager_P1Collected++
+				
+				// TODO: note that this should be updated when adding mutliplayer
+				if EmeraldManager_P1Collected >= temp2
+					stage.timeEnabled = false
+				end if
 			end if
 			if options.vsMode == 0
 				if EmeraldManager_BonusFrame != -1
@@ -641,7 +646,6 @@ event ObjectMain
 			object.state++
 			object.priority = PRIORITY_ACTIVE_PAUSED
 			stage.state = 3
-			stage.timeEnabled = 0
 			object[0].controlMode = -1
 			object[0].direction = 0
 			object[0].up = 0
