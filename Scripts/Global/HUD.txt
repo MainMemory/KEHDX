@@ -577,6 +577,16 @@ event ObjectMain
 				temp2 = object[0].ypos
 				temp2 -= object[arrayPos0].ypos
 				temp2 >>= 16
+				CheckCurrentStageFolder("Zone09")
+				if checkResult == 1
+					temp2 &= 0x7FF
+					temp2 += 0xFC00
+					temp2 &= 0xFFFF
+					temp2 ^= 0xFC00
+					if temp2 >= 0x8000
+						temp2 |= 0xFFFF0000
+					end if
+				end if
 				temp3 = temp2
 				temp2 *= temp3
 				temp1 += temp2
