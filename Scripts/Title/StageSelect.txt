@@ -8,35 +8,41 @@
 // Aliases
 
 private alias object.value1 : KEH.menusel
-private alias object.value2 : KEH.scroll 
-private alias object.value3 : KEH.scroll2 
+private alias object.value2 : KEH.scroll
 
-private alias 15 : KEH.menulimit
-private alias 72 : importantnumberthing
+private alias object.value3 : KEH.scrollPosPrev
+private alias object.value4 : KEH.scrollPosTarget
+private alias object.value5 : KEH.scrollAngle
 
-// States
+private alias 0  : KEH_MIN
+private alias 15 : KEH_MAX
 
-reserve function Sega_Background
+private alias 72 : KEH_STAGEROWSIZE
+
 reserve function scrolling
-reserve function saveram_stuff
-
+reserve function Sega_Background
 
 
 function scrolling
-	if KEH.menusel >= 3
-		temp1 -= 216
-	end if
-	if KEH.menusel >= 6
-		temp1 -= 216
-	end if
-	if KEH.menusel >= 9
-		temp1 -= 216
-	end if
-	if KEH.menusel >= 12
-		temp1 -= 216
-	end if
-	if KEH.menusel >= 15
-		temp1 -= 72
+	// Move the camera to the target
+	if KEH.scrollPosPrev != KEH.scrollPosTarget
+		Sin(temp7, KEH.scrollAngle)
+		
+		temp7 >>= 2
+		
+		if temp7 > KEH_STAGEROWSIZE
+			temp7 = KEH_STAGEROWSIZE
+		end if
+		
+		temp1 -= KEH.scrollPosPrev
+		
+		if KEH.scrollPosPrev > KEH.scrollPosTarget
+			temp1 += temp7
+		else
+			temp1 -= temp7
+		end if
+	else
+		temp1 -= KEH.scrollPosTarget
 	end if
 end function
 
@@ -160,8 +166,14 @@ event ObjectMain
 		object.value0 = 320
 		SetActivePalette(5, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, object.value0)
+		KEH.menusel = saveRAM[251]
+		
+		KEH.scrollPosTarget = KEH.menusel
+		KEH.scrollPosTarget *= KEH_STAGEROWSIZE
+		KEH.scrollPosPrev = KEH.scrollPosTarget
+		
+		KEH.scrollAngle = 0
 		object.state++
-		object.value1 = saveRAM[251]
 		break
 
 	case 1
@@ -174,10 +186,65 @@ event ObjectMain
 
 		SetScreenFade(0, 0, 0, object.value0)
 		break
+		
 	case 2
+		if inputPress.buttonB == 1				
+			object.state = 6
+			return
+		end if
+		
+		// Move the camera to the target
+		if KEH.scrollAngle < 127
+			KEH.scrollAngle += 8
+			if KEH.scrollAngle > 127
+				KEH.scrollAngle = 127
+				KEH.scrollPosPrev = KEH.scrollPosTarget
+			end if
+		end if
+		
+		if KEH.scrollPosPrev != KEH.scrollPosTarget
+			return
+		end if
+		
+		if inputPress.up == true
+			if KEH.menusel > KEH_MIN
+				KEH.menusel--
+				
+				KEH.scrollAngle = 0
+				
+				temp0 = KEH_MAX
+				temp0 -= 2
+				
+				CheckLower(KEH.menusel, temp0)
+				checkResult *= 72
+				KEH.scrollPosTarget -= checkResult
+				
+				PlaySfx(SfxName[Score Add], 0)
+			end if
+		end if
+		
+		if inputPress.down == true		
+			if KEH.menusel < KEH_MAX
+				KEH.menusel++
+				
+				KEH.scrollAngle = 0
+				
+				CheckLower(KEH.scrollPosTarget, 936)
+				temp0 = checkResult
+				CheckLower(KEH.menusel, KEH_MAX)
+				temp0 &= checkResult
+				temp0 *= 72
+				KEH.scrollPosTarget += temp0
+				
+				PlaySfx(SfxName[Score Add], 0)
+			end if
+		end if
+		
+		if inputPress.start == true	
+			object.state = 5
+			saveRAM[251] = KEH.menusel
+		end if
 		break
-
-
 
 	case 5
 		if KEH.menusel == 9
@@ -188,9 +255,6 @@ event ObjectMain
 			stage.listPos = KEH.menusel
 		end if
 		stage.playerListPos = saveRAM[202]
-		inputPress.start = 0	
-		inputPress.up = 0		
-		inputPress.down = 0	
 		if object.value0 < 256
 			object.value0 += 8
 			music.volume -= 2
@@ -202,9 +266,6 @@ event ObjectMain
 		end if	
 		break
 	case 6
-		inputPress.start = 0	
-		inputPress.up = 0		
-		inputPress.down = 0
 		stage.listPos = 0
 		if object.value0 < 256
 			object.value0 += 8
@@ -217,37 +278,16 @@ event ObjectMain
 		end if	
 		break
 	end switch
-	if inputPress.up == 1
-		KEH.menusel -= 1
-		PlaySfx(SfxName[Score Add], 0)
-		if KEH.menusel < 0
-			KEH.menusel = KEH.menulimit
-		end if
-	end if
-	if inputPress.down == 1				
-		KEH.menusel += 1
-		PlaySfx(SfxName[Score Add], 0)
-		if KEH.menusel > KEH.menulimit
-			KEH.menusel = 0
-		end if
-	end if
-	if inputPress.buttonB == 1				
-		object.state = 6
-	end if
-	if inputPress.start == 1	
-		if KEH.menusel != 13
-			object.state = 5
-			saveRAM[251] = KEH.menusel
-		else
-			PlaySfx(SfxName[Fail], 0)
-		end if
-	end if
-
 end event
 
 
 event ObjectDraw
 	CallFunction(Sega_Background)
+
+	// Select Stage Header
+	temp1 = 16
+	CallFunction(scrolling)
+	DrawSpriteScreenXY(1, screen.xcenter, temp1)
 
 	//Add stages
 	temp1 = 32
@@ -255,21 +295,23 @@ event ObjectDraw
 	CallFunction(scrolling)
 	while temp0 < 16
 		DrawSpriteScreenXY(0, screen.xcenter, temp1)
-		temp1 += importantnumberthing
+		temp1 += KEH_STAGEROWSIZE
 		temp0++
 	loop
-
-	//Select Stage Header
-	DrawSpriteScreenXY(1, screen.xcenter, 17)
-
+	
 	//Selector
 	temp1 = 32
 	temp0 = 0
 	while temp0 < KEH.menusel
-		temp1 += importantnumberthing
+		temp1 += KEH_STAGEROWSIZE
 		temp0++
 	loop
+	
+	temp1 = 32
 	CallFunction(scrolling)
+	temp0 = KEH.menusel
+	temp0 *= KEH_STAGEROWSIZE
+	temp1 += temp0
 	DrawSpriteScreenXY(3, screen.xcenter, temp1)
 
 	//Numbers	
@@ -347,10 +389,11 @@ event ObjectDraw
 	CallFunction(scrolling)
 	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
-		temp1 += 72
+		temp1 += KEH_STAGEROWSIZE
 		temp2++
 		temp0++
 	loop
+	
 	temp0 = 0
 	temp1 = 624
 	temp2 = 32
@@ -359,7 +402,7 @@ event ObjectDraw
 	CallFunction(scrolling)
 	while temp0 < 8
 		DrawSpriteScreenXY(temp2, temp3, temp1)
-		temp1 += 72
+		temp1 += KEH_STAGEROWSIZE
 		temp2++
 		temp0++
 	loop
@@ -371,17 +414,18 @@ event ObjectDraw
 	temp2 = 4
 	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
-		temp1 += importantnumberthing
+		temp1 += KEH_STAGEROWSIZE
 		temp2++
 		temp0++
 	loop
+	
 	temp0 = 0
 	temp1 = 624
 	CallFunction(scrolling)
 	temp2 = 26
 	while temp0 < 8
 		DrawSpriteScreenXY(temp2, temp3, temp1)
-		temp1 += importantnumberthing
+		temp1 += KEH_STAGEROWSIZE
 		temp2++
 		temp0++
 	loop
@@ -390,10 +434,11 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/StageSelect.gif")
-	SpriteFrame(-149, 0, 298, 58, 1, 130)
-	SpriteFrame(-71, 0, 142, 7, 33, 1)
-	SpriteFrame(0, 0, 32, 128, 0, 1)
-	SpriteFrame(-149, 0, 298, 58, 1, 372)
+	SpriteFrame(-149, 0, 298, 58, 1, 130) // 0 - Stage box (incl. texts), Highlighted
+	SpriteFrame(-71, 0, 142, 7, 33, 1)    // 1 - "Select a Stage"
+	SpriteFrame(0, 0, 32, 128, 0, 1)      // 2 - Background strip
+	SpriteFrame(-149, 0, 298, 58, 1, 372) // 3 - Stage box (incl. texts), Unhighlighted
+	
 	temp0 = 0
 	temp1 = 33
 	while temp0 < 8
@@ -401,6 +446,7 @@ event ObjectStartup
 		temp1 += 33
 		temp0++
 	loop
+	
 	temp0 = 0
 	temp1 = 33
 	while temp0 < 2
@@ -408,11 +454,10 @@ event ObjectStartup
 		temp1 += 33
 		temp0++
 	loop
-	temp0 = 0
-	while temp0 < 2
-		SpriteFrame(0, 0, 32, 25, 66, 59) 
-		temp0++
-	loop
+	
+	SpriteFrame(0, 0, 32, 25, 66, 59) // 15 - X Stage Icon
+	SpriteFrame(0, 0, 32, 25, 66, 59) // 16 - X Stage Icon (filler)
+	
 	temp0 = 0
 	temp1 = 34
 	while temp0 < 10
@@ -420,11 +465,10 @@ event ObjectStartup
 		temp1 += 8
 		temp0++
 	loop
-	temp0 = 0
-	while temp0 < 2
-		SpriteFrame(40, -7, 112, 7, 99, 122) 
-		temp0++
-	loop
+	
+	SpriteFrame(40, -7, 112, 7, 99, 122) // 27 - filler
+	SpriteFrame(40, -7, 112, 7, 99, 122) // 28 - filler
+	
 	temp0 = 0
 	temp1 = 1
 	while temp0 < 6
@@ -432,6 +476,7 @@ event ObjectStartup
 		temp1 += 33
 		temp0++
 	loop
+	
 	temp0 = 0
 	temp1 = 456
 	while temp0 < 6
@@ -439,6 +484,7 @@ event ObjectStartup
 		temp1 += 8
 		temp0++
 	loop
+	
 	temp0 = 0
 	temp1 = 99
 	while temp0 < 10

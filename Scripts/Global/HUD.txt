@@ -109,17 +109,16 @@ end function
 
 function EmeraldManager_AwardEmerald
 	if HPZCheck == true
-		temp1 = 5
+		temp2 = 5
 	else
-		temp1 = 3
+		temp2 = 3
 	end if
-	if EmeraldManager_P1Collected >= temp1 
-		return
-	end if
-	if EmeraldManager_P2Collected >= temp1 
-		return
-	end if
-	temp1 = 0
+	CheckEqual(EmeraldManager_P1Collected, temp2)
+	temp0 = checkResult
+	CheckEqual(EmeraldManager_P2Collected, temp2)
+	temp0 |= checkResult
+	temp0 *= 255
+	temp1 = temp0
 	while temp1 < EmeraldManager_EmeraldCount
 		GetTableValue(arrayPos0, temp1, EmeraldManager_EmeraldObjects)
 		if arrayPos0 == object.entityPos
@@ -135,6 +134,11 @@ function EmeraldManager_AwardEmerald
 			else
 				//EmeraldManager_P1Collected += 3 //Dev Command for checking the results or smth
 				EmeraldManager_P1Collected++
+				
+				// TODO: note that this should be updated when adding mutliplayer
+				if EmeraldManager_P1Collected >= temp2
+					stage.timeEnabled = false
+				end if
 			end if
 			if options.vsMode == 0
 				if EmeraldManager_BonusFrame != -1
@@ -653,6 +657,7 @@ event ObjectMain
 			object.priority = PRIORITY_ACTIVE_PAUSED
 			stage.state = 3
 			object[0].controlMode = -1
+			object[0].direction = 0
 			object[0].up = 0
 			object[0].down = 0
 			object[0].left = 0
@@ -661,6 +666,8 @@ event ObjectMain
 			object[0].jumpHold = 0
 			object[0].xvel = 0
 			object[0].yvel = 0
+			object[0].value1 = 0
+			object[0].value8 = 0
 			EmeraldManager.fadeAmount = 0
 		end if
 		break
@@ -700,7 +707,6 @@ event ObjectMain
 			object[0].speed = 0
 			screen.cameraX = object[0].ixpos
 			screen.cameraY = object[0].iypos
-			stage.timeEnabled = 0
 			stage.state = 1
 		end if
 		break
@@ -924,13 +930,10 @@ event ObjectStartup
 		temp0++
 	loop
 
-	// Set the HUD's draw function based on the current platform
+	// Setup HUD values
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
-		if engine.deviceType == RETRO_STANDARD
-			HUD[arrayPos0].drawFunction = HUD_DrawPC
-		else
-			HUD[arrayPos0].drawFunction = HUD_DrawMobile
-		end if
+		HUD[arrayPos0].drawFunction = HUD_DrawPC
+		
 		object[arrayPos0].inkEffect = INK_ALPHA
 		object[arrayPos0].alpha = 102
 	next

@@ -21,16 +21,7 @@ event ObjectMain
 	if object.state == 0
 
 		// Object when placed in level
-
-		if recAnimation != 0
-			temp0 = recAnimation
-		else
-			temp0 = ANI_WATERSLIDE
-			temp0 <<= 16
-			temp0 |= ANI_WATERSLIDE
-			temp0 <<= 8
-		end if
-
+		
 		// Cycle through each player
 		//  - Not using foreach because more needs to be done than just changing player values
 		currentPlayer = 0
@@ -49,15 +40,10 @@ event ObjectMain
 			object[tempObjectPos].targetPlayer = currentPlayer
 
 			// Set the direction the player should face
-			object[tempObjectPos].direction = temp0
-			object[tempObjectPos].direction &= 255
-
-			temp0 >>= 8
+			object[tempObjectPos].direction = 0
 
 			// Set the animation the player should use
-			object[tempObjectPos].animation = temp0
-			object[tempObjectPos].animation &= 255
-			temp0 >>= 8
+			object[tempObjectPos].animation = ANI_JUMPING
 
 			currentPlayer++
 		loop
