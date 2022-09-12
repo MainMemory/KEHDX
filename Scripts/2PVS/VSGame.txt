@@ -41,10 +41,23 @@ event ObjectMain
 			screen.cameraX = object[0].ixpos
 			screen.cameraY = object[0].iypos
 			object[0].xvel = 0
-			object[0].animation = 0
+			
+			// Not a good solution, but it works
+			// This manages starting exceptions - LZ and HPZ are started falling (see below) and LZ in particular should be started facing left
+			CheckEqual(stage.listPos, StageName[R - LABYRINTH ZONE])
+			temp0 = checkResult
+			object[0].direction = checkResult
+			CheckEqual(HPZCheck, true)
+			temp0 |= checkResult
+			if temp0 == true
+				// Note - Knuckles originally enters HPZ rolling, but let's make him fall this time 'round
+				object[0].animation = ANI_WATERSLIDE
+			else
+				object[0].animation = ANI_STOPPED
+			end if
+			
 			object[0].yvel = 0
 			object[0].speed = 0
-			object[0].direction = FLIP_NONE
 			stage.state = 1
 		end if
 		SetScreenFade(208, 255, 224, object.value0)
