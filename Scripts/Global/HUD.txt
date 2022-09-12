@@ -113,13 +113,12 @@ function EmeraldManager_AwardEmerald
 	else
 		temp1 = 3
 	end if
-	if EmeraldManager_P1Collected >= temp1 
-		return
-	end if
-	if EmeraldManager_P2Collected >= temp1 
-		return
-	end if
-	temp1 = 0
+	CheckEqual(EmeraldManager_P1Collected, temp1)
+	temp0 = checkResult
+	CheckEqual(EmeraldManager_P2Collected, temp1)
+	temp0 |= checkResult
+	temp0 *= 255
+	temp1 = temp0
 	while temp1 < EmeraldManager_EmeraldCount
 		GetTableValue(arrayPos0, temp1, EmeraldManager_EmeraldObjects)
 		if arrayPos0 == object.entityPos
