@@ -320,23 +320,19 @@ event ObjectDraw
 		temp0 /= 2
 		temp1 = screen.ysize
 		temp1 /= 2
-		temp2 = temp0
-		temp2 -= 36
-		temp3 = temp1
-		temp3 -= 18
-		DrawRect(temp2, temp3, 73, 37, 0xE0, 0x50, 0x60, 0x40)
 		DrawSpriteScreenXY(0, temp0, temp1)
-		temp2 = 1
+		DrawSpriteScreenFX(1, FX_INK, temp0, temp1)
+		temp2 = 2
 		if object.value0 == 0
 			temp2++
 		end if
 		DrawSpriteScreenXY(temp2, temp0, temp1)
-		temp2 = 3
+		temp2 = 4
 		if object.value0 == 1
 			temp2++
 		end if
 		DrawSpriteScreenXY(temp2, temp0, temp1)
-		temp2 = 5
+		temp2 = 6
 		if object.value0 == 2
 			temp2++
 		end if
@@ -377,6 +373,8 @@ event ObjectStartup
 	object[8].type = TypeName[Stage Setup]
 	object[8].priority = PRIORITY_ACTIVE_PAUSED
 	object[8].drawOrder = 6
+	object[8].inkEffect = INK_ALPHA
+	object[8].alpha = 0x40
 
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].type = TypeName[Blank Object]
@@ -413,12 +411,13 @@ event ObjectStartup
 
 	// Pause menu
 	SpriteFrame(-40, -22, 81, 45, 137, 413)	// 0  - Frame
-	SpriteFrame(-32, -14, 64, 7, 137, 389)	// 1  - Continue
-	SpriteFrame(-32, -14, 64, 7, 170, 405)	// 2  - Continue (Sel)
-	SpriteFrame(-28, -3, 56, 7, 137, 397)	// 3  - Restart
-	SpriteFrame(-28, -3, 56, 7, 194, 397)	// 4  - Restart (Sel)
-	SpriteFrame(-16, 8, 32, 7, 137, 405)	// 5  - Exit
-	SpriteFrame(-16, 8, 32, 7, 202, 389)	// 6  - Exit (Sel)
+	SpriteFrame(-36, -18, 73, 37, 137, 459)	// 1  - Inner
+	SpriteFrame(-32, -14, 64, 7, 137, 389)	// 2  - Continue
+	SpriteFrame(-32, -14, 64, 7, 170, 405)	// 3  - Continue (Sel)
+	SpriteFrame(-28, -3, 56, 7, 137, 397)	// 4  - Restart
+	SpriteFrame(-28, -3, 56, 7, 194, 397)	// 5  - Restart (Sel)
+	SpriteFrame(-16, 8, 32, 7, 137, 405)	// 6  - Exit
+	SpriteFrame(-16, 8, 32, 7, 202, 389)	// 7  - Exit (Sel)
 
 end event
 
