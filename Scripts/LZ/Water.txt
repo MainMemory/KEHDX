@@ -515,6 +515,17 @@ event ObjectMain
 					if object[currentPlayer].yvel < -0x100000
 						object[currentPlayer].yvel = -0x100000
 					end if
+					
+					// KEHDX - Taken from the Sega Forever version of the game, this is a
+					//         fix for the hi-jump bug, when jumping at the surface of the water and getting very large upwards momentum
+					if object[currentPlayer].animation == ANI_JUMPING
+						if object[currentPlayer].value1 > 0
+							if object[currentPlayer].yvel < -0x68000
+								object[currentPlayer].yvel = -0x68000
+							end if
+						end if
+					end if
+					
 					if object[currentPlayer].state == PlayerObject_HandleTailsFlight
 						if object[currentPlayer].value1 < 480
 							PlaySfx(SfxName[Flying], 1)
