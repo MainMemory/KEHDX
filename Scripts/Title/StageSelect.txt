@@ -241,8 +241,12 @@ event ObjectMain
 		end if
 		
 		if inputPress.start == true	
-			object.state = 5
-			saveRAM[251] = KEH.menusel
+			if KEH.menusel == 13
+				PlaySfx(SfxName[Fail], 0)
+			else
+				object.state = 5
+				saveRAM[251] = KEH.menusel
+			end if
 		end if
 		break
 
