@@ -351,7 +351,6 @@ event ObjectStartup
 				object[arrayPos0].direction = FLIP_X
 				object[arrayPos0].xvel = 0x4000
 			end if
-			CallFunction(EmeraldManager_AddEntity)
 		else
 			object[arrayPos0].value3 = 1
 			object[arrayPos0].xvel = 0
@@ -360,6 +359,10 @@ event ObjectStartup
 			else
 				object[arrayPos0].direction = FLIP_X
 			end if
+		end if
+		CheckCurrentStageFolder("LZ")
+		if checkResult == 1
+			CallFunction(EmeraldManager_AddEntity)
 		end if
 	next
 	temp0 = 0
