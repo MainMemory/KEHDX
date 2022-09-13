@@ -3027,16 +3027,16 @@ event ObjectMain
 
 	//Victory Code
 	if object[9].state >= 2
-		object[0].up = 0
-		object[0].down = 0
-		object[0].left = 0
-		object[0].right = 0
-		object[0].jumpPress = 0
-		object[0].jumpHold = 0
-		object[0].speed = 0
-		object[0].xvel = 0
-		object[0].value1 = 0
-		object[0].animation = ANI_VICTORY
+		object.up = 0
+		object.down = 0
+		object.left = 0
+		object.right = 0
+		object.jumpPress = 0
+		object.jumpHold = 0
+		object.speed = 0
+		object.xvel = 0
+		object.value1 = 0
+		object.animation = ANI_VICTORY
 		screen.cameraX = object[0].ixpos
 		screen.cameraY = object[0].iypos
 	end if 
@@ -3086,25 +3086,18 @@ event ObjectStartup
 		case 0
 		default
 			LoadAnimation("Knuckles.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
 			break
 		case 1
 			LoadAnimation("Tikal.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
 			break
 		end switch
+		object[0].propertyValue = 2
+		object[0].value30 = -5
+		object[0].value32 = PlayerObject_StartKnuxGlide
+		ANI_PEELOUT = ANI_RUNNING
+		if options.saveSlot > 0
+			stage.player2Enabled = 0
+		end if
 		if stage.player2Enabled == 1
 			playerCount = 2
 		else

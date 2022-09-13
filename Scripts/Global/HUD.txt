@@ -666,6 +666,7 @@ event ObjectMain
 			object[0].jumpHold = 0
 			object[0].xvel = 0
 			object[0].yvel = 0
+			object[0].visible = true
 			object[0].value1 = 0
 			object[0].value8 = 0
 			EmeraldManager.fadeAmount = 0
