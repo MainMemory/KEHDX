@@ -27,18 +27,18 @@ private alias object.value12 : KEH.dragging
 private alias object.value13 : KEH.dragposBase
 private alias object.value14 : KEH.dragposCur
 
+// KEH.menusel Aliases
+private alias 0   : MENUSEL_STGSEL_MIN // EHZ
+private alias 15  : MENUSEL_STGSEL_MAX // SBZ
 
-private alias 0   : KEH_MIN // EHZ
-private alias 15  : KEH_MAX // SBZ
-private alias 255 : KEH_NULL
-
+// How tall each row should be
 private alias 72 : KEH_STAGEROWSIZE
 
-reserve function scrolling
-reserve function Sega_Background
+
+reserve function KEH_GetScrollOffset
 
 
-function scrolling
+function KEH_GetScrollOffset
 	// This function is called to get the offset for vertical scrolling sprites
 	
 	// Preconditions:
@@ -69,122 +69,10 @@ function scrolling
 	end if
 end function
 
-function Sega_Background
-	// This function is caled to draw the Background
-	
-	KEH.bgPos++
-	KEH.bgPos &= 255
-	
-	temp3 = KEH.bgPos
-	temp3 >>= 1
-	
-	// Right bounds to stop drawing sprite, goes a little above just for good measure
-	temp4 = screen.xsize
-	temp4 += 64
-	
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 += 128
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 -= 128
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-	
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 -= 256
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 += 256
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 += 384
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-	
-	temp0 = temp3
-	temp1 = temp3
-	temp1 -= 10000
-	temp1 += 512
-	while temp1 < temp4
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-
-		temp0 -= 10000
-	loop
-end function
-
 
 event ObjectMain
 	switch object.state
 	case 0
-		object.inkEffect = INK_ALPHA
 		KEH.timer = 320
 		SetActivePalette(5, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, KEH.timer)
@@ -193,10 +81,20 @@ event ObjectMain
 		KEH.scrollAngle = 0
 		KEH.scrollPosTarget = KEH.menusel
 		KEH.scrollPosTarget *= KEH_STAGEROWSIZE
+		
+		// If returning from SBZ or anywhere else down the list, keep a cap
+		if KEH.scrollPosTarget > 936
+			KEH.scrollPosTarget = 936
+		end if
+		
 		KEH.scrollPosPrev = KEH.scrollPosTarget
 		
 		KEH.usingTouch = false
 		KEH.scrollOverride = KEH.scrollPosTarget
+		
+		// Set BG speed, 0.5 px per frame rather than the 1.0 the other Menus use
+		tileLayer[1].scrollSpeed = -0x8000
+		hParallax[0].scrollSpeed = -0x8000
 		
 		object.state++
 		break
@@ -232,20 +130,22 @@ event ObjectMain
 			end if
 			
 			if KEH.scrollPosPrev != KEH.scrollPosTarget
+				// Don't allow switching selections while already scrolling
+				
 				return
 			end if
 			
 			if inputPress.up == true
-				if KEH.menusel > KEH_MIN
+				if KEH.menusel > MENUSEL_STGSEL_MIN
 					KEH.menusel--
 					
 					KEH.scrollAngle = 0
 					
-					temp0 = KEH_MAX
+					temp0 = MENUSEL_STGSEL_MAX
 					temp0 -= 2
 					
 					CheckLower(KEH.menusel, temp0)
-					checkResult *= 72
+					checkResult *= KEH_STAGEROWSIZE
 					KEH.scrollPosTarget -= checkResult
 					
 					PlaySfx(SfxName[Score Add], false)
@@ -253,16 +153,16 @@ event ObjectMain
 			end if
 			
 			if inputPress.down == true
-				if KEH.menusel < KEH_MAX
+				if KEH.menusel < MENUSEL_STGSEL_MAX
 					KEH.menusel++
 					
 					KEH.scrollAngle = 0
 					
 					CheckLower(KEH.scrollPosTarget, 936)
 					temp0 = checkResult
-					CheckLower(KEH.menusel, KEH_MAX)
+					CheckLower(KEH.menusel, MENUSEL_STGSEL_MAX)
 					temp0 &= checkResult
-					temp0 *= 72
+					temp0 *= KEH_STAGEROWSIZE
 					KEH.scrollPosTarget += temp0
 					
 					PlaySfx(SfxName[Score Add], false)
@@ -287,20 +187,26 @@ event ObjectMain
 			
 			// See if the screen's tapped at all
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			arrayPos1 = checkResult
 			temp3 = checkResult
 			
-			// Priority of controls
-			// - Exit (top)
-			// - Dragging (middle)
+			// The priority of controls is:
+			// - Exit (highest priority)
+			// - Dragging (mid)
 			// - Selecting (least prio)
 			
 			if KEH.dragging == false
+				
+				// Check for the Exit button
+				// It's at the top of the "scene," next to the Select A Stage text
+				// This box is 
 				temp1 = 12
-				CallFunction(scrolling)
+				CallFunction(KEH_GetScrollOffset)
 				temp2 = temp1
 				temp2 += 40
-				CheckTouchRect(10, temp1, 50, temp2)
+				CheckTouchRect(10, temp1, 58, temp2)
 				
+				// Used to block further scrolling, if needed
 				temp4 = 0
 				
 				if checkResult > -1
@@ -312,8 +218,8 @@ event ObjectMain
 						if KEH.menusel == 254
 							object.state = 6
 							KEH.menusel = 255
+							
 							temp4 = 5
-							return
 						end if
 					else
 						if KEH.menusel == 254
@@ -325,12 +231,16 @@ event ObjectMain
 				arrayPos0 = -1
 				
 				// Allow scrolling from both the left and right blank areas
+				
+				// Left
 				CheckTouchRect(0, 0, 40, screen.ysize)
 				if checkResult > -1
 					arrayPos0 = checkResult
 				end if
 				
-				CheckTouchRect(340, 0, screen.xsize, screen.ysize)
+				temp0 = screen.xsize
+				temp0 -= 40
+				CheckTouchRect(temp0, 0, screen.xsize, screen.ysize)
 				if checkResult > -1
 					arrayPos0 = checkResult
 				end if
@@ -341,18 +251,18 @@ event ObjectMain
 					KEH.dragging = true
 					KEH.menusel = 255
 					
-					KEH.dragposBase = touchScreen[arrayPos0].ypos
+					KEH.dragposBase = touchscreen[arrayPos0].ypos
 				else
 					temp0 = 0
-					while temp0 <= KEH_MAX
+					while temp0 <= MENUSEL_STGSEL_MAX
 						temp1 = 32
-						CallFunction(scrolling)
+						CallFunction(KEH_GetScrollOffset)
 						temp2 = temp0
 						temp2 *= KEH_STAGEROWSIZE
 						temp1 += temp2
 						temp2 = temp1
 						temp2 += 58
-						CheckTouchRect(50, temp1, 350, temp2)
+						CheckTouchRect(63, temp1, 360, temp2)
 						
 						if checkResult > -1
 							KEH.menusel = temp0
@@ -377,11 +287,8 @@ event ObjectMain
 			else
 				// Scrolling is active
 				
-				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-				if checkResult > -1
-					arrayPos0 = checkResult
-					
-					KEH.dragposBase -= touchScreen[arrayPos0].ypos
+				if arrayPos1 > -1
+					KEH.dragposBase -= touchscreen[arrayPos1].ypos
 					KEH.scrollOverride += KEH.dragposBase
 					
 					// Enforce scroll limits
@@ -393,7 +300,7 @@ event ObjectMain
 						KEH.scrollOverride = 936
 					end if
 					
-					KEH.dragposBase = touchScreen[arrayPos0].ypos
+					KEH.dragposBase = touchscreen[arrayPos1].ypos
 				else
 					// Screen's no longer held, disable scrolling
 					
@@ -451,13 +358,17 @@ event ObjectMain
 		break
 		
 	case 6
-		stage.listPos = 0
 		if KEH.timer < 256
 			KEH.timer += 8
 			music.volume -= 2
 			SetScreenFade(0, 0, 0, KEH.timer)
 		else
-			LoadStage()
+			if TypeName[Main Menu] > 0
+				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+			else
+				stage.listPos = StageName[P - TITLE SCREEN]
+				LoadStage()
+			end if
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
 		end if
@@ -468,14 +379,14 @@ end event
 
 
 event ObjectDraw
-	CallFunction(Sega_Background)
-
 	// Select Stage Header
 	temp1 = 16
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	DrawSpriteScreenXY(1, screen.xcenter, temp1)
 	
 	if KEH.usingTouch == true
+		// Draw the back button
+		
 		temp1 += 4
 		checkEqual(KEH.menusel, 254)
 		checkResult += 52
@@ -485,7 +396,7 @@ event ObjectDraw
 	//Add stages
 	temp1 = 32
 	temp0 = 0
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	while temp0 < 16
 		DrawSpriteScreenXY(0, screen.xcenter, temp1)
 		temp1 += KEH_STAGEROWSIZE
@@ -494,7 +405,7 @@ event ObjectDraw
 	
 	//Selector
 	temp1 = 32
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	temp0 = KEH.menusel
 	temp0 *= KEH_STAGEROWSIZE
 	temp1 += temp0
@@ -503,7 +414,7 @@ event ObjectDraw
 	//Numbers	
 	temp0 = 0
 	temp1 = 32
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	temp2 = screen.xcenter
 	temp2 += 3
 	while temp0 < 16
@@ -572,7 +483,7 @@ event ObjectDraw
 	temp2 = 16
 	temp3 = screen.xcenter
 	temp3 -= 141
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
 		temp1 += KEH_STAGEROWSIZE
@@ -585,7 +496,7 @@ event ObjectDraw
 	temp2 = 32
 	temp3 = screen.xcenter
 	temp3 -= 141
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	while temp0 < 8
 		DrawSpriteScreenXY(temp2, temp3, temp1)
 		temp1 += KEH_STAGEROWSIZE
@@ -596,7 +507,7 @@ event ObjectDraw
 	// Stage Icons
 	temp0 = 0
 	temp1 = 48
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	temp2 = 4
 	while temp0 < 10
 		DrawSpriteScreenXY(temp2, temp3, temp1)
@@ -607,7 +518,7 @@ event ObjectDraw
 	
 	temp0 = 0
 	temp1 = 624
-	CallFunction(scrolling)
+	CallFunction(KEH_GetScrollOffset)
 	temp2 = 26
 	while temp0 < 8
 		DrawSpriteScreenXY(temp2, temp3, temp1)
@@ -622,7 +533,7 @@ event ObjectStartup
 	LoadSpriteSheet("KEHMenu/StageSelect.gif")
 	SpriteFrame(-149, 0, 298, 58, 1, 130) // 0 - Stage box (incl. texts), Highlighted
 	SpriteFrame(-71, 0, 142, 7, 33, 1)    // 1 - "Select a Stage"
-	SpriteFrame(0, 0, 32, 128, 0, 1)      // 2 - Background strip
+	SpriteFrame(0, 0, 1, 1, 0, 0)      // 2 - Filler (formerly background strip)
 	SpriteFrame(-149, 0, 298, 58, 1, 372) // 3 - Stage box (incl. texts), Unhighlighted
 	
 	temp0 = 0

@@ -17,6 +17,10 @@ private alias object.value22 : object.usingTouch
 
 private alias object.visible : player.visible
 
+// Menu Boot Mode Aliases
+private alias 3 : BOOTMODE_STAGESELECT
+
+
 // Function declarations
 reserve function StageSetup_HandleOscillationTable
 
@@ -295,7 +299,8 @@ event ObjectMain
 			object.timer += 4
 			if object.timer == 384
 				stage.activeList = PRESENTATION_STAGE
-				stage.listPos = 4
+				stage.listPos = 0
+				menu.bootMode = BOOTMODE_STAGESELECT
 				object.timer = 384
 				LoadStage()
 			end if

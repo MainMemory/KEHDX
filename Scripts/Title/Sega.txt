@@ -16,88 +16,17 @@ private alias object.value5 : sega.reigonCheat
 
 public alias saveRAM[202] : saved.character
 
-// Function declarations
-reserve function Sega_CheckTouchCheat
-
-function Sega_CheckTouchCheat
-	CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-	if checkResult == -1
-		sega.anyCheatDone = 0
-	end if
-	if sega.anyCheatDone == 0
-		temp0 = screen.xcenter
-		switch sega.LSelCheat
-		case 0
-			temp0 -= 93
-			temp1 = temp0
-			temp1 += 39
-			break
-		case 1
-			temp0 -= 50
-			temp1 = temp0
-			temp1 += 42
-			break
-		case 2
-			temp0 -= 6
-			temp1 = temp0
-			temp1 += 42
-			break
-		case 3
-			temp0 += 36
-			temp1 = temp0
-			temp1 += 58
-			break
-		end switch
-		CheckTouchRect(temp0, 90, temp1, 150)
-		if checkResult > -1
-			sega.anyCheatDone = 1
-			sega.LSelCheat++
-			if sega.LSelCheat == 4
-				if options.gameMode == 0
-					PlaySfx(SfxName[Ring L], 0)
-					options.stageSelectFlag = 1
-				end if
-			end if
-		end if
-		temp0 = screen.xcenter
-		switch sega.reigonCheat
-		case 0
-			temp0 += 36
-			temp1 = temp0
-			temp1 += 58
-			break
-		case 1
-			temp0 -= 6
-			temp1 = temp0
-			temp1 += 42
-			break
-		case 2
-			temp0 -= 50
-			temp1 = temp0
-			temp1 += 42
-			break
-		case 3
-			temp0 -= 93
-			temp1 = temp0
-			temp1 += 39
-			break
-		end switch
-		CheckTouchRect(temp0, 90, temp1, 150)
-		if checkResult > -1
-			sega.anyCheatDone = 1
-			sega.reigonCheat++
-			if sega.reigonCheat == 4
-				PlaySfx(SfxName[Ring L], 0)
-				options.region ^= 1
-			end if
-		end if
-	end if
-end function
+// Menu Boot Mode Aliases
+// Public since the following Menu-related objects use them too
+public alias 0 : BOOTMODE_NONE
+public alias 1 : BOOTMODE_MAINMENU
+public alias 2 : BOOTMODE_OPTIONS
+public alias 3 : BOOTMODE_STAGESELECT
 
 
 event ObjectMain
 
-	if inputPress.start == 1
+	if inputPress.start == true
 		if object.state < 6
 			object.state = 7
 		end if
@@ -197,9 +126,6 @@ end event
 
 event ObjectDraw
 	DrawRect(0, 0, screen.xsize, screen.ysize, 224, 224, 224, 255)
-	if saved.character == 1
-		object.frame += 12
-	end if
 	switch object.state
 	case 2
 		temp0 = sega.spriteCounter
@@ -237,6 +163,7 @@ event ObjectDraw
 	case 6
 	case 7
 		DrawSpriteScreenXY(11, screen.xcenter, screen.ycenter)
+		
 		if specialMode == 1
 			temp0 = screen.xcenter
 			temp0 -= 93
@@ -252,13 +179,21 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/SEGA.gif")
-
-	//Knuckles
-	SpriteFrame(-31, -36, 62, 72, 1, 226)
-	SpriteFrame(-31, -36, 62, 72, 64, 226)
-	SpriteFrame(-29, -36, 60, 72, 127, 226)
-	SpriteFrame(-31, -36, 62, 72, 188, 226)
-
+	
+	if saved.character == 0
+		//Knuckles
+		SpriteFrame(-31, -36, 62, 72, 1, 226)
+		SpriteFrame(-31, -36, 62, 72, 64, 226)
+		SpriteFrame(-29, -36, 60, 72, 127, 226)
+		SpriteFrame(-31, -36, 62, 72, 188, 226)
+	else
+		//Tikal
+		SpriteFrame(-31, -36, 62, 72, 1, 153)
+		SpriteFrame(-31, -36, 62, 72, 64, 153)
+		SpriteFrame(-29, -36, 60, 72, 127, 153)
+		SpriteFrame(-31, -36, 62, 72, 188, 153)
+	end if
+	
 	//SEGA
 	SpriteFrame(-192, -35, 256, 70, 1, 299)
 	SpriteFrame(-384, -35, 192, 70, 1, 299)
@@ -269,14 +204,30 @@ event ObjectStartup
 	SpriteFrame(-93, -29, 187, 58, 323, 297)
 	SpriteFrame(-93, -29, 187, 58, 323, 238)
 
-	//Tikal
-	SpriteFrame(-31, -36, 62, 72, 1, 153)
-	SpriteFrame(-31, -36, 62, 72, 64, 153)
-	SpriteFrame(-29, -36, 60, 72, 127, 153)
-	SpriteFrame(-31, -36, 62, 72, 188, 153)
-
-	//NO TOUCH CONTROLS
-	options.touchControls = 0
+	// Hide Touch Controls
+	options.touchControls = false
+	
+	temp0 = 0
+	
+	switch menu.bootMode
+	case BOOTMODE_NONE
+		// Nothing special needed here, player just booted up the game so give them all the splashes
+		break
+	case BOOTMODE_STAGESELECT
+		temp0++
+	case BOOTMODE_OPTIONS
+		temp0++
+	case BOOTMODE_MAINMENU
+		temp0 += 2
+		
+		if temp0 > 0
+			foreach (TypeName[Sega], arrayPos0, ALL_ENTITIES)
+				object[arrayPos0].type = temp0
+				object[arrayPos0].priority = 1 // "PRIORITY_ACTIVE", actual name varies across decomp versions so numeric ID is used here instead
+			next
+		end if
+		break
+	end switch
 end event
 
 event RSDKDraw
