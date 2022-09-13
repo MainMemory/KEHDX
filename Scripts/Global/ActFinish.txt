@@ -35,9 +35,9 @@ private alias 5 : ACTFINISH_CHOOSEWHERETOGO
 private alias 6 : ACTFINISH_GOTCONTINUE
 private alias 7 : ACTFINISH_LOADNEXTSTAGE
 
-// Static Values
+// Menu Boot Mode Aliases
+private alias 3 : BOOTMODE_STAGESELECT
 
-// Tables
 
 event ObjectMain
 
@@ -406,8 +406,9 @@ event ObjectMain
 			else
 				if temp3 < 0
 					if object.menuselection == 1
-						object.NEXTSTAGE = 4
+						object.NEXTSTAGE = 0
 						object.STAGETYPE = PRESENTATION_STAGE
+						menu.bootMode = BOOTMODE_STAGESELECT
 						object.state = ACTFINISH_LOADNEXTSTAGE
 					end if
 				else
