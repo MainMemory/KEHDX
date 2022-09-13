@@ -59,11 +59,11 @@ end function
 event ObjectMain
 	
 	// As cool as it looks, allow the player to skip the splash if they so desire
+	temp0 = inputPress[0].start
+	temp0 |= touchScreen[0].down
 	CheckGreater(object.state, SPLASH_FADEIN)
-	temp0 = checkResult
-	CheckLower(object.state, SPLASH_FADEOUT)
 	temp0 &= checkResult
-	CheckEqual(inputPress[0].start, true)
+	CheckLower(object.state, SPLASH_FADEOUT)
 	temp0 &= checkResult
 	
 	if temp0 == true

@@ -6,322 +6,278 @@
 // ----------------------------------
 
 // Aliases
-private alias object.value0 : sega.timer
-
+private alias object.value0 : KEH.timer
 private alias object.value1 : KEH.menusel
-private alias object.value2 : sega.peekPos
-private alias object.value3 : sega.levelSelectCheatPos
-private alias object.value4 : sega.touchDown
-private alias object.value5 : sega.regionSwitchCheatPos
+
+private alias object.value2 : KEH.usingTouch
+
+// Padded out for parity with other Menu objects, so that the value slot is the same across each
+private alias object.value10 : KEH.buttonLeft
+private alias object.value11 : KEH.buttonTop
+private alias object.value12 : KEH.buttonRight
+private alias object.value13 : KEH.buttonBottom
+private alias object.value14 : KEH.buttonID
+private alias object.value15 : KEH.buttonFunc
+
+// Kept public as it's used by the KEH_RunButton function, which is used by other objects too
+public alias 255 : MENUSEL_NULL
 
 // States
-private alias 0 : SEGA_SETUP
-private alias 1 : SEGA_FADEIN
-private alias 2 : SEGA_PEEKSEGA
-private alias 3 : SEGA_REVEALSEGA
-private alias 4 : SEGA_SEGASCREEN
-private alias 5 : SEGA_FADEOUT
-private alias 6 : STAGESELECT_FADEOUT
-private alias 7 : OPTIONS_FADEOUT
-private alias 8 : COMPETITION_FADEOUT
+private alias 0 : MAINMENU_SETUP
+private alias 1 : MAINMENU_FADEIN
+private alias 2 : MAINMENU_MAIN
+private alias 3 : MAINMENU_STAGESELECT
+private alias 4 : MAINMENU_OPTIONS
 
 // Function declarations
-reserve function KEH_Background
+reserve function KEH_RunButton
 
-function KEH_Background
-	//Background
-	object.value22++
-	object.value22 %= 1
-	if object.value22 == 0
-		object.value21++
-		object.value21 %= 128
+reserve function KEH_Button_Singleplayer
+reserve function KEH_Button_Competition
+reserve function KEH_Button_Options
+reserve function KEH_Button_Credits
+
+
+function KEH_RunButton
+	
+	// This function is called to update a button
+	
+	// Preconditions:
+	// - temp3 is if the screen is held at all or not (-1, 0, or above)
+	// - KEH.buttonLeft is the XPos of the left bounds of the button
+	// - KEH.buttonRight is the XPos of the right bounds of the button
+	// - KEH.buttonTop is the YPos of the top bounds of the button
+	// - KEH.buttonBottom is the YPos of the lower bounds of the button
+	// - KEH.buttonID is the button ID of the button
+	// - KEH.buttonFunc is the function ID of the button, to be called if the button was pressed
+	
+	CheckTouchRect(KEH.buttonLeft, KEH.buttonTop, KEH.buttonRight, KEH.buttonBottom)
+		
+	if checkResult > -1
+		KEH.menusel = KEH.buttonID
+	else
+		if temp3 < 0
+			if KEH.menusel == KEH.buttonID
+				CallFunction(KEH.buttonFunc)
+			end if
+		else
+			if KEH.menusel == KEH.buttonID
+				KEH.menusel = MENUSEL_NULL
+			end if
+		end if
 	end if
+	
+end function
 
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
-	loop
+function KEH_Button_Singleplayer
+	object.state = MAINMENU_STAGESELECT
+	saveRAM[250] = KEH.menusel
+end function
 
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 128
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
-	loop
+function KEH_Button_Competition
+	PlaySfx(SfxName[Fail], false)
+end function
 
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 -= 128
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
 
-	temp0 -= 10000
-	loop
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 -= 256
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
+function KEH_Button_Options
+	object.state = MAINMENU_OPTIONS
+	saveRAM[250] = KEH.menusel
+end function
 
-	temp0 -= 10000
-	loop
 
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 256
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 384
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 512
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
+function KEH_Button_Credits
+	PlaySfx(SfxName[Fail], false)
 end function
 
 
 event ObjectMain
 	switch object.state
-	case SEGA_SETUP
-		object.alpha = 0x00
-		object.value1 = saveRAM[250]
-		object.inkEffect = INK_ALPHA
-		sega.timer = 320
+	case MAINMENU_SETUP
+		KEH.menusel = saveRAM[250]
+		KEH.timer = 320
+		KEH.usingTouch = false
+		
+		// Set BG speed, 1.0 pixel per frame
+		tileLayer[1].scrollSpeed = -0x10000
+		hParallax[0].scrollSpeed = -0x10000
+		
 		SetActivePalette(1, 0, screen.ysize)
-		SetScreenFade(0, 0, 0, sega.timer)
+		SetScreenFade(0, 0, 0, KEH.timer)
 		object.state++
 		break
 
-	case SEGA_FADEIN
-		if sega.timer > 0
-			sega.timer -= 8
+	case MAINMENU_FADEIN
+		if KEH.timer > 0
+			KEH.timer -= 8
 		else
-			sega.peekPos = screen.xcenter
-			sega.peekPos -= 104
-			object.alpha = 0x80
 			PlayMusic(1)
 			object.state++
 		end if
 
-		SetScreenFade(0, 0, 0, sega.timer)
+		SetScreenFade(0, 0, 0, KEH.timer)
 		break
-
-	case SEGA_PEEKSEGA
-		temp0 = screen.xcenter
-		temp0 += 112
-		if sega.peekPos < temp0
-			sega.peekPos += 4
+		
+	case MAINMENU_MAIN
+		if KEH.usingTouch == false
+			// Assuming physical controls, this is the default
+			
+			if inputPress.up == true
+				KEH.menusel--
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			if inputPress.down == true
+				KEH.menusel++
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			KEH.menusel &= 3
+			
+			if inputPress.start == true
+				temp0 = KEH_Button_Singleplayer
+				temp0 += KEH.menusel
+				CallFunction(temp0)
+			end if
+			
+			// If the player's touched the screen at all...
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			
+			if checkResult > -1
+				// ... then activate touch controls, and hide the Knuckles cursor too
+				KEH.usingTouch = true
+				KEH.menusel = MENUSEL_NULL
+			end if
 		else
-			object.alpha = 0
-			object.state++
+			// Seeing if the player's got a finger on the screen at all
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Get the base XPos of the button, center screen aligned
+			
+			// Left bounds
+			KEH.buttonLeft = screen.xcenter
+			KEH.buttonLeft -= 80
+			
+			// Right bounds
+			KEH.buttonRight = KEH.buttonLeft
+			KEH.buttonRight += 180
+			
+			// Other values
+			KEH.buttonTop = 130
+			KEH.buttonBottom = 150
+			KEH.buttonFunc = KEH_Button_Singleplayer
+			
+			// Cycle through, and look at all four buttons
+			KEH.buttonID = 0
+			while KEH.buttonID < 4
+				CallFunction(KEH_RunButton)
+				
+				KEH.buttonTop += 20
+				KEH.buttonBottom += 20
+				KEH.buttonID++
+				KEH.buttonFunc++
+			loop
+			
+			// If the player's tapping around, then resume physical controls
+			temp0 = inputPress.up
+			temp0 |= inputPress.down
+			temp0 |= inputPress.left
+			temp0 |= inputPress.right
+			temp0 |= inputPress.start
+			temp0 |= inputPress.buttonA
+			temp0 |= inputPress.buttonB
+			temp0 |= inputPress.buttonC
+			temp0 ^= true
+			KEH.usingTouch = temp0
 		end if
 		break
-
-	case SEGA_REVEALSEGA
-		if object.alpha < 0xD0
-			object.alpha += 8
+			
+	case MAINMENU_STAGESELECT
+		if KEH.timer < 256
+			KEH.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, KEH.timer)
 		else
-			object.alpha = 0xFF
-			object.state++
+			// Odds are, one of these will cause a compiler warning - not an error - at any given time
+			// This is intentional, it's a one-or-the-other scenario between two ways to set up the menu
+			if TypeName[Stage Select] > 0
+				ResetObjectEntity(object.entityPos, TypeName[Stage Select], 0, object.xpos, object.ypos)
+			else
+				stage.listPos = StageName[P - LEVEL SELECT]
+				LoadStage()
+			end if
+			menu.bootMode = BOOTMODE_STAGESELECT
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
 		end if
-
 		break
-
-	case SEGA_FADEOUT
-			stage.activeList = PRESENTATION_STAGE
-			stage.listPos = 4
-			inputPress.start = 0	
-			inputPress.up = 0		
-			inputPress.down = 0	
-			if sega.timer < 256
-				sega.timer += 8
-				music.volume -= 2
-				SetScreenFade(0, 0, 0, sega.timer)
-			else
-				LoadStage()
-				StopMusic()
-				SetScreenFade(0, 0, 0, 0xFF)
-			end if	
-			break
-	case STAGESELECT_FADEOUT	
-			stage.listPos = 4
-			inputPress.start = 0	
-			inputPress.up = 0		
-			inputPress.down = 0
-			if sega.timer < 256
-				sega.timer += 8
-				music.volume -= 2
-				SetScreenFade(0, 0, 0, sega.timer)
-			else
-				LoadStage()
-				StopMusic()
-				SetScreenFade(0, 0, 0, 0xFF)
-			end if	
-			break
-	case OPTIONS_FADEOUT	
-			inputPress.start = 0	
-			inputPress.up = 0		
-			inputPress.down = 0	
-			if sega.timer < 256
-				sega.timer += 8
-				music.volume -= 2
-				SetScreenFade(0, 0, 0, sega.timer)
-			else
-				ResetObjectEntity(object.entityPos, TypeName[Options], 0, object.xpos, object.ypos)
-				StopMusic()
-				SetScreenFade(0, 0, 0, 0xFF)
-			end if	
-			break
+		
+	case MAINMENU_OPTIONS
+		if KEH.timer < 256
+			KEH.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, KEH.timer)
+		else
+			menu.bootMode = BOOTMODE_OPTIONS
+			ResetObjectEntity(object.entityPos, TypeName[Options], 0, object.xpos, object.ypos)
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
 	end switch
-	if inputPress.up == 1
-		KEH.menusel -= 1
-		PlaySfx(SfxName[Score Add], 0)
-		if KEH.menusel < 0
-			KEH.menusel = 3
-		end if
-	end if
-	if inputPress.down == 1				
-		KEH.menusel += 1
-		PlaySfx(SfxName[Score Add], 0)
-		KEH.menusel %= 4
-	end if
-	if inputPress.start == 1	
-		switch KEH.menusel
-		default
-			PlaySfx(SfxName[Fail], 0)
-			break
-		case 0
-			object.state = STAGESELECT_FADEOUT	
-			saveRAM[250] = KEH.menusel
-			break
-		case 2
-			object.state = OPTIONS_FADEOUT	
-			saveRAM[250] = KEH.menusel
-			break
-		end switch
-	end if
+	
+	// Animation for the Knuckles cursor
+	object.animationTimer++
+	object.animationTimer %= 60
 end event
 
 
 event ObjectDraw
-	//Random PlaceHolder
-	DrawRect(0, 0, screen.xsize, screen.ysize, 164, 161, 230, 255)
-
-	CallFunction(KEH_Background)
-
+	
 	// Logo and Selections
 	DrawSpriteScreenXY(0, screen.xcenter, 16)
 	DrawSpriteScreenXY(1, screen.xcenter, 133)
 
 	// Little Knuckles
-	switch KEH.menusel
-		case 0
-			temp0 = 132
-			break
-		case 1
-			temp0 = 152
-			break
-		case 2
-			temp0 = 172
-			break
-		case 3
-			temp0 = 192
-			break
-	end switch
-
+	
+	temp0 = KEH.menusel
+	temp0 *= 20
+	temp0 += 132
+	
 	temp1 = screen.xcenter
 	temp1 -= 109
-
-	if object.value23 >= 30
-		DrawSpriteScreenXY(3, temp1, temp0)
-		object.value24++
-		if object.value24 >= 30
-			object.value23 = 0
-		end if
-	else
-		DrawSpriteScreenXY(4, temp1, temp0)
-		object.value23++
-		object.value24 = 0
-	end if
-
-
-	DrawSpriteScreenXY(5, screen.xcenter, 216)
-
+	
+	object.frame = object.animationTimer
+	object.frame >>= 5
+	object.frame += 2
+	DrawSpriteScreenXY(object.frame, temp1, temp0)
+	
+	// Website link
+	DrawSpriteScreenXY(4, screen.xcenter, 216)
+	
 end event
 
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/MainTitle.gif")
-	SpriteFrame(-142, -3, 284, 113, 0, 201)
-	SpriteFrame(-80, 0, 159, 77, 82, 112)
-	SpriteFrame(0, 0, 32, 128, 0, 1)
-	SpriteFrame(0, 0, 23, 22, 33, 112)
-	SpriteFrame(0, 0, 24, 22, 57, 112)
-	SpriteFrame(-152, 0, 304, 10, 0, 190)
-	options.touchControls = false
+	SpriteFrame(-142, -3, 284, 113, 0, 201) // 0 - Knuckles' Emerald Hunt, DX!
+	SpriteFrame(-80, 0, 159, 77, 82, 112)   // 1 - Selection texts
+	SpriteFrame(0, 0, 23, 22, 33, 112)      // 2 - Tiny Knuckles, Frame 1
+	SpriteFrame(0, 0, 24, 22, 57, 112)      // 3 - Tiny Knuckles, Frame 2
+	SpriteFrame(-152, 0, 304, 10, 0, 190)   // 4 - Webpage link
+	
 	SetMusicTrack("SPPMenu.ogg", 1, 214596)
 	LoadPalette("MainTitle.act", 1, 0, 0, 256)
+	
+	options.touchControls = false
+	
+	// No Main Menu objects are placed into a scene normally, but if they are this would make sure they're active all the time
+//	foreach (TypeName[Main Menu], arrayPos0, ALL_ENTITIES)
+//		object[arrayPos0].priority = PRIORITY_ACTIVE
+//	next
 end event
 
 event RSDKDraw
@@ -329,6 +285,8 @@ event RSDKDraw
 end event
 
 event RSDKLoad
-	LoadSpriteSheet("Title/Title.gif")
-	SpriteFrame(-93, -29, 188, 58, 323, 242)
+	LoadSpriteSheet("KEHMenu/MainTitle.gif")
+	SpriteFrame(-142, -3, 284, 113, 0, 201)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

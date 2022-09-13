@@ -664,23 +664,20 @@ function PlayerObject_ProcessPlayer
 				touchDebug = inputDown.buttonB
 			end if
 			CheckTouchRect(240, 0, screen.xsize, 40)
-			if checkResult > -1
-				if options.vsMode == 0
-					PlaySfx(SfxName[Menu Back], 0)
+			CheckGreater(checkResult, -1)
+			checkResult |= inputPress.start
+			if checkResult == true
+				temp0 = options.vsMode
+				foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+					temp0 = true
+				next
+				
+				if temp0 == false
+					PlaySfx(SfxName[Menu Back], false)
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
 					stage.state = STAGE_PAUSED
 					PauseMusic()
-				end if
-			end if
-			if inputPress.start == 1
-				if options.vsMode == 0
-					PlaySfx(SfxName[Menu Back], 0)
-					StopSfx(SfxName[Flying])
-					StopSfx(SfxName[Tired])
-					stage.state = STAGE_PAUSED
-					PauseMusic()
-					inputPress.start = 0
 				end if
 			end if
 		end if
@@ -3030,16 +3027,16 @@ event ObjectMain
 
 	//Victory Code
 	if object[9].state >= 2
-		object[0].up = 0
-		object[0].down = 0
-		object[0].left = 0
-		object[0].right = 0
-		object[0].jumpPress = 0
-		object[0].jumpHold = 0
-		object[0].speed = 0
-		object[0].xvel = 0
-		object[0].value1 = 0
-		object[0].animation = ANI_VICTORY
+		object.up = 0
+		object.down = 0
+		object.left = 0
+		object.right = 0
+		object.jumpPress = 0
+		object.jumpHold = 0
+		object.speed = 0
+		object.xvel = 0
+		object.value1 = 0
+		object.animation = ANI_VICTORY
 		screen.cameraX = object[0].ixpos
 		screen.cameraY = object[0].iypos
 	end if 
@@ -3087,37 +3084,20 @@ event ObjectStartup
 		PlayerObject_value3 = 0
 		switch stage.playerListPos
 		case 0
+		default
 			LoadAnimation("Knuckles.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
 			break
 		case 1
 			LoadAnimation("Tikal.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
-			break
-		default
-			stage.playerListPos = 0
-			LoadAnimation("Knuckles.ani")
-			object[0].propertyValue = 2
-			object[0].value30 = -5
-			object[0].value32 = PlayerObject_StartKnuxGlide
-			ANI_PEELOUT = ANI_RUNNING
-			if options.saveSlot > 0
-				stage.player2Enabled = 0
-			end if
 			break
 		end switch
+		object[0].propertyValue = 2
+		object[0].value30 = -5
+		object[0].value32 = PlayerObject_StartKnuxGlide
+		ANI_PEELOUT = ANI_RUNNING
+		if options.saveSlot > 0
+			stage.player2Enabled = 0
+		end if
 		if stage.player2Enabled == 1
 			playerCount = 2
 		else

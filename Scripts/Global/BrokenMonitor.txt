@@ -8,6 +8,8 @@
 // Aliases
 private alias 14 : TYPE_BROKENMONITOR
 
+private alias object.value4 : object.drawIndex
+
 // Function declarations
 reserve function BrokenMonitor_DummyFunction
 reserve function BrokenMonitor_AddRing
@@ -54,16 +56,8 @@ event ObjectMain
 			temp0 = object.ixpos
 			temp0 += 30	
 			stage.newXBoundary2 = temp0
-		end if
-	end if
-	if object[9].state == 3
-		if object.propertyValue == 13
-			object.type = TypeName[Blank Object]
-		end if	
-	end if
-	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-		if object.propertyValue == 13
-			if stage.listPos != 13
+			
+			foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 				temp0 = object[currentPlayer].collisionRight
 				temp0 <<= 16
 				temp0 += object[currentPlayer].xpos
@@ -77,9 +71,14 @@ event ObjectMain
 					temp0 <<= 16
 					object[currentPlayer].xpos -= temp0
 				end if
-			end if
+			next
 		end if
-	next
+		
+		if object[9].state == 3
+			object.type = TypeName[Blank Object]
+		end if
+	end if
+	
 	switch object.state
 	case 0
 		if object.value1 < 0
@@ -88,6 +87,7 @@ event ObjectMain
 		else
 			object.value1 = 0
 		end if
+		
 		if object.value1 == 0
 			object.state = 1
 			object.inkEffect = INK_ALPHA
@@ -152,6 +152,7 @@ event ObjectMain
 				else
 					temp1 = 3
 				end if
+				
 				if EmeraldManager_P1Collected < temp1
 					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
 					object[tempObjectPos].state = 1
@@ -201,10 +202,15 @@ end event
 
 
 event ObjectDraw
-	DrawSprite(0)
-	if object.propertyValue > 0
-		DrawSpriteFX(object.propertyValue, FX_INK, object.xpos, object.value0)
+	if object.drawIndex == 0
+		DrawSprite(0)
+		AddDrawListEntityRef(5, object.entityPos)
+	else
+		if object.propertyValue > 0
+			DrawSpriteFX(object.propertyValue, FX_INK, object.xpos, object.value0)
+		end if
 	end if
+	object.drawIndex ^= 1
 end event
 
 

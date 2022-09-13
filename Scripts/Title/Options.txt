@@ -6,410 +6,257 @@
 // ----------------------------------
 
 // Aliases
-private alias 2 : TYPE_MENUCONTROL
+private alias object.value0 : KEH.timer
+private alias object.value1 : KEH.menusel
 
-private alias object.value0 : menuControl.fadeValue
-private alias object.value1 : menuControl.scrollDelayUp
-private alias object.value2 : menuControl.scrollDelayDown
-private alias object.value3 : menuControl.currentSelection
-private alias object.value4 : menuControl.soundTestCooldown
+private alias object.value2 : KEH.usingTouch
 
-private alias object.value0 : hexNo.number
-private alias object.value1 : hexNo.highlighted
+// Padded out for parity with other Menu objects, so that the value slot is the same across each
+private alias object.value10 : KEH.buttonLeft
+private alias object.value11 : KEH.buttonTop
+private alias object.value12 : KEH.buttonRight
+private alias object.value13 : KEH.buttonBottom
+private alias object.value14 : KEH.buttonID
+private alias object.value15 : KEH.buttonFunc
 
-private alias 0 : STATE_INIT
-private alias 1 : STATE_FADEIN
-private alias 2 : STATE_MAIN
-private alias 3 : STATE_LOADLEVEL
-private alias 4 : STATE_LOADSPECIAL
-private alias 5 : STATE_BACKHOME
+// States
+private alias 0 : OPTIONS_INIT
+private alias 1 : OPTIONS_FADEIN
+private alias 2 : OPTIONS_MAIN
+private alias 3 : OPTIONS_EXIT
+
+private alias saveRAM[200] : saved.radar
+private alias saveRAM[201] : saved.radarstyle
+
 
 // Function declarations
-
-public alias saveRAM[200] : saved.radar
-public alias saveRAM[201] : saved.radarstyle
-public alias saveRAM[202] : saved.character
-
-// Static Values
-public value MenuControl_value1 = 0;
-public value MenuControl_value2 = 0;
-public value MenuControl_value3 = 0;
-public value MenuControl_value4 = 0;
-public value MenuControl_value5 = 0;
-public value MenuControl_value6 = 0;
-
-private alias BGAnimation_value0 : BGAnimation_currentPreview
-private alias MenuControl_value1 : MenuControl_optionsMenuCounter
-private alias MenuControl_value2 : MenuControl_optionsMenuOpen
-private alias MenuControl_value3 : MenuControl_debugModeCounter
-private alias MenuControl_value4 : MenuControl_emeraldCodeCounter
-private alias MenuControl_value5 : MenuControl_continueCodeCounter
-private alias MenuControl_value6 : MenuControl_PPZCodeCounter
-
-// Tables
+reserve function KEH_Button_Character
+reserve function KEH_Button_Radar
+reserve function KEH_Button_SoundTest
+reserve function KEH_Button_MusicSwitch
+reserve function KEH_Button_RadarStyle
 
 
-
-
-// This table holds data for every stage with six values for every stage, 
-// -> First entry is menu table the stage option is on
-// -> Second is what number this one is on the list, from top to bottom
-// -> Third is the active stage list the stage is on
-// -> Fourth is the stage's position in the stage list
-// -> Fifth is the menu entry of what is on the opposite side of this selection, like how MTZ is to the right of EHZ and vice versa
-// -> Sixth is the icon the entry uses
-
-public table MenuControl_EntryTable
-	MENU_1, 2,  REGULAR_STAGE, 0, 14, 1		
-	MENU_1, 8,  REGULAR_STAGE, 1, 17, 2	
-	MENU_1, 14,  REGULAR_STAGE, 2, 18, 3		
-	MENU_1, 20,  REGULAR_STAGE, 3, 19, 4		
-	MENU_1, 26,  REGULAR_STAGE, 3, 19, 5		
-end table
-
-
-function Sega_Background
-	//Background
-	object.value22++
-	object.value22 %= 1
-	if object.value22 == 0
-		object.value21++
-		object.value21 %= 128
-	end if
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 128
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 -= 128
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 -= 256
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 256
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 384
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
-	temp0 = object.value21
-	temp1 = object.value21
-	temp1 -= 10000
-	temp1 += 512
-	while temp1 < 999
-		while temp0 < screen.ysize
-			DrawSpriteScreenXY(2, temp1, temp0)
-			temp0 += 32
-			temp1 += 32
-		loop
-	//temp0 = object.value21
-
-	temp0 -= 10000
-	loop
+function KEH_Button_Character
+	saved.character++
+	saved.character &= 1
+	
+	switch saved.character
+	case 0
+		EditMenuEntry(MENU_1, "KNUCKLES", 2, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "TIKAL", 2, true)
+		break
+		
+	end switch
+	
+	WriteSaveRAM()
+	
+	KEH.menusel = MENUSEL_NULL
 end function
 
 
+function KEH_Button_Radar
+	saved.radar++
+	saved.radar &= 1
+	
+	switch saved.radar
+	case 0
+		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "OFF", 8, true)
+		break
+	end switch
+	
+	WriteSaveRAM()
+	
+	KEH.menusel = MENUSEL_NULL
+end function
+
+
+function KEH_Button_SoundTest
+	KEH.menusel = MENUSEL_NULL
+end function
+
+
+function KEH_Button_MusicSwitch
+	KEH.menusel = MENUSEL_NULL
+end function
+
+
+function KEH_Button_RadarStyle
+	saved.radarstyle++
+	saved.radarstyle %= 2
+	
+	switch saved.radarstyle
+	case 0
+		EditMenuEntry(MENU_1, "NEW", 26, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "OLD", 26, true)
+		break
+		
+	end switch
+	
+	WriteSaveRAM()
+	
+	KEH.menusel = MENUSEL_NULL
+end function
+
 event ObjectMain
-
-	// Setup the HexNo object
-	object[+1].xpos = screen.xcenter
-	object[+1].xpos += 118
-
+	
 	switch object.state
-	case STATE_INIT
-		menuControl.fadeValue = 320
-		SetScreenFade(0, 0, 0, menuControl.fadeValue)
-		object[+1].ypos = 160
-		object[+1].priority = PRIORITY_ACTIVE
+	case OPTIONS_INIT
+		KEH.timer = 320
+		KEH.usingTouch = false
+		
+		tileLayer[1].scrollSpeed = -0x10000
+		hParallax[0].scrollSpeed = -0x10000
+		
+		SetScreenFade(0, 0, 0, KEH.timer)
 		object.state++
 		break
 
-	case STATE_FADEIN
-		if menuControl.fadeValue > 0
-			menuControl.fadeValue -= 16
+	case OPTIONS_FADEIN
+		if KEH.timer > 0
+			KEH.timer -= 16
 		else
 			PlayMusic(0)
 			object.state++
 		end if
-		SetScreenFade(0, 0, 0, menuControl.fadeValue)
+		
+		SetScreenFade(0, 0, 0, KEH.timer)
 		break
 
-	case STATE_MAIN
-		// Don't do any of this if the options menu is open
-		if MenuControl_optionsMenuOpen == 0
+	case OPTIONS_MAIN
+		if KEH.usingTouch == false
+			KEH.menusel += inputpress.down
+			KEH.menusel -= inputpress.up
 
-			if inputpress.down == true
+			if KEH.menusel > 4
+				KEH.menusel = 0
+			end if
 
-
-					menuControl.currentSelection++
-	
-				menuControl.scrollDelayDown %= 4
-
+			if KEH.menusel < 0
+				KEH.menusel = 4
+			end if
+			
+			temp0 = inputpress.left
+			temp0 |= inputpress.right
+			
+			if temp0 == true
+				temp0 = KEH_Button_Character
+				temp0 += KEH.menusel
+				CallFunction(temp0)
+			end if
+			
+			if inputPress.buttonB == true
+				object.state = OPTIONS_EXIT
+			end if
+			
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > -1
+				// Activate touch controls, hide the Knuckles cursor
+				KEH.usingTouch = true
+				KEH.menusel = MENUSEL_NULL
+			end if
+		else
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Touch inputs, including the null buttons
+			
+			// Left bounds
+			KEH.buttonLeft = screen.xcenter
+			KEH.buttonLeft -= 149
+			
+			// Right bounds
+			KEH.buttonRight = KEH.buttonLeft
+			KEH.buttonRight += 300
+			
+			// Other values
+			KEH.buttonTop = 3
+			KEH.buttonBottom = 51
+			KEH.buttonFunc = KEH_Button_Character
+			
+			// Cycle through, and look at all four buttons
+			KEH.buttonID = 0
+			while KEH.buttonID < 5
+				CallFunction(KEH_RunButton)
+				
+				KEH.buttonTop += 48
+				KEH.buttonBottom += 48
+				KEH.buttonID++
+				KEH.buttonFunc++
+			loop
+			
+			// Check for the exit button
+			CheckTouchRect(10, 190, 60, 220)
+			
+			if checkResult > -1
+				KEH.menusel = 5
 			else
-
-				if inputpress.up == true
-						menuControl.currentSelection--
-					menuControl.scrollDelayUp %= 4
+				if temp3 < 0
+					if KEH.menusel == 5
+						object.state = OPTIONS_EXIT
+						KEH.menusel = MENUSEL_NULL
+					end if
 				else
-					menuControl.scrollDelayUp = 0
-					menuControl.scrollDelayDown = 0
-				end if
-
-			end if
-
-			if menuControl.currentSelection > 4
-				menuControl.currentSelection = 0
-			end if
-
-			if menuControl.currentSelection < 0
-				menuControl.currentSelection = 4
-			end if
-
-
-			switch menuControl.currentSelection
-			case 0
-				if inputpress.left == true
-					saved.character--
-					if saved.character < 0
-						saved.character = 1
+					if KEH.menusel == 5
+						KEH.menusel = MENUSEL_NULL
 					end if
-					temp1 = 1
 				end if
-				if inputpress.right == true
-					saved.character++
-					saved.character %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.character
-						case 0
-							EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "TIKAL", 2, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			case 1
-				if inputpress.left == true
-					saved.radar--
-					if saved.radar < 0
-						saved.radar = 1
-					end if
-					temp1 = 1
-				end if
-				if inputpress.right == true
-					saved.radar++
-					saved.radar %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.radar
-						case 0
-							EditMenuEntry(MENU_1, " ON ", 8, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "OFF", 8, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			case 4
-				if inputpress.left == true
-					saved.radarstyle--
-					if saved.radarstyle < 0
-						saved.radarstyle = 1
-					end if
-					temp1 = 1
-				end if
-				if inputpress.right == true
-					saved.radarstyle ++
-					saved.radarstyle %= 2
-					temp1 = 1
-				end if
-				if temp1 == 1
-					switch saved.radarstyle
-						case 0
-							EditMenuEntry(MENU_1, "NEW", 26, 1)
-							WriteSaveRAM()
-							break
-						case 1
-							EditMenuEntry(MENU_1, "OLD", 26, 1)
-							WriteSaveRAM()
-							break
-					end switch
-				end if
-				break
-			end switch
-
-
-			temp0 = menuControl.currentSelection
-			temp0 *= 6
-			temp0++
-			GetTableValue(temp2, temp0, MenuControl_EntryTable)
-			temp0 += 3
-			GetTableValue(temp1, temp0, MenuControl_EntryTable)
-
-
-
-			temp0 = menuControl.currentSelection
-			temp0 *= 6
-			GetTableValue(temp1, temp0, MenuControl_EntryTable)
-			temp0++
-
-			if temp1 == MENU_1
-				menu2.selection = -1
-				GetTableValue(menu1.selection, temp0, MenuControl_EntryTable)
-			else // MENU_2
-				menu1.selection = -1
-				GetTableValue(menu2.selection, temp0, MenuControl_EntryTable)
 			end if
-
-			// Set the preview image to what it should be
-			temp0 += 4
+			
+			temp0 = inputPress.up
+			temp0 |= inputPress.down
+			temp0 |= inputPress.left
+			temp0 |= inputPress.right
+			temp0 |= inputPress.start
+			temp0 |= inputPress.buttonA
+			temp0 |= inputPress.buttonB
+			temp0 |= inputPress.buttonC
+			temp0 ^= true
+			KEH.usingTouch = temp0
 		end if
+		
+		menu1.selection = KEH.menusel
+		menu1.selection *= 6
+		menu1.selection += 2
 		break
-
-	case STATE_LOADLEVEL
-		if menuControl.fadeValue < 256
-			music.volume -= 10
-			menuControl.fadeValue += 16
-			SetScreenFade(0, 0, 0, menuControl.fadeValue)
+		
+	case OPTIONS_EXIT
+		if KEH.timer < 256
+			music.volume -= 2
+			KEH.timer += 8
+			SetScreenFade(0, 0, 0, KEH.timer)
 		else
 			StopMusic()
-			temp0 = menuControl.currentSelection
-			temp0 *= 6
-			temp0 += 2
-			GetTableValue(temp1, temp0, MenuControl_EntryTable)
-			temp0++
-			GetTableValue(temp2, temp0, MenuControl_EntryTable)
-			stage.activeList = temp1
-			stage.listPos = temp2
-			LoadStage()
-			SetScreenFade(0, 0, 0, 255)
+			menu.bootMode = BOOTMODE_MAINMENU
+			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+			SetScreenFade(0, 0, 0, 0xFF)
 		end if
-		break
-
-	case STATE_LOADSPECIAL
-		if menuControl.fadeValue < 768
-			music.volume -= 10
-			menuControl.fadeValue += 8
-			SetScreenFade(208, 255, 224, menuControl.fadeValue)
-		else
-			StopMusic()
-			temp0 = menuControl.currentSelection
-			temp0 *= 6
-			temp0 += 2
-			GetTableValue(temp1, temp0, MenuControl_EntryTable)
-			temp0++
-			GetTableValue(temp2, temp0, MenuControl_EntryTable)
-			stage.activeList = temp1
-			stage.listPos = temp2
-			LoadStage()
-			SetScreenFade(208, 255, 224, 255)
-		end if
-		break
-	case STATE_BACKHOME
-			if menuControl.fadeValue < 768
-				music.volume -= 2
-				menuControl.fadeValue += 8
-				SetScreenFade(0, 0, 0, menuControl.fadeValue)
-			else
-				StopMusic()
-				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
-				SetScreenFade(0, 0, 0, 255)
-			end if
 		break
 
 	end switch
-	if inputPress.buttonB == 1
-		object.state = STATE_BACKHOME
-	end if
+	
 end event
 
 
 event ObjectDraw
-	CallFunction(Sega_Background)
+	
+	// Draw the text
 	temp0 = screen.xcenter
 	DrawMenu(MENU_1, screen.xcenter, 12)
+	
 	SetActivePalette(3, 0, screen.ysize)
+	
+	// Now, draw all the yellow boxes
 	temp1 = 3
 	temp0 = 0
 	while temp0 < 5
@@ -417,95 +264,119 @@ event ObjectDraw
 		temp1 += 48
 		temp0++
 	loop
-
-	temp1 = 3
-	temp0 = 0
-	while temp0 < menuControl.currentSelection
-		temp1 += 48
-		temp0++
-	loop
+	
+	// Find the position of the current selection, and draw a red box on top of there too
+	temp1 = KEH.menusel
+	temp1 *= 48
+	temp1 += 3
 	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	
+	if KEH.usingTouch == true
+		// The arrows don't actually do or mean anything, but they help convey that the current option is selected
+		DrawSpriteScreenXY(2, screen.xcenter, temp1)
+		DrawSpriteScreenXY(3, screen.xcenter, temp1)
+		
+		// Back button
+		checkEqual(KEH.menusel, 5)
+		checkResult += 4
+		DrawSpriteScreenXY(checkResult, 38, 202)
+	end if
+	
 end event
 
 
 event ObjectStartup
 
 	// Load the sprite sheet
-	// No need to setup sprite frames since the menu will handle them automatically
 	LoadSpriteSheet("KEHMenu/Options.gif")
-	SpriteFrame(-141, 0, 282, 42, 129, 1)
-	SpriteFrame(-141, 0, 282, 42, 129, 173)
-	SpriteFrame(0, 0, 32, 128, 129, 44)
-
+	
+	// No need to setup sprite frames for the text since the menu system will handle them automatically
+	
+	SpriteFrame(-141, 0, 282, 42, 129, 1)   // 0 - Yellow box
+	SpriteFrame(-141, 0, 282, 42, 129, 173) // 1 - Red box
+	
+	// Touch control Frames
+	SpriteFrame(-175, 12, 20, 20, 162, 44) // 2 - Left, Blue
+	SpriteFrame(165, 12, 20, 20, 183, 44)  // 3 - Right, Blue
+	
+	SpriteFrame(-20, -10, 40, 20, 204, 44)  // 4 - Blue left right arrow
+	SpriteFrame(-20, -10, 40, 20, 204, 65)  // 5 - Red left right arrow
+	
+	// No Options objects are placed directly into the scene normally, 
+//	foreach (TypeName[Options], arrayPos0, ALL_ENTITIES)
+//		object[arrayPos0].priority = PRIORITY_ACTIVE
+//	next
+	
 	LoadPalette("Options.act", 3, 0, 0, 256)
 
 	if stage.actNum < 3
 		options.stageSelectFlag = true
 	end if
 
-	options.touchControls = 0
+	options.touchControls = false
 
-	SetMusicTrack("Options.ogg", 0, 1)
+	SetMusicTrack("Options.ogg", 0, true)
 	
 	// Setup menu 1 (left column)
 	SetupMenu(MENU_1, 0, 1, 2)
 
 	// Add the entries
-	AddMenuEntry(MENU_1, "*@@PLAYER SELECT@@*", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "KNUCKLES", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "*@@RADAR@@*", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ON ", 1)
-	AddMenuEntry(MENU_1, "    ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "*@@SOUND TEST@@*", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "NOT AVAILABLE", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "*@@MUSIC SWITCH@@*", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "NOT AVAILABLE", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "*@@RADAR SPRITES@@*", 1)
-	AddMenuEntry(MENU_1, " ", 1)
-	AddMenuEntry(MENU_1, "NEW", 1)
+	AddMenuEntry(MENU_1, "*@@PLAYER SELECT@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "KNUCKLES", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@RADAR@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@ON@", true)
+	AddMenuEntry(MENU_1, "@@@@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@SOUND TEST@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@MUSIC SWITCH@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@RADAR SPRITES@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NEW", true)
 
-	menu1.selection = 1
+	menu1.selection = 2
+	menu2.selection = -1
 
 	switch saved.character
-		case 0
-			EditMenuEntry(MENU_1, "KNUCKLES", 2, 1)
-			break
-		case 1
-			EditMenuEntry(MENU_1, "TIKAL", 2, 1)
-			break
+	case 0
+		EditMenuEntry(MENU_1, "KNUCKLES", 2, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "TIKAL", 2, true)
+		break
 	end switch
 
 	switch saved.radar
-		case 0
-			EditMenuEntry(MENU_1, " ON ", 8, 1)
-			break
-		case 1
-			EditMenuEntry(MENU_1, "OFF", 8, 1)
-			break
+	case 0
+		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "OFF", 8, true)
+		break
 	end switch
 
 	switch saved.radarstyle
-		case 0
-			EditMenuEntry(MENU_1, "NEW", 26, 1)
-			break
-		case 1
-			EditMenuEntry(MENU_1, "OLD", 26, 1)
-			break
+	case 0
+		EditMenuEntry(MENU_1, "NEW", 26, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "OLD", 26, true)
+		break
 	end switch
 
 end event
@@ -515,6 +386,8 @@ event RSDKDraw
 end event
 
 event RSDKLoad
-	LoadSpriteSheet("Global/Display.gif")
-	SpriteFrame(-16, -16, 32, 32, 1, 143)
+	LoadSpriteSheet("KEHMenu/Options.gif")
+	SpriteFrame(0, 0, 32, 128, 129, 44)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

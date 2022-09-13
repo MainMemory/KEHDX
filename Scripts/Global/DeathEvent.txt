@@ -12,6 +12,10 @@ private alias object.value1 : deathEvent.leftTextPos
 private alias object.value2 : deathEvent.rightTextPos
 private alias object.value3 : deathEvent.timer
 
+// Menu Boot Mode Aliases
+private alias 3 : BOOTMODE_STAGESELECT
+
+
 event ObjectMain
 
 	switch object.state
@@ -41,7 +45,8 @@ event ObjectMain
 				recStage = stage.listPos
 				stage.activeList = PRESENTATION_STAGE
 				if options.vsMode == false
-					stage.listPos = 4
+					stage.listPos = 0
+					menu.bootMode = BOOTMODE_STAGESELECT
 				else
 					stage.listPos = 3
 					if vs.playerID == 0
@@ -131,7 +136,8 @@ event ObjectMain
 			stage.milliSeconds = 0
 			stage.seconds = 0
 			stage.minutes = 0
-			stage.listPos = 4
+			stage.listPos = 0
+			menu.bootMode = BOOTMODE_STAGESELECT
 			stage.activeList = PRESENTATION_STAGE
 		end if
 		SetScreenFade(0, 0, 0, deathEvent.timer)
