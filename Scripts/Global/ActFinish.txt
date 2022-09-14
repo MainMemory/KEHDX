@@ -335,7 +335,7 @@ event ObjectMain
 			temp0 = inputpress.start
 			temp0 |= inputpress.buttonA
 			temp0 |= inputpress.buttonC
-			if temp0 == true
+			if temp0 == 1
 				switch object.menuselection
 				case 0
 					object.NEXTSTAGE = stage.listPos
@@ -344,8 +344,9 @@ event ObjectMain
 					break
 					
 				case 1
-					object.NEXTSTAGE = 4
+					object.NEXTSTAGE = 0
 					object.STAGETYPE = PRESENTATION_STAGE
+					menu.bootMode = BOOTMODE_STAGESELECT
 					break
 					
 				case 2
