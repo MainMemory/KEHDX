@@ -1,0 +1,309 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: HPZ Setup Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+// Cutscene values
+private alias object.value0 : object.timer
+
+// Animation values, same as base HPZSetup
+private alias object.value1 : object.paletteTimer
+private alias object.value2 : object.orb1AniTileDelay
+private alias object.value3 : object.orb1AniTileFrame
+private alias object.value4 : object.orb2AniTileDelay
+private alias object.value5 : object.orb2AniTileFrame
+private alias object.value6 : object.orb3AniTileDelay
+private alias object.value7 : object.orb3AniTileFrame
+
+private alias 0 : CUTSCENE_FADEIN
+private alias 1 : CUTSCENE_WALKRIGHT
+private alias 2 : CUTSCENE_PAUSE
+private alias 3 : CUTSCENE_PAN
+private alias 4 : CUTSCENE_JUMP
+private alias 5 : CUTSCENE_BREAKROCK
+private alias 6 : CUTSCENE_POSE
+private alias 7 : CUTSCENE_FADEOUT
+
+// Player Aliases
+private alias object.state : player.state
+private alias object.speed : player.speed
+private alias object.animation : player.animation
+private alias object.tileCollisions : player.tileCollisions
+private alias object.gravity : player.gravity
+
+private alias object.right : player.right
+private alias object.jumpHold : player.jumpHold
+
+// ========================
+// Tables
+// ========================
+
+public table HPZSetup_greenOrbFramesTable1
+	768, 18, 770, 9, 772, 18, 770, 9
+end table
+
+public table HPZSetup_purpleOrbFramesTable1
+	774, 18, 776, 9, 778, 18, 776, 9
+end table
+
+public table HPZSetup_greenOrbFramesTable2
+	780, 18, 783, 9, 786, 18, 783, 9
+end table
+
+public table HPZSetup_purpleOrbFramesTable2
+	789, 18, 792, 9, 795, 18, 792, 9
+end table
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	object.paletteTimer++
+	if object.paletteTimer == 5
+		object.paletteTimer = 0
+		RotatePalette(0, 185, 188, true)
+	end if
+	
+	if object.orb1AniTileDelay < 2
+		GetTableValue(temp0, object.orb1AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		Copy16x16Tile(738, temp0)
+		temp0++
+		Copy16x16Tile(739, temp0)
+		GetTableValue(temp0, object.orb1AniTileFrame, HPZSetup_purpleOrbFramesTable1)
+		Copy16x16Tile(744, temp0)
+		temp0++
+		Copy16x16Tile(745, temp0)
+		GetTableValue(temp0, object.orb1AniTileFrame, HPZSetup_greenOrbFramesTable2)
+		Copy16x16Tile(750, temp0)
+		temp0++
+		Copy16x16Tile(751, temp0)
+		temp0++
+		Copy16x16Tile(752, temp0)
+		GetTableValue(temp0, object.orb1AniTileFrame, HPZSetup_purpleOrbFramesTable2)
+		Copy16x16Tile(759, temp0)
+		temp0++
+		Copy16x16Tile(760, temp0)
+		temp0++
+		Copy16x16Tile(761, temp0)
+		object.orb1AniTileFrame++
+		GetTableValue(object.orb1AniTileDelay, object.orb1AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		object.orb1AniTileFrame++
+		object.orb1AniTileFrame &= 7
+	else
+		object.orb1AniTileDelay--
+	end if
+	
+	if object.orb2AniTileDelay < 2
+		GetTableValue(temp0, object.orb2AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		Copy16x16Tile(740, temp0)
+		temp0++
+		Copy16x16Tile(741, temp0)
+		GetTableValue(temp0, object.orb2AniTileFrame, HPZSetup_purpleOrbFramesTable1)
+		Copy16x16Tile(746, temp0)
+		temp0++
+		Copy16x16Tile(747, temp0)
+		GetTableValue(temp0, object.orb2AniTileFrame, HPZSetup_greenOrbFramesTable2)
+		Copy16x16Tile(753, temp0)
+		temp0++
+		Copy16x16Tile(754, temp0)
+		temp0++
+		Copy16x16Tile(755, temp0)
+		GetTableValue(temp0, object.orb2AniTileFrame, HPZSetup_purpleOrbFramesTable2)
+		Copy16x16Tile(762, temp0)
+		temp0++
+		Copy16x16Tile(763, temp0)
+		temp0++
+		Copy16x16Tile(764, temp0)
+		object.orb2AniTileFrame++
+		GetTableValue(object.orb2AniTileDelay, object.orb2AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		object.orb2AniTileFrame++
+		object.orb2AniTileFrame &= 7
+	else
+		object.orb2AniTileDelay--
+	end if
+	
+	if object.orb3AniTileDelay < 2
+		GetTableValue(temp0, object.orb3AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		Copy16x16Tile(742, temp0)
+		temp0++
+		Copy16x16Tile(743, temp0)
+		GetTableValue(temp0, object.orb3AniTileFrame, HPZSetup_purpleOrbFramesTable1)
+		Copy16x16Tile(748, temp0)
+		temp0++
+		Copy16x16Tile(749, temp0)
+		GetTableValue(temp0, object.orb3AniTileFrame, HPZSetup_greenOrbFramesTable2)
+		Copy16x16Tile(756, temp0)
+		temp0++
+		Copy16x16Tile(757, temp0)
+		temp0++
+		Copy16x16Tile(758, temp0)
+		GetTableValue(temp0, object.orb3AniTileFrame, HPZSetup_purpleOrbFramesTable2)
+		Copy16x16Tile(765, temp0)
+		temp0++
+		Copy16x16Tile(766, temp0)
+		temp0++
+		Copy16x16Tile(767, temp0)
+		object.orb3AniTileFrame++
+		GetTableValue(object.orb3AniTileDelay, object.orb3AniTileFrame, HPZSetup_greenOrbFramesTable1)
+		object.orb3AniTileFrame++
+		object.orb3AniTileFrame &= 7
+	else
+		object.orb3AniTileDelay--
+	end if
+	
+	// Cutscene management
+	switch object.state
+	case CUTSCENE_FADEIN
+		object.alpha -= 8
+		if object.alpha < 1
+			object.alpha = 0
+			object.timer = 0
+			
+			CheckEqual(player[0].gravity, GRAVITY_GROUND)
+			object.state += checkResult
+		end if
+		break
+		
+	case CUTSCENE_WALKRIGHT
+		player[0].right = true
+		object.timer++
+			
+		//Stop that mf
+		if object.timer >= 170
+			player[0].right = false
+			player[0].speed = 0
+			
+			object.timer = 0
+			object.state++
+		end if
+		break
+		
+	case CUTSCENE_PAUSE
+		object.timer++
+		
+		CheckEqual(object.timer, 10)
+		object.state += checkResult
+		break
+		
+	case CUTSCENE_PAN
+		screen[0].cameraEnabled = false
+		screen[0].xoffset++
+		
+		object.timer++
+		
+		CheckEqual(object.timer, 86)
+		object.state += checkResult
+		break
+		
+	case CUTSCENE_JUMP
+		object[0].right = true
+		object[0].state = Player_Action_Jump
+		object[0].jumpHold = true
+		
+		object.timer = 0
+		object.state++
+		// [Fallthrough]
+	case CUTSCENE_BREAKROCK
+		CheckGreater(object[0].xpos, object[34].xpos)
+		object.state += checkResult
+		break
+		
+	case CUTSCENE_POSE
+		object.timer++
+		
+		switch object.timer
+		case 0
+			// Stop moving
+			object[0].right = false
+			object[0].speed = 0
+			break
+			
+		case 50
+			// Start the win pose
+			player[0].animation = 39
+			player[0].state = Player_State_Static
+			break
+			
+		case 140
+			// I'm outta here!
+			player[0].state = Player_Action_Jump
+			player[0].tileCollisions = false
+			break
+			
+		case 170
+			// Next state transition, half a second later
+			object.timer = 0
+			object.state++
+			break
+			
+		end switch
+		break
+		
+	case CUTSCENE_FADEOUT
+		object.alpha += 3
+		music.volume -= 2
+		if object.alpha == 255
+			// On to the real stage!
+			
+			stage.listPos = 9
+			LoadStage()
+			stage.activeList = REGULAR_STAGE
+			
+			StopMusic()
+		end if
+		break
+		
+	end switch
+end event
+
+
+event ObjectDraw
+	DrawRect(0, 0, screen.xsize, screen.ysize, 0, 0, 0, object.alpha)
+end event
+
+
+event ObjectStartup
+	SetMusicTrack("Extra.ogg", 0, 0xE9CC)
+	PlayMusic(0)
+	
+	object[0].controlmode = -1
+	
+	if stage.player2Enabled == true
+		object[1].xpos = object[0].xpos
+	end if
+	
+	HPZCheck = true
+	
+	object[10].type = TypeName[HPZ Cutscene Setup]
+	object[10].priority = PRIORITY_ACTIVE
+	object[10].drawOrder = 6
+	object[10].orb2AniTileFrame = 2
+	object[10].orb3AniTileFrame = 4
+	object[10].state = 0
+	object[10].alpha = 255
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 143)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

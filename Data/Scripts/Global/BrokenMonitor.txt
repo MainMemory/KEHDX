@@ -1,0 +1,362 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: Broken Monitor Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+private alias object.value0 : object.contentsPos.y
+private alias object.value1 : object.timer
+private alias object.value3 : object.rewardPlayer
+private alias object.value4 : object.drawIndex
+
+// Monitor type aliases
+private alias 0  : MONITOR_BLANK
+private alias 1  : MONITOR_RINGS
+private alias 2  : MONITOR_SHIELD_BLUE
+private alias 3  : MONITOR_INVINCIBILITY
+private alias 4  : MONITOR_SPEEDSHOES
+private alias 5  : MONITOR_RING
+private alias 6  : MONITOR_RING_1
+private alias 7  : MONITOR_RING_5
+private alias 8  : MONITOR_RING_15
+private alias 9  : MONITOR_UNUSED // Seven ate nine, KEHDX seems to skip over this?
+private alias 10 : MONITOR_RING_40
+private alias 11 : MONITOR_RING_20
+private alias 12 : MONITOR_EGGMAN
+private alias 13 : MONITOR_TELEPORT
+private alias 14 : MONITOR_RANDOM
+private alias 14 : MONITOR_DEBUG_SPIKES // This is strange... spikes shouldn't be here... yet is is.
+private alias 15 : MONITOR_DEBUG_SHIELD
+private alias 16 : MONITOR_DEBUG_EMERALDS
+private alias 17 : MONITOR_COUNT
+
+// Monitor states
+private alias 0 : MONITOR_STATE_RISE
+private alias 1 : MONITOR_STATE_FADE
+private alias 2 : MONITOR_STATE_IDLE
+
+// VSGame States
+private alias 1 : VSGAME_TELEPORT
+
+// Player aliases
+private alias object.xpos    : player.xpos
+private alias object.ypos    : player.ypos
+private alias object.speed   : player.speed
+private alias object.value0  : player.rings
+private alias object.value3  : player.drownTimer
+private alias object.value4  : player.drownLevel
+private alias object.value6  : player.speedShoesTimer
+private alias object.value7  : player.invincibleTimer
+private alias object.value16 : player.isSidekick	// false if player 1, true if player 2
+private alias object.value37 : player.shield
+
+// Shields
+private alias 0 : SHIELD_NONE
+private alias 1 : SHIELD_NORMAL
+private alias 2 : SHIELD_BUBBLE
+private alias 3 : SHIELD_FIRE
+private alias 4 : SHIELD_LIGHTNING
+
+// Super States
+private alias 1 : SUPERSTATE_SUPER
+
+// Game Modes
+private alias 2 : MODE_TIMEATTACK
+
+// Music Events
+private alias 25 : SLOT_MUSICEVENT_CHANGE
+
+private alias  2 : MUSICEVENT_TRANSITION
+
+// Tracks
+private alias 2 : TRACK_INVINCIBLE
+
+// ========================
+// Function Declarations
+// ========================
+reserve function BrokenMonitor_DummyFunction
+reserve function BrokenMonitor_AddRing
+
+// ========================
+// Static Values
+// ========================
+public value BrokenMonitor_ResetDrownMusic = 0
+
+
+public function BrokenMonitor_DummyFunction
+	// Do nothing!
+end function
+
+function BrokenMonitor_AddRing
+	if ringPan == false
+		PlaySfx(SfxName[Ring L], false)
+		SetSfxAttributes(SfxName[Ring L], -1, -100)
+		ringPan = true
+	else
+		PlaySfx(SfxName[Ring R], false)
+		SetSfxAttributes(SfxName[Ring R], -1, 100)
+		ringPan = false
+	end if
+	
+	if player[currentPlayer].rings > 999
+		player[currentPlayer].rings = 999
+	end if
+	
+	if player[0].rings >= ringExtraLife
+		if options.gameMode != 2
+			player.lives++
+			PlaySfx(SfxName[Life], 0)
+			PauseMusic()
+			ResetObjectEntity(25, TypeName[Music Event], 2, 0, 0)
+			object[25].priority = PRIORITY_ACTIVE
+		end if
+		
+		ringExtraLife += 100
+		if ringExtraLife > 300
+			ringExtraLife = 1000
+		end if
+	end if
+end function
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	if object.propertyValue == MONITOR_TELEPORT
+		if stage.listPos != 13
+			temp0 = object.ixpos
+			temp0 += 30	
+			stage.newXBoundary2 = temp0
+			
+			foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+				temp0 = object[currentPlayer].collisionRight
+				temp0 <<= 16
+				temp0 += object[currentPlayer].xpos
+				temp1 = stage.curXBoundary2
+				temp1 <<= 16
+				if temp0 > temp1
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].speed = 0
+					object[currentPlayer].xpos = temp1
+					temp0 = object[currentPlayer].collisionRight
+					temp0 <<= 16
+					object[currentPlayer].xpos -= temp0
+				end if
+			next
+		end if
+		
+		// If the player's done with the level, then clear
+		if object[9].state == 3
+			object.type = TypeName[Blank Object]
+		end if
+	end if
+	
+	switch object.state
+	case MONITOR_STATE_RISE
+		if object.timer < 0
+			object.contentsPos.y += object.timer
+			object.timer += 0x1800
+		else
+			object.timer = 0
+		end if
+
+		if object.timer == 0
+			object.state = MONITOR_STATE_FADE
+			object.inkEffect = INK_ALPHA
+			currentPlayer = object.rewardPlayer
+			switch object.propertyValue
+			case MONITOR_BLANK
+			default
+				break
+
+			case MONITOR_RINGS
+				player[currentPlayer].rings += 10
+				CallFunction(BrokenMonitor_AddRing)
+				break
+
+			case MONITOR_SHIELD_BLUE
+				PlaySfx(SfxName[Blue Shield], false)
+				arrayPos0 = playerCount
+				arrayPos0 += currentPlayer
+				player[currentPlayer].shield = SHIELD_NORMAL
+
+				if Player_superState != SUPERSTATE_SUPER
+					if object[arrayPos0].type != invincibilityType
+						CallFunction(Player_ApplyShield)
+					end if
+				end if
+				break
+
+			case MONITOR_INVINCIBILITY
+				if Player_superState != SUPERSTATE_SUPER
+					arrayPos0 = playerCount
+					arrayPos0 += currentPlayer
+					ResetObjectEntity(arrayPos0, invincibilityType, 0, player[currentPlayer].xpos, player[currentPlayer].ypos)
+					object[arrayPos0].priority = PRIORITY_ACTIVE
+					player[currentPlayer].invincibleTimer = 1260
+					PlayMusic(TRACK_INVINCIBLE)
+				end if
+				break
+
+			case MONITOR_SPEEDSHOES
+				if SpeedUpMusic != 0
+					if player[currentPlayer].speedShoesTimer == 0
+						CallFunction(SpeedUpMusic)
+					end if
+				end if
+
+				player[currentPlayer].speedShoesTimer = 1320
+				CallFunction(Player_UpdatePhysicsState)
+				break
+
+			case MONITOR_RING_1
+				object[currentPlayer].value0++
+				CallFunction(BrokenMonitor_AddRing)
+				break
+				
+			case MONITOR_RING_5
+				object[currentPlayer].value0 += 5
+				CallFunction(BrokenMonitor_AddRing)
+				break
+
+			case MONITOR_RING_15
+				object[currentPlayer].value0 += 15
+				CallFunction(BrokenMonitor_AddRing)
+				break
+				
+			case MONITOR_RING_40
+				object[currentPlayer].value0 += 40
+				CallFunction(BrokenMonitor_AddRing)
+				break
+
+			case MONITOR_RING_20
+				object[currentPlayer].value0 += 20
+				CallFunction(BrokenMonitor_AddRing)
+				break
+
+			case MONITOR_EGGMAN
+				CallFunction(Player_Hit)
+				break
+
+			case MONITOR_TELEPORT
+				if HPZCheck == true
+					temp1 = 5
+				else
+					temp1 = 3
+				end if
+				
+				if EmeraldManager_P1Collected < temp1
+					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
+					object[tempObjectPos].state = VSGAME_TELEPORT
+					PlaySfx(SfxName[Teleport], false)
+				end if
+				break
+
+			case MONITOR_DEBUG_SPIKES
+				PlaySfx(SfxName[Spike], false)
+				options.spikeBehavior ^= true
+				break
+
+			case MONITOR_DEBUG_SHIELD
+				PlaySfx(SfxName[Blue Shield], false)
+				options.shieldType++
+				options.shieldType &= 3
+				arrayPos0 = playerCount
+				currentPlayer = 0
+				CallFunction(Player_ApplyShield)
+				break
+
+			case MONITOR_DEBUG_EMERALDS
+				// Toggle emerald state - give the player all emeralds if they don't have them already but give them none if they have all
+				if specialStage.emeralds == 127
+					specialStage.emeralds = 0
+				else
+					specialStage.emeralds = 127
+				end if
+				PlaySfx(SfxName[Transform], false)
+				break
+			end switch
+		end if
+		break
+
+	case MONITOR_STATE_FADE
+		object.timer++
+		if object.timer == 30
+			object.timer = 0
+			object.state = MONITOR_STATE_IDLE
+			object.propertyValue = MONITOR_BLANK
+			if object.priority != 4
+				object.priority = PRIORITY_BOUNDS
+			end if
+		else
+			if object.timer > 14
+				object.alpha -= 16
+			end if
+		end if
+		break
+
+	case MONITOR_STATE_IDLE
+		break
+	end switch
+end event
+
+
+event ObjectDraw
+	if object.drawIndex == 0
+		DrawSprite(0)
+		AddDrawListEntityRef(5, object.entityPos)
+	else
+		if object.propertyValue > 0
+			DrawSpriteFX(object.propertyValue, FX_INK, object.xpos, object.value0)
+		end if
+	end if
+	object.drawIndex ^= 1
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("Global/Items.gif")
+	SpriteFrame(-16, 0, 32, 16, 18, 34)
+	SpriteFrame(-8, -9, 16, 14, 18, 66)
+	SpriteFrame(-8, -9, 16, 14, 35, 66)
+	SpriteFrame(-8, -9, 16, 14, 18, 81)
+	SpriteFrame(-8, -9, 16, 14, 35, 81)
+	SpriteFrame(-8, -9, 16, 14, 18, 96)
+	SpriteFrame(-8, -9, 16, 14, 35, 96)
+	SpriteFrame(-8, -9, 16, 14, 18, 111)
+	SpriteFrame(-8, -9, 16, 14, 35, 111)
+	SpriteFrame(-8, -9, 16, 14, 18, 141)
+	SpriteFrame(-8, -9, 16, 14, 35, 126)
+	SpriteFrame(-8, -9, 16, 14, 18, 126)
+	SpriteFrame(-8, -9, 16, 14, 35, 141)
+	SpriteFrame(-8, -9, 16, 14, 18, 156)
+	SpriteFrame(-8, -9, 16, 14, 35, 156)
+	SpriteFrame(-8, -9, 16, 14, 18, 171)
+	SpriteFrame(-8, -9, 16, 14, 35, 171)
+
+	BrokenMonitor_ResetDrownMusic = BrokenMonitor_DummyFunction
+	
+	foreach (TypeName[Broken Monitor], arrayPos0, ALL_ENTITIES)
+		if object[arrayPos0].propertyValue == MONITOR_TELEPORT
+			object[arrayPos0].priority = PRIORITY_ALWAYS
+		end if
+	next
+end event
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Items.gif")
+	SpriteFrame(-16, 0, 32, 16, 18, 34)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

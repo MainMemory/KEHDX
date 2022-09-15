@@ -1,0 +1,911 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: HUD Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.flashingTimer
+
+// Player Aliases
+private alias object.xpos : player.xpos
+private alias object.ypos : player.ypos
+
+private alias object.value0 : player.rings
+
+// Game Mode Aliases
+private alias 2 : MODE_TIMEATTACK
+
+// KEHDX Aliases, for a variety of things
+
+private alias object.value1 : EmeraldManager.pingTimer
+private alias object.value2 : EmeraldManager.fadeAmount
+private alias object.value3 : object.xoffset
+
+private alias 102400 : min_dist
+
+public alias saveRAM[200] : saved.radar
+public alias saveRAM[201] : saved.radarstyle
+
+
+// ========================
+// Function Declarations
+// ========================
+
+reserve function EmeraldManager_AddEntity
+reserve function EmeraldManager_AwardEmerald
+reserve function EmeraldManager_AwardBonus
+reserve function EmeraldManager_HUD
+reserve function sqrt
+
+reserve function HUD_Draw_Standard
+
+
+// ========================
+// Static Values
+// ========================
+
+private value EmeraldManager_EntityCount = 0;
+public value EmeraldManager_EmeraldCount = 0;
+public value EmeraldManager_P1Collected = 0;
+private value EmeraldManager_P2Collected = 0;
+private value EmeraldManager_EmeraldTimer = 0;
+private value EmeraldManager_BonusTimer = 0;
+private value EmeraldManager_BonusFrame = -1;
+private value EmeraldManager_GotEmeralds = 0;
+public value EmeraldManager_EndX = 0;
+public value EmeraldManager_EndY = 0;
+
+
+// ========================
+// Tables
+// ========================
+
+private table EmeraldManager_ObjectPool[255]
+
+
+public table EmeraldManager_EmeraldObjects
+	-1, -1, -1, -1, -1
+end table
+
+
+private table EmeraldManager_RadarSprites[5]
+
+
+private table EmeraldManager_RadarScale[5]
+
+
+private table EmeraldManager_ScoreBonuses
+	20000, 15000, 10000, 8000, 6000, 5000, 4000, 3000, 2000, 1000
+end table
+
+
+private table EmeraldManager_DistanceLimits
+	1638400, 921600, 102400, 25600, 9216, -1
+end table
+
+
+// ========================
+// Function Definitions
+// ========================
+
+public function EmeraldManager_AddEntity
+	SetTableValue(arrayPos0, EmeraldManager_EntityCount, EmeraldManager_ObjectPool)
+	EmeraldManager_EntityCount++
+end function
+
+
+private function EmeraldManager_AwardBonus
+	GetTableValue(temp0, EmeraldManager_BonusFrame, EmeraldManager_ScoreBonuses)
+	player.score += temp0
+	EmeraldManager_BonusFrame = -1
+end function
+
+
+public function EmeraldManager_AwardEmerald
+	if HPZCheck == true
+		temp2 = 5
+	else
+		temp2 = 3
+	end if
+	CheckEqual(EmeraldManager_P1Collected, temp2)
+	temp0 = checkResult
+	CheckEqual(EmeraldManager_P2Collected, temp2)
+	temp0 |= checkResult
+	temp0 *= 255
+	temp1 = temp0
+	while temp1 < EmeraldManager_EmeraldCount
+		GetTableValue(arrayPos0, temp1, EmeraldManager_EmeraldObjects)
+		if arrayPos0 == object.entityPos
+			CreateTempObject(TypeName[Chaos Emerald], 0, player[currentPlayer].xpos, player[currentPlayer].ypos)
+			object[tempObjectPos].ypos -= 2097152
+			object[tempObjectPos].state = 2
+			object[tempObjectPos].drawOrder = 5
+			object[tempObjectPos].propertyValue = currentPlayer
+			object[tempObjectPos].inkEffect = INK_ALPHA
+			object[tempObjectPos].priority = PRIORITY_ACTIVE
+			if currentPlayer == 1
+				EmeraldManager_P2Collected++
+			else
+				//EmeraldManager_P1Collected += 3 //Dev Command for checking the results or smth
+				EmeraldManager_P1Collected++
+				
+				// TODO: note that this should be updated when adding mutliplayer
+				if EmeraldManager_P1Collected >= temp2
+					stage.timeEnabled = false
+				end if
+			end if
+			if options.vsMode == 0
+				if EmeraldManager_BonusFrame != -1
+					CallFunction(EmeraldManager_AwardBonus)
+				end if
+				EmeraldManager_BonusFrame = EmeraldManager_EmeraldTimer
+				EmeraldManager_BonusFrame /= 1800
+				if EmeraldManager_BonusFrame > 9
+					EmeraldManager_BonusFrame = -1
+				end if
+				EmeraldManager_BonusTimer = 120
+				EmeraldManager_EmeraldTimer = 0
+			end if
+			PlaySfx(SfxName[Star Post], 0)
+			SetTableValue(-1, temp1, EmeraldManager_EmeraldObjects)
+			SetTableValue(-1, temp1, EmeraldManager_RadarSprites)
+			EmeraldManager_GotEmeralds++
+		end if
+		temp1++
+	loop
+end function
+
+
+public function EmeraldManager_DeleteEmerald
+	EmeraldManager_GotEmeralds--
+end function
+
+
+private function EmeraldManager_HUD
+	// duh emealds
+	temp1 = EmeraldManager_EmeraldCount
+	temp1 *= 20
+	temp1 -= 4
+	temp1 >>= 1
+	temp0 = screen.xcenter
+	temp0 -= temp1
+	temp1 = screen.ysize
+	temp1 -= 16
+	temp1 -= object.xoffset
+	temp2 = 0
+	while temp2 < EmeraldManager_EmeraldCount
+		GetTableValue(temp3, temp2, EmeraldManager_RadarSprites)
+		switch temp3
+		case -1
+			break
+		case 38
+			if HPZCheck == true
+				DrawSpriteScreenFX(95, FX_INK, temp0, temp1)
+			else
+				DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
+			end if
+			break
+		default
+			if HPZCheck == true
+				temp3 += 57
+			end if
+			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
+			object.scale *= 5
+			object.scale += 512
+			DrawSpriteScreenFX(temp3, FX_SCALE, temp0, temp1)
+			break
+		end switch
+		temp0 += 20
+		temp2++
+	loop
+end function
+
+
+public function HUD_Draw_Standard
+	temp0 = 17
+	temp0 -= object.xoffset
+	DrawSpriteScreenXY(10, temp0, 13)
+
+	if player[currentPlayer].rings == 0
+		if object.flashingTimer > 7
+			DrawSpriteScreenXY(12, temp0, 45)
+		end if
+	end if
+
+	temp1 = 104
+	temp1 -= object.xoffset
+	DrawNumbers(0, temp1, 13, player.score, 6, 8, 0)
+
+	temp0 = 67
+	temp0 -= object.xoffset
+	DrawSpriteScreenXY(13, temp0, 29)
+
+	DrawNumbers(0, temp1, 29, stage.milliSeconds, 2, 8, 1)
+	temp0 = 80
+	temp0 -= object.xoffset
+	DrawNumbers(0, temp0, 29, stage.seconds, 2, 8, 1)
+	temp0 -= 24
+	DrawNumbers(0, temp0, 29, stage.minutes, 1, 8, 1)
+
+	DrawNumbers(0, temp1, 45, player[currentPlayer].rings, 3, 8, 0)
+
+	if stage.debugMode == true
+
+		// Player position display, show it if they have debug mode on
+
+		// XPos display
+		temp0 = player[currentPlayer].xpos
+		temp0 >>= 16
+		Abs(temp0)
+		temp1 = screen.xsize
+		temp1 -= 24
+		temp1 += object.xoffset
+		if EmeraldManager_P1Collected > 0
+			temp2 = 28
+		else
+			temp2 = 13
+		end if
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
+
+		// YPos display
+		temp0 = player[currentPlayer].ypos
+		temp0 >>= 16
+		Abs(temp0)
+		temp2 += 16
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
+
+		// Move 42 pixels to the left
+		temp1 -= 42
+
+		// Draw the "X:" and "Y:" icons
+		temp2 -= 14
+		// Use red variant if player is in a negative pos
+		if player[currentPlayer].xpos >= 0
+			DrawSpriteScreenXY(18, temp1, temp2)
+		else
+			DrawSpriteScreenXY(36, temp1, temp2)
+		end if
+		temp2 += 16
+		if player[currentPlayer].ypos >= 0
+			DrawSpriteScreenXY(19, temp1, temp2)
+		else
+			DrawSpriteScreenXY(37, temp1, temp2)
+		end if
+	end if
+
+	// Lives icon
+	temp0 = stage.playerListPos
+	temp0 += 15
+	temp1 = 16
+	temp1 -= object.xoffset
+	DrawSpriteScreenXY(temp0, temp1, 212)
+
+	// Character text
+	temp0 += 6
+	temp1 += 17
+	DrawSpriteScreenXY(temp0, temp1, 213)
+
+	// Small "x" inbetween icon and text
+	temp1 += 5
+	DrawSpriteScreenXY(20, temp1, 222)
+
+	// The actual player lives number
+	temp1 += 18
+	DrawNumbers(24, temp1, 220, player.lives, 2, 8, 0)
+
+	if saved.radar == 0
+		CallFunction(EmeraldManager_HUD)
+	end if
+
+	temp0 = screen.xsize
+	temp0 -= 24
+	temp1 = 0
+	temp2 = 8
+	temp0 += object.xoffset
+	while temp1 < EmeraldManager_P1Collected
+		if HPZCheck == true
+			DrawSpriteScreenXY(101, temp0, temp2)
+		else
+			DrawSpriteScreenXY(44, temp0, temp2)
+		end if
+		temp0 -= 20
+		temp1++
+	loop
+
+	temp0 = screen.xsize
+	temp0 -= 24
+	temp1 = 0
+	while temp1 < EmeraldManager_P2Collected
+		if HPZCheck == true
+			DrawSpriteScreenXY(101, temp0, temp2)
+		else
+			DrawSpriteScreenXY(44, temp0, temp2)
+		end if
+		temp0 -= 20
+		temp1++
+	loop
+
+	if EmeraldManager_BonusFrame != -1
+		if EmeraldManager_BonusTimer > 60
+			temp0 = EmeraldManager_BonusFrame
+			temp0 += 85
+			DrawSpriteScreenXY(temp0, 17, 61)
+		else
+			GetTableValue(temp0, EmeraldManager_BonusFrame, EmeraldManager_ScoreBonuses)
+			if EmeraldManager_BonusFrame < 3
+				DrawNumbers(0, 49, 61, temp0, 5, 8, 0)
+			else
+				DrawNumbers(0, 41, 61, temp0, 4, 8, 0)
+			end if
+		end if
+	end if
+
+	//Best Time 
+	temp2 = screen.xsize
+	temp2 -= 113	
+
+	temp3 = 200
+
+	temp0 = temp2
+	temp0 += object.xoffset
+	DrawSpriteScreenXY(102, temp0, temp3)
+
+	temp2 += 40
+
+	temp0 = temp2
+	temp0 += object.xoffset
+
+	arrayPos1 = 300
+	arrayPos1 *= stage.listPos
+	arrayPos1 += 3
+
+	object.value11 = saveRAM[arrayPos1]		
+	object.value12 = 0
+	object.value13 = 0
+	while object.value11 >= 6000
+		object.value13++
+		object.value11 -= 6000
+	loop
+	
+	while object.value11 >= 100
+		object.value12++
+		object.value11 -= 100
+	loop
+
+	DrawNumbers(0, temp0, temp3, object.value13, 1, 8, 1)
+	temp0 += 24
+	DrawNumbers(0, temp0, temp3, object.value12, 2, 8, 1)
+	temp0 += 24
+	DrawNumbers(0, temp0, temp3, object.value11, 2, 8, 1)
+
+	temp0 -= 37
+	DrawSpriteScreenXY(13, temp0, temp3)
+
+	// Ranks
+	temp3 += 16
+	temp0 -= 10
+
+	DrawSpriteScreenXY(34, temp0, temp3)
+end function
+
+function sqrt
+	temp1 = 0x40000000
+	temp2 = 0
+	while temp1 > temp0
+		temp1 >>= 2
+	loop
+
+	while temp1 > 0
+		temp3 = temp1
+		temp3 += temp2
+		if temp0 >= temp3
+			temp0 -= temp3
+			temp3 = temp1
+			temp3 *= 2
+			temp2 += temp3
+		end if
+		temp1 >>= 2
+		temp2 >>= 1
+	loop
+
+	if temp0 > temp2
+		temp2++
+	end if
+	temp0 = temp2
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	CheckEqual(object[30].type, TypeName[Act Finish])
+	if checkResult == true
+		if object.xoffset < screen.xsize
+			object.xoffset += 7
+		end if
+		
+		if object.xoffset >= screen.xsize
+			object.xoffset = screen.xsize
+		end if
+	end if
+	
+	// duh emealds
+	switch object.state
+	case 0
+		temp0 = 0
+		if HPZCheck == true
+			EmeraldManager_EmeraldCount = 5
+		else
+			EmeraldManager_EmeraldCount = 3
+		end if
+		while temp0 < EmeraldManager_EmeraldCount
+			arrayPos0 = -1
+			temp5 = 0
+			while arrayPos0 == -1
+				rand(temp2, EmeraldManager_EntityCount)
+				GetTableValue(arrayPos0, temp2, EmeraldManager_ObjectPool)
+				temp2 = 0
+				if temp5 == 10
+					temp2 = temp0
+				end if
+				while temp2 < temp0
+					GetTableValue(arrayPos1, temp2, EmeraldManager_EmeraldObjects)
+					if arrayPos1 == arrayPos0
+						arrayPos0 = -1
+						temp2 = temp0
+					else
+						temp3 = object[arrayPos0].xpos
+						temp3 -= object[arrayPos1].xpos
+						temp3 >>= 16
+						temp4 = temp3
+						temp3 *= temp4
+						temp4 = object[arrayPos0].ypos
+						temp4 -= object[arrayPos1].ypos
+						temp4 >>= 16
+						temp6 = temp4
+						temp4 *= temp6
+						temp3 += temp4
+						if temp3 < min_dist
+							arrayPos0 = -1
+							temp2 = temp0
+						end if
+					end if
+					temp2++
+				loop
+				temp5++
+			loop
+			
+			SetTableValue(arrayPos0, temp0, EmeraldManager_EmeraldObjects)
+			
+			switch object[arrayPos0].type
+			case TypeName[Chaos Emerald]
+				object[arrayPos0].state = 1
+				break
+				
+			case TypeName[Monitor]
+				object[arrayPos0].value31 = object[arrayPos0].propertyValue
+				object[arrayPos0].propertyValue = 9
+				object[arrayPos0].frame = 11
+				break
+
+			end switch
+			
+			temp0++
+		loop
+		
+		// Clear all unchosen Emeralds
+		foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
+			if object[arrayPos0].state == 0
+				ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, 0, 0)
+			end if
+		next
+		
+		object.state++
+		break
+		
+	case 1
+		EmeraldManager_EmeraldTimer++
+		temp0 = 0
+		temp4 = -1
+		temp5 = 1638400
+		while temp0 < EmeraldManager_EmeraldCount
+			GetTableValue(arrayPos0, temp0, EmeraldManager_EmeraldObjects)
+			if arrayPos0 != -1
+				temp1 = object[0].xpos
+				temp1 -= object[arrayPos0].xpos
+				temp1 >>= 16
+				temp2 = temp1
+				temp1 *= temp2
+				temp2 = object[0].ypos
+				temp2 -= object[arrayPos0].ypos
+				temp2 >>= 16
+				CheckCurrentStageFolder("Zone09")
+				if checkResult == 1
+					temp2 &= 0x7FF
+					temp2 += 0xFC00
+					temp2 &= 0xFFFF
+					temp2 ^= 0xFC00
+					if temp2 >= 0x8000
+						temp2 |= 0xFFFF0000
+					end if
+				end if
+				temp3 = temp2
+				temp2 *= temp3
+				temp1 += temp2
+				temp2 = 0
+				GetTableValue(temp3, temp2, EmeraldManager_DistanceLimits)
+				while temp1 <= temp3
+					temp2++
+					GetTableValue(temp3, temp2, EmeraldManager_DistanceLimits)
+				loop
+				if temp5 > temp1
+					temp4 = temp0
+					temp5 = temp1
+				end if
+				temp2 += 38
+			else
+				temp2 = -1
+			end if
+			SetTableValue(temp2, temp0, EmeraldManager_RadarSprites)
+			temp0++
+		loop
+		if temp4 != -1
+			EmeraldManager.pingTimer++
+			temp0 = temp5
+			CallFunction(sqrt)
+			temp0 <<= 16 // 16.16 fixed point
+			temp0 /= 1280
+			if temp0 > 32768
+				temp0 -= 32768 // 0.5
+				temp1 = temp0
+				temp1 /= 163840 // 1.4
+				temp0 += temp1
+				temp0 += 19661 // 0.3
+				temp0 *= 120
+			else
+				temp0 *= 72
+			end if
+			temp0 >>= 16
+			if temp0 < 9
+				temp0 = 9
+			else
+				if temp0 > 76
+					temp0 = 76
+				end if
+			end if
+			if EmeraldManager.pingTimer >= temp0
+				temp1 = 76
+				temp1 -= temp0
+				SetTableValue(temp1, temp4, EmeraldManager_RadarScale)
+				EmeraldManager.pingTimer = 0
+				if saved.radar == 0
+					PlaySfx(SfxName[Radar Ping], 0)
+				end if
+			end if
+		end if
+		if HPZCheck == true
+			temp1 = 4
+		else
+			temp1 = 2
+		end if
+		CheckGreater(EmeraldManager_P1Collected, temp1)
+		temp0 = checkResult
+		CheckGreater(EmeraldManager_P2Collected, temp1)
+		temp0 |= checkResult
+		CheckLower(EmeraldManager_GotEmeralds, 1)
+		temp0 &= checkResult
+		if temp0 == true
+			object.state++
+			object.priority = PRIORITY_ALWAYS
+			stage.state = 3
+			object[0].controlMode = -1
+			object[0].direction = 0
+			object[0].up = 0
+			object[0].down = 0
+			object[0].left = 0
+			object[0].right = 0
+			object[0].jumpPress = 0
+			object[0].jumpHold = 0
+			object[0].xvel = 0
+			object[0].yvel = 0
+			object[0].visible = true
+			object[0].value1 = 0
+			object[0].value8 = 0
+			EmeraldManager.fadeAmount = 0
+		end if
+		break
+		
+	case 2
+		music.volume -= 2
+
+		object[0].state = Player_State_Air
+		object[0].value7 = 0
+		if object[0].value37 > 0
+			object[0].value37 = 0
+			arrayPos0 = playerCount
+			CallFunction(Player_ApplyShield)
+		end if
+
+		EmeraldManager.fadeAmount += 8
+		StopSfx(0)
+		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
+
+		if EmeraldManager.fadeAmount == 0x200
+			if EmeraldManager_BonusFrame != -1
+				CallFunction(EmeraldManager_AwardBonus)
+			end if
+			object.state++
+			stage.newXBoundary2 = stage.ogXBoundary
+			object[0].xpos = EmeraldManager_EndX
+			object[0].ypos = EmeraldManager_EndY
+			object[0].speed = 0
+			object[0].xvel = 0
+			object[0].up = 0
+			object[0].down = 0
+			object[0].left = 0
+			object[0].right = 0
+			object[0].jumpPress = 0
+			object[0].jumpHold = 0
+			object[0].speed = 0
+			screen.cameraX = object[0].ixpos
+			screen.cameraY = object[0].iypos
+			stage.state = 1
+		end if
+		break
+		
+	case 3
+		EmeraldManager.fadeAmount -= 8
+		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
+		if EmeraldManager.fadeAmount == 0
+			object.state++
+			PlayMusic(1)
+			object[0].animation = 39
+			object[0].state = Player_State_Static
+			object[30].type = TypeName[Act Finish]
+			object[30].drawOrder = 6
+			object[30].priority = PRIORITY_ACTIVE
+		end if
+		break
+	end switch
+	
+	if EmeraldManager_BonusFrame != -1
+		EmeraldManager_BonusTimer--
+		if EmeraldManager_BonusTimer == 0
+			CallFunction(EmeraldManager_AwardBonus)
+		end if
+	end if
+	
+	temp0 = 0
+	while temp0 < EmeraldManager_EmeraldCount
+		GetTableValue(temp1, temp0, EmeraldManager_RadarScale)
+		if temp1 > 0
+			temp2 = temp1
+			temp2 >>= 4
+			temp1 -= temp2
+			temp1--
+			if temp1 < 0
+				temp1 = 0
+			end if
+			SetTableValue(temp1, temp0, EmeraldManager_RadarScale)
+		end if
+		temp0++
+	loop
+end event
+
+
+event ObjectDraw
+	currentPlayer = 0
+	
+#platform: USE_ORIGINS
+	currentPlayer = screen.currentID
+#endplatform
+	
+	if player[currentPlayer].rings == 0
+		object.flashingTimer = oscillation
+		object.flashingTimer &= 15
+	else
+		if stage.minutes == 9
+			object.flashingTimer = oscillation
+			object.flashingTimer &= 15
+		end if
+	end if
+
+	CallFunction(HUD_Draw_Standard)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("Global/Display.gif")
+
+	// HUD frames
+	SpriteFrame(0, 0, 8, 11, 1, 50) 	// #0  - Number 0
+	SpriteFrame(0, 0, 8, 11, 10, 50) 	// #1  - Number 1
+	SpriteFrame(0, 0, 8, 11, 19, 50) 	// #2  - Number 2
+	SpriteFrame(0, 0, 8, 11, 28, 50) 	// #3  - Number 3
+	SpriteFrame(0, 0, 8, 11, 1, 62) 	// #4  - Number 4
+	SpriteFrame(0, 0, 8, 11, 10, 62) 	// #5  - Number 5
+	SpriteFrame(0, 0, 8, 11, 19, 62) 	// #6  - Number 6
+	SpriteFrame(0, 0, 8, 11, 28, 62) 	// #7  - Number 7
+	SpriteFrame(0, 0, 8, 11, 1, 74) 	// #8  - Number 8
+	SpriteFrame(0, 0, 8, 11, 10, 74) 	// #9  - Number 9
+	
+	// A-F digits are unused
+	
+	SpriteFrame(0, 0, 40, 43, 1, 1) 	// #10 - Score, Time, Rings HUD text
+	SpriteFrame(0, 0, 31, 11, 1, 119) 	// #11 - Red Time text
+	SpriteFrame(0, 0, 39, 11, 1, 131) 	// #12 - Red Rings text
+	SpriteFrame(0, 0, 29, 4, 1, 45) 	// #13 - Timer ticks
+	SpriteFrame(0, 0, 3, 11, 37, 50) 	// #14 - Timer colon
+	SpriteFrame(0, 0, 16, 16, 83, 18) 	// #15 - Sonic life icon
+	SpriteFrame(0, 0, 16, 16, 100, 18) 	// #16 - Tails life icon
+	SpriteFrame(0, 0, 16, 16, 117, 18) 	// #17 - Knuckles life icon
+	SpriteFrame(0, 0, 8, 8, 1, 98) 		// #18 - Yellow X Debug Icon
+	SpriteFrame(0, 0, 8, 8, 10, 98) 	// #19 - Yellow Y Debug Icon
+	SpriteFrame(0, 0, 6, 6, 19, 98) 	// #20 - Small white x Debug Icon
+
+	SpriteFrame(0, 0, 31, 7, 185, 18) 	// #21 - Sonic name tag
+
+	// Tails or Miles
+	if options.region == false
+		SpriteFrame(0, 0, 31, 7, 217, 18) // #22 - Tails name tag
+	else
+		SpriteFrame(0, 0, 31, 7, 185, 26) // #22 - Miles name tag
+	end if
+
+	SpriteFrame(0, 0, 31, 7, 217, 26) 	// #23 - Knuckles name tag
+
+	SpriteFrame(0, 0, 8, 8, 37, 64) 	// #24 - Small number 0
+	SpriteFrame(0, 0, 8, 8, 46, 64) 	// #25 - Small number 1
+	SpriteFrame(0, 0, 8, 8, 55, 64) 	// #26 - Small number 2
+	SpriteFrame(0, 0, 8, 8, 64, 64) 	// #27 - Small number 3
+	SpriteFrame(0, 0, 8, 8, 73, 64) 	// #28 - Small number 4
+	SpriteFrame(0, 0, 8, 8, 82, 64) 	// #29 - Small number 5
+	SpriteFrame(0, 0, 8, 8, 91, 64) 	// #30 - Small number 6
+	SpriteFrame(0, 0, 8, 8, 100, 64) 	// #31 - Small number 7
+	SpriteFrame(0, 0, 8, 8, 109, 64) 	// #32 - Small number 8
+	SpriteFrame(0, 0, 8, 8, 118, 64) 	// #33 - Small number 9
+
+	SpriteFrame(-1, 1, 8, 8, 127, 64) 	// 34 - Debug minus icon
+	SpriteFrame(8, 0, 8, 8, 136, 64) 	// #35 - Small debug Minus sign
+	SpriteFrame(0, 0, 8, 8, 25, 98) 	// #36 - Red X Debug Icon
+	SpriteFrame(0, 0, 8, 8, 34, 98) 	// #37 - Red Y Debug Icon
+	
+	CheckCurrentStageFolder("GHZ")
+	temp2 = checkresult
+	CheckCurrentStageFolder("MZ")
+	temp2 |= checkResult
+	CheckCurrentStageFolder("SYZ")
+	temp2 |= checkResult
+	CheckCurrentStageFolder("LZ")
+	temp2 |= checkResult
+	CheckCurrentStageFolder("SLZ")
+	temp2 |= checkResult
+	CheckCurrentStageFolder("SBZ")
+	temp2 |= checkResult
+	if temp2 == true
+		temp0 = 0
+		temp1 = 1
+		while temp0 < 6
+			SpriteFrame(-8, -8, 16, 16, temp1, 375) 	// 38-43 - New Emerald Radar
+			temp1 += 17
+			temp0++
+		loop
+	
+		if saved.radarstyle == 0
+			SpriteFrame(0, 0, 16, 16, 120, 375) 	// 44 - New Got Emerald
+		else
+			SpriteFrame(0, 0, 16, 16, temp1, 375) 	// 44 - Old Got Emerald
+		end if
+	else
+		temp0 = 0
+		temp1 = 1
+		while temp0 < 6
+			if saved.radarstyle == 0
+				SpriteFrame(-8, -8, 16, 16, temp1, 256) 	// 38-43 - New Emerald Radar
+			else 
+				SpriteFrame(-8, -8, 16, 16, temp1, 358) 	// 38-43 - Old Emerald Radar
+			end if
+			temp1 += 17
+			temp0++
+		loop
+		if saved.radarstyle == 0
+			SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - New Got Emerald
+		else
+			SpriteFrame(0, 0, 16, 16, temp1, 358) 	// 44 - Old Got Emerald
+		end if
+	end if
+	
+	temp0 = 0
+	temp1 = 273
+	while temp0 < 5
+		temp2 = 0
+		temp3 = 1
+		while temp2 < 8
+			SpriteFrame(-8, -8, 16, 16, temp3, temp1) 	// 45-84 - Arrows
+			temp3 += 17
+			temp2++
+		loop
+		temp1 += 17
+		temp0++
+	loop
+	
+	SpriteFrame(0, 0, 60, 11, 137, 256) 	// 85 - Perfect!
+	SpriteFrame(0, 0, 62, 11, 137, 268) 	// 86 - Extreme!
+	SpriteFrame(0, 0, 62, 11, 137, 280) 	// 87 - Awesome!
+	SpriteFrame(0, 0, 40, 11, 137, 292) 	// 88 - Tight!
+	SpriteFrame(0, 0, 55, 11, 178, 292) 	// 89 - Radical!
+	SpriteFrame(0, 0, 35, 11, 137, 304) 	// 90 - Cool!
+	SpriteFrame(0, 0, 55, 11, 173, 304) 	// 91 - Jammin'!
+	SpriteFrame(0, 0, 33, 11, 200, 268) 	// 92 - Nice!
+	SpriteFrame(0, 0, 44, 11, 200, 280) 	// 93 - Great!
+	SpriteFrame(0, 0, 36, 11, 196, 256) 	// 94 - Good!
+	
+	temp0 = 0
+	temp1 = 1
+	while temp0 < 6
+		SpriteFrame(-8, -8, 16, 16, temp1, 392) 	// 95-100 - HPZ Emerald Radar
+		temp1 += 17
+		temp0++
+	loop
+	
+	if saved.radarstyle == 0
+		SpriteFrame(0, 0, 16, 16, 120, 392) 	// 101 - New HPZ Got Emerald
+	else
+		SpriteFrame(0, 0, 16, 16, temp1, 392) 	// 101 - Old HPZ Got Emerald
+	end if
+
+	SpriteFrame(0, 0, 34, 27, 157, 35)		// 102 - Best and Rank Text
+
+	temp0 = 0
+	temp1 = 1
+	while temp0 < 7
+		SpriteFrame(0, -3, 16, 16, temp1, 409) 	// 103 - 110 - S, A, B, C, D, E, F ranks
+		temp1 += 17
+		temp0++
+	loop
+
+	// Setup HUD values
+	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].inkEffect = INK_ALPHA
+		object[arrayPos0].alpha = 102
+	next
+
+	EmeraldManager_EntityCount = 0
+	EmeraldManager_EmeraldCount = 0
+	EmeraldManager_P1Collected = 0
+	EmeraldManager_P2Collected = 0
+	EmeraldManager_EmeraldTimer = 0
+	EmeraldManager_BonusTimer = 0
+	EmeraldManager_BonusFrame = -1
+	EmeraldManager_GotEmeralds = 0
+	HPZCheck = false
+
+	temp0 = 0
+	while temp0 < 5
+		SetTableValue(-1, temp0, EmeraldManager_EmeraldObjects)
+		SetTableValue(-1, temp0, EmeraldManager_RadarSprites)
+		SetTableValue(0, temp0, EmeraldManager_RadarScale)
+		temp0++
+	loop
+end event
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(0, 0, 40, 43, 1, 1)
+	
+	// This gets set in Stage Setup, but  it's just an old CD leftover for time periods and doesn't do anything in this game
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

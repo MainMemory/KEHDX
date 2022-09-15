@@ -1,0 +1,293 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: Break Block Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+private alias 0 : BREAKBLOCK_BLOCK
+private alias 1 : BREAKBLOCK_FRAGMENT
+
+
+// Player Aliases
+private alias object.yvel : player.yvel
+private alias object.gravity : player.gravity
+private alias object.animation : player.animation
+private alias object.collisionPlane : player.collisionPlane
+
+private alias object.value16 : player.isSidekick
+private alias object.value19 : player.scoreBonus
+
+// Debug Mode aliases
+private alias object.value17 : debugMode.currentSelection
+
+
+// ========================
+// Function Declarations
+// ========================
+
+reserve function BreakBlock_DebugDraw
+reserve function BreakBlock_DebugSpawn
+
+
+// ========================
+// Static Values
+// ========================
+
+private value BreakBlock_debugStartID = 0
+
+
+// ========================
+// Tables
+// ========================
+
+private table BreakBlock_fragmentVels
+	-0x10000, -0x80000
+	 0x10000, -0x80000
+	-0xE000,  -0x70000
+	 0xE000,  -0x70000
+	-0xC000,  -0x60000
+	 0xC000,  -0x60000
+	-0xA000,  -0x50000
+	 0xA000,  -0x50000
+	-0x8000,  -0x40000
+	 0x8000,  -0x40000
+end table
+
+
+private function BreakBlock_DebugDraw
+	temp0 = debugMode.currentSelection
+	temp0 -= BreakBlock_debugStartID
+	DrawSprite(temp0)
+end function
+
+
+private function BreakBlock_DebugSpawn
+	temp0 = debugMode.currentSelection
+	temp0 -= BreakBlock_debugStartID
+	temp0 |= 0x80 // Set it to be on 1
+	CreateTempObject(TypeName[Break Block], temp0, object.xpos, object.ypos)
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case BREAKBLOCK_BLOCK
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+			temp1 = object.propertyValue
+			temp1 &= 0x7F
+			if temp1 == 0
+				temp0 = 4
+			else
+				temp0 = 5
+				temp0 -= temp1
+			end if
+			temp0 <<= 3
+			temp1 = temp0
+			FlipSign(temp0)
+
+			BoxCollisionTest(C_SOLID, object.entityPos, -16, temp0, 16, temp1, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
+			if checkResult == COL_TOP
+				if player[currentPlayer].animation == ANI_JUMPING
+					player[currentPlayer].yvel = 0
+					player[currentPlayer].gravity = GRAVITY_AIR
+					temp0 += 8
+					temp0 <<= 16
+					temp0 += object.ypos
+
+					temp3 = object.propertyValue
+					temp3 &= 0x7F
+					temp4 = 5
+					temp4 += temp3
+					temp5 = temp3
+					temp5 <<= 2
+					while temp3 < 5
+						CreateTempObject(TypeName[Break Block], temp4, object.xpos, temp0)
+						object[tempObjectPos].ixpos -= 8
+						GetTableValue(object[tempObjectPos].xvel, temp5, BreakBlock_fragmentVels)
+						temp5++
+						GetTableValue(object[tempObjectPos].yvel, temp5, BreakBlock_fragmentVels)
+						temp5++
+						object[tempObjectPos].state = BREAKBLOCK_FRAGMENT
+						object[tempObjectPos].drawOrder = 5
+
+						CreateTempObject(TypeName[Break Block], temp4, object.xpos, temp0)
+						object[tempObjectPos].ixpos += 8
+						GetTableValue(object[tempObjectPos].xvel, temp5, BreakBlock_fragmentVels)
+						temp5++
+						GetTableValue(object[tempObjectPos].yvel, temp5, BreakBlock_fragmentVels)
+						temp5++
+						object[tempObjectPos].state = BREAKBLOCK_FRAGMENT
+						object[tempObjectPos].drawOrder = 5
+						temp0 += 0x100000
+
+						temp3++
+						temp4++
+					loop
+
+					CreateTempObject(TypeName[Object Score], player[currentPlayer].scoreBonus, object.xpos, object.ypos)
+					object[tempObjectPos].drawOrder = 5
+					object.propertyValue++
+					object.ypos += 0x80000
+					temp0 = object.propertyValue
+					temp0 &= 0x7F
+					if temp0 >= 5
+						object.type = TypeName[Blank Object]
+					end if
+
+					// global variable "array" (yes, this is actually how its done)
+					arrayPos0 = 22
+#platform: USE_DECOMP
+					arrayPos0 = VarName[player.score]
+#endplatform
+					if player[currentPlayer].isSidekick == false
+						arrayPos0 += currentPlayer
+					end if
+
+					switch player[currentPlayer].scoreBonus
+					case 0
+						global[arrayPos0] += 100
+						break
+
+					case 1
+						global[arrayPos0] += 200
+						break
+
+					case 2
+						global[arrayPos0] += 500
+						break
+
+					case 3
+					case 4
+					case 5
+					case 6
+					case 7
+					case 8
+					case 9
+					case 10
+					case 11
+					case 12
+					case 13
+					case 14
+						global[arrayPos0] += 1000
+						break
+
+					case 15
+						global[arrayPos0] += 10000
+						break
+					end switch
+
+					if player[currentPlayer].gravity == 1
+						if player[currentPlayer].scoreBonus < 15
+							player[currentPlayer].scoreBonus++
+						end if
+					end if
+					PlaySfx(SfxName[Block Break], false)
+				end if
+			end if
+		next
+		break
+
+	case BREAKBLOCK_FRAGMENT
+		object.xpos += object.xvel
+		object.ypos += object.yvel
+		object.yvel += 0x1800
+
+		if object.outOfBounds == true
+			object.type = TypeName[Blank Object]
+		end if
+		break
+
+	end switch
+end event
+
+
+event ObjectDraw
+	temp0 = object.propertyValue
+	temp0 &= 0x7F
+	DrawSprite(temp0)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("HPZ/Rock.gif")
+	SpriteFrame(-16, -32, 32, 80, 0, 0)
+	SpriteFrame(-16, -32, 32, 64, 0, 0)
+	SpriteFrame(-16, -24, 32, 48, 0, 0)
+	SpriteFrame(-16, -16, 32, 32, 0, 0)
+	SpriteFrame(-16, -8, 32, 16, 0, 0)
+	SpriteFrame(-8, -8, 16, 16, 0, 0)
+	SpriteFrame(-8, -8, 16, 16, 0, 0)
+	SpriteFrame(-8, -8, 16, 16, 0, 0)
+	SpriteFrame(-8, -8, 16, 16, 0, 0)
+	SpriteFrame(-8, -8, 16, 16, 0, 0)
+
+	temp0 = 0
+	BreakBlock_debugStartID = DebugMode_ObjCount
+	while temp0 < 5
+		SetTableValue(TypeName[Break Block], DebugMode_ObjCount, DebugMode_TypesTable)
+		SetTableValue(BreakBlock_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
+		SetTableValue(BreakBlock_DebugSpawn, DebugMode_ObjCount, DebugMode_SpawnTable)
+		DebugMode_ObjCount++
+		temp0++
+	loop
+end event
+
+
+event RSDKEdit
+	if editor.returnVariable == true
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			checkResult = object.propertyValue
+			break
+		case 0 // size
+			checkResult = object.propertyValue
+			checkResult &= 0x7F
+			break
+		end switch
+	else
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			object.propertyValue = editor.variableValue
+			break
+		case 0 // size
+			temp0 = editor.variableValue
+			temp0 &= 0x7F
+			object.propertyValue &= 0x80
+			object.propertyValue |= temp0
+			break
+		end switch
+	end if
+end event
+
+
+event RSDKDraw
+	temp0 = object.propertyValue
+	temp0 &= 0x7F
+	DrawSprite(temp0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("HPZ/Rock.gif")
+	SpriteFrame(-16, -32, 32, 80, 0, 0)
+	SpriteFrame(-16, -32, 32, 64, 0, 0)
+	SpriteFrame(-16, -24, 32, 48, 0, 0)
+	SpriteFrame(-16, -16, 32, 32, 0, 0)
+	SpriteFrame(-16, -8, 32, 16, 0, 0)
+	
+	AddEditorVariable("size")
+	SetActiveVariable("size")
+	AddEnumVariable("5 Blocks", 0)
+	AddEnumVariable("4 Blocks", 1)
+	AddEnumVariable("3 Blocks", 2)
+	AddEnumVariable("2 Blocks", 3)
+	AddEnumVariable("1 Block", 4)
+end event

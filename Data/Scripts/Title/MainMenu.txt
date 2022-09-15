@@ -1,0 +1,308 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Sega Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.timer
+private alias object.value1 : object.menusel
+
+private alias object.value2 : object.usingTouch
+
+// Padded out for parity with other Menu objects, so that the value slot is the same across each
+private alias object.value10 : object.buttonLeft
+private alias object.value11 : object.buttonTop
+private alias object.value12 : object.buttonRight
+private alias object.value13 : object.buttonBottom
+private alias object.value14 : object.buttonID
+private alias object.value15 : object.buttonFunc
+
+// Kept public as it's used by the KEH_RunButton function, which is used by other objects too
+public alias 255 : MENUSEL_NULL
+
+// States
+private alias 0 : MAINMENU_SETUP
+private alias 1 : MAINMENU_FADEIN
+private alias 2 : MAINMENU_MAIN
+private alias 3 : MAINMENU_STAGESELECT
+private alias 4 : MAINMENU_OPTIONS
+
+// Touch Input Aliases
+private alias -1 : TOUCHINPUT_NULL
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// General function, used outside this script too
+reserve function KEH_RunButton
+
+// Button activation functions, only used in this script
+reserve function KEH_Button_Singleplayer
+reserve function KEH_Button_Competition
+reserve function KEH_Button_Options
+reserve function KEH_Button_Credits
+
+
+// ========================
+// Function Definitions
+// ========================
+
+public function KEH_RunButton
+	
+	// This function is called to update a button, with the values specified
+	
+	// Preconditions:
+	// - temp3 is if the screen is held at all or not (-1, 0, or above)
+	// - object.buttonLeft is the XPos of the left bounds of the button
+	// - object.buttonRight is the XPos of the right bounds of the button
+	// - object.buttonTop is the YPos of the top bounds of the button
+	// - object.buttonBottom is the YPos of the lower bounds of the button
+	// - object.buttonID is the button ID of the button
+	// - object.buttonFunc is the function ID of the button, to be called if the button was pressed
+	
+	CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
+		
+	if checkResult > TOUCHINPUT_NULL
+		object.menusel = object.buttonID
+	else
+		if temp3 < 0
+			if object.menusel == object.buttonID
+				CallFunction(object.buttonFunc)
+			end if
+		else
+			if object.menusel == object.buttonID
+				object.menusel = MENUSEL_NULL
+			end if
+		end if
+	end if
+	
+end function
+
+// Button Functions, nothing too big
+
+private function KEH_Button_Singleplayer
+	object.state = MAINMENU_STAGESELECT
+	saveRAM[250] = object.menusel
+end function
+
+
+private function KEH_Button_Competition
+	PlaySfx(SfxName[Fail], false)
+end function
+
+
+private function KEH_Button_Options
+	object.state = MAINMENU_OPTIONS
+	saveRAM[250] = object.menusel
+end function
+
+
+private function KEH_Button_Credits
+	PlaySfx(SfxName[Fail], false)
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case MAINMENU_SETUP
+		object.menusel = saveRAM[250]
+		object.timer = 320
+		object.usingTouch = false
+		
+		// Set BG speed, 1.0 pixel per frame
+		tileLayer[1].scrollSpeed = -0x10000
+		hParallax[0].scrollSpeed = -0x10000
+		
+		SetActivePalette(1, 0, screen.ysize)
+		SetScreenFade(0, 0, 0, object.timer)
+		object.state++
+		break
+
+	case MAINMENU_FADEIN
+		if object.timer > 0
+			object.timer -= 8
+		else
+			PlayMusic(1)
+			object.state++
+		end if
+
+		SetScreenFade(0, 0, 0, object.timer)
+		break
+		
+	case MAINMENU_MAIN
+		if object.usingTouch == false
+			// Assuming physical controls, this is the default
+			
+			if keyPress[0].up == true
+				object.menusel--
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			if keyPress[0].down == true
+				object.menusel++
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			object.menusel &= 3
+			
+			if keyPress[0].start == true
+				temp0 = KEH_Button_Singleplayer
+				temp0 += object.menusel
+				CallFunction(temp0)
+			end if
+			
+			// If the player's touched the screen at all...
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > TOUCHINPUT_NULL
+				// ... then activate touch controls, and hide the Knuckles cursor too
+				object.usingTouch = true
+				object.menusel = MENUSEL_NULL
+			end if
+		else
+			// Seeing if the player's got a finger on the screen at all
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Get the base XPos of the button, center screen aligned
+			
+			// Left bounds
+			object.buttonLeft = screen.xcenter
+			object.buttonLeft -= 80
+			
+			// Right bounds
+			object.buttonRight = object.buttonLeft
+			object.buttonRight += 180
+			
+			// Other values
+			object.buttonTop = 130
+			object.buttonBottom = 150
+			object.buttonFunc = KEH_Button_Singleplayer
+			
+			// Cycle through, and look at all four buttons
+			object.buttonID = 0
+			while object.buttonID < 4
+				CallFunction(KEH_RunButton)
+				
+				object.buttonTop += 20
+				object.buttonBottom += 20
+				object.buttonID++
+				object.buttonFunc++
+			loop
+			
+			object.usingTouch = input.pressButton
+			object.usingTouch ^= true
+		end if
+		break
+			
+	case MAINMENU_STAGESELECT
+		if object.timer < 256
+			object.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			if TypeName[Stage Select] > 0
+				menu.bootMode = BOOTMODE_STAGESELECT
+				ResetObjectEntity(object.entityPos, TypeName[Stage Select], 0, object.xpos, object.ypos)
+			else
+				stage.listPos = 0
+				LoadStage()
+			end if
+			menu.bootMode = BOOTMODE_STAGESELECT
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
+	case MAINMENU_OPTIONS
+		if object.timer < 256
+			object.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			menu.bootMode = BOOTMODE_OPTIONS
+			ResetObjectEntity(object.entityPos, TypeName[Options], 0, object.xpos, object.ypos)
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
+	end switch
+	
+	// Animation for the Knuckles cursor
+	object.animationTimer++
+	object.animationTimer %= 60
+end event
+
+
+event ObjectDraw
+	
+	// Logo and Selections
+	DrawSpriteScreenXY(0, screen.xcenter, 16)
+	DrawSpriteScreenXY(1, screen.xcenter, 133)
+
+	// Little Knuckles
+	
+	temp0 = object.menusel
+	temp0 *= 20
+	temp0 += 132
+	
+	temp1 = screen.xcenter
+	temp1 -= 109
+	
+	object.frame = object.animationTimer
+	object.frame >>= 5
+	object.frame += 2
+	DrawSpriteScreenXY(object.frame, temp1, temp0)
+	
+	// Website link
+	DrawSpriteScreenXY(4, screen.xcenter, 216)
+	
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("KEHMenu/MainTitle.gif")
+	SpriteFrame(-142, -3, 284, 113, 0, 201) // 0 - Knuckles' Emerald Hunt, DX!
+	SpriteFrame(-80, 0, 159, 77, 82, 112)   // 1 - Selection texts
+	SpriteFrame(0, 0, 23, 22, 33, 112)      // 2 - Tiny Knuckles, Frame 1
+	SpriteFrame(0, 0, 24, 22, 57, 112)      // 3 - Tiny Knuckles, Frame 2
+	SpriteFrame(-152, 0, 304, 10, 0, 190)   // 4 - Webpage link
+	
+	SetMusicTrack("SPPMenu.ogg", 1, 214596)
+	LoadPalette("MainTitle.act", 1, 0, 0, 256)
+	
+	options.touchControls = false
+	
+	// No Main Menu objects are placed into a scene normally, but if they are this would make sure they're active all the time
+//	foreach (TypeName[Main Menu], arrayPos0, ALL_ENTITIES)
+//		object[arrayPos0].priority = PRIORITY_ACTIVE
+//	next
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/MainTitle.gif")
+	SpriteFrame(-142, -3, 284, 113, 0, 201)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event
