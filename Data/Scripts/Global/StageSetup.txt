@@ -207,9 +207,9 @@ event ObjectUpdate
 	case STAGE_PAUSED
 		foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
 			pause.KEH = 0
-			stage.state = STAGE_RUNNING
 			return
 		next
+		
 		switch pause.KEH
 		case 0
 			pause.KEH = 1
