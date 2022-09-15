@@ -24,16 +24,19 @@ private alias object.value7 : object.orb3AniTileFrame
 private alias 0 : CUTSCENE_FADEIN
 private alias 1 : CUTSCENE_WALKRIGHT
 private alias 2 : CUTSCENE_PAUSE
-private alias 3 : CUTSCENE_PAN
-private alias 4 : CUTSCENE_JUMP
-private alias 5 : CUTSCENE_BREAKROCK
-private alias 6 : CUTSCENE_POSE
-private alias 7 : CUTSCENE_FADEOUT
+private alias 3 : CUTSCENE_STARTPAN
+private alias 4 : CUTSCENE_PAN
+private alias 5 : CUTSCENE_JUMP
+private alias 6 : CUTSCENE_BREAKROCK
+private alias 7 : CUTSCENE_POSE
+private alias 8 : CUTSCENE_FADEOUT
 
 // Player Aliases
 private alias object.state : player.state
+private alias object.xpos : player.xpos
 private alias object.speed : player.speed
 private alias object.animation : player.animation
+private alias object.controlmode : player.controlmode
 private alias object.tileCollisions : player.tileCollisions
 private alias object.gravity : player.gravity
 
@@ -44,19 +47,19 @@ private alias object.jumpHold : player.jumpHold
 // Tables
 // ========================
 
-public table HPZSetup_greenOrbFramesTable1
+private table HPZSetup_greenOrbFramesTable1
 	768, 18, 770, 9, 772, 18, 770, 9
 end table
 
-public table HPZSetup_purpleOrbFramesTable1
+private table HPZSetup_purpleOrbFramesTable1
 	774, 18, 776, 9, 778, 18, 776, 9
 end table
 
-public table HPZSetup_greenOrbFramesTable2
+private table HPZSetup_greenOrbFramesTable2
 	780, 18, 783, 9, 786, 18, 783, 9
 end table
 
-public table HPZSetup_purpleOrbFramesTable2
+private table HPZSetup_purpleOrbFramesTable2
 	789, 18, 792, 9, 795, 18, 792, 9
 end table
 
@@ -192,10 +195,15 @@ event ObjectUpdate
 		CheckEqual(object.timer, 10)
 		object.state += checkResult
 		break
-		
+	
+	case CUTSCENE_STARTPAN
+		camera[0].target = 34
+		camera[0].style = 4
+		object.timer = 0
+		object.state++
+		// [Fallthrough]
 	case CUTSCENE_PAN
-		screen[0].cameraEnabled = false
-		screen[0].xoffset++
+		camera[0].xpos++
 		
 		object.timer++
 		
@@ -204,15 +212,15 @@ event ObjectUpdate
 		break
 		
 	case CUTSCENE_JUMP
-		object[0].right = true
-		object[0].state = Player_Action_Jump
-		object[0].jumpHold = true
+		player[0].right = true
+		player[0].state = Player_Action_Jump
+		player[0].jumpHold = true
 		
 		object.timer = 0
 		object.state++
 		// [Fallthrough]
 	case CUTSCENE_BREAKROCK
-		CheckGreater(object[0].xpos, object[34].xpos)
+		CheckGreater(player[0].xpos, object[34].xpos)
 		object.state += checkResult
 		break
 		
@@ -220,10 +228,10 @@ event ObjectUpdate
 		object.timer++
 		
 		switch object.timer
-		case 0
+		case 1
 			// Stop moving
-			object[0].right = false
-			object[0].speed = 0
+			player[0].right = false
+			player[0].speed = 0
 			break
 			
 		case 50
@@ -274,10 +282,11 @@ event ObjectStartup
 	SetMusicTrack("Extra.ogg", 0, 0xE9CC)
 	PlayMusic(0)
 	
-	object[0].controlmode = -1
+	player[0].controlmode = -1
 	
 	if stage.player2Enabled == true
-		object[1].xpos = object[0].xpos
+		object[1].xpos = player[0].xpos
+		object[1].xpos -= 0x100000
 	end if
 	
 	HPZCheck = true
