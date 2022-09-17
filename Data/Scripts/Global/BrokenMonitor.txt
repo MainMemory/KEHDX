@@ -244,7 +244,7 @@ event ObjectUpdate
 				break
 
 			case MONITOR_TELEPORT
-				if HPZCheck == true
+				if stage.listPos == 9
 					temp1 = 5
 				else
 					temp1 = 3

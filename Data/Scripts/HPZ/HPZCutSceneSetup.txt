@@ -39,7 +39,6 @@ private alias object.animation : player.animation
 private alias object.controlmode : player.controlmode
 private alias object.tileCollisions : player.tileCollisions
 private alias object.gravity : player.gravity
-
 private alias object.right : player.right
 private alias object.jumpHold : player.jumpHold
 
@@ -51,13 +50,16 @@ private table HPZSetup_greenOrbFramesTable1
 	768, 18, 770, 9, 772, 18, 770, 9
 end table
 
+
 private table HPZSetup_purpleOrbFramesTable1
 	774, 18, 776, 9, 778, 18, 776, 9
 end table
 
+
 private table HPZSetup_greenOrbFramesTable2
 	780, 18, 783, 9, 786, 18, 783, 9
 end table
+
 
 private table HPZSetup_purpleOrbFramesTable2
 	789, 18, 792, 9, 795, 18, 792, 9
@@ -170,12 +172,15 @@ event ObjectUpdate
 			object.alpha = 0
 			object.timer = 0
 			
+			// Wait for the player to land
 			CheckEqual(player[0].gravity, GRAVITY_GROUND)
 			object.state += checkResult
 		end if
 		break
 		
 	case CUTSCENE_WALKRIGHT
+		// Make Knuckles walk towards the Master Emerald
+		
 		player[0].right = true
 		object.timer++
 			
@@ -190,6 +195,8 @@ event ObjectUpdate
 		break
 		
 	case CUTSCENE_PAUSE
+		// Hold for a brief moment
+		
 		object.timer++
 		
 		CheckEqual(object.timer, 10)
@@ -197,6 +204,8 @@ event ObjectUpdate
 		break
 	
 	case CUTSCENE_STARTPAN
+		// Start panning the camera over to the Gem
+		// object[34] is the CutSceneGem object, with a hardcoded address here for ease
 		camera[0].target = 34
 		camera[0].style = 4
 		object.timer = 0
@@ -262,8 +271,8 @@ event ObjectUpdate
 			// On to the real stage!
 			
 			stage.listPos = 9
-			LoadStage()
 			stage.activeList = REGULAR_STAGE
+			LoadStage()
 			
 			StopMusic()
 		end if
@@ -279,24 +288,24 @@ end event
 
 
 event ObjectStartup
-	SetMusicTrack("Extra.ogg", 0, 0xE9CC)
+	SetMusicTrack("Extra.ogg", 0, 59852)
 	PlayMusic(0)
 	
-	player[0].controlmode = -1
+	// In this scene, we're going to be the one controlling Knuckles
+	player[0].controlMode = CONTROLMODE_NONE
 	
-	if stage.player2Enabled == true
-		object[1].xpos = player[0].xpos
-		object[1].xpos -= 0x100000
+	// Not used quite yet, though it hopefully will be soon
+	if options.vsMode == true
+		player[1].xpos = player[0].xpos
+		player[1].xpos -= 0x100000
 	end if
-	
-	HPZCheck = true
 	
 	object[10].type = TypeName[HPZ Cutscene Setup]
 	object[10].priority = PRIORITY_ACTIVE
+	object[10].state = 0
 	object[10].drawOrder = 6
 	object[10].orb2AniTileFrame = 2
 	object[10].orb3AniTileFrame = 4
-	object[10].state = 0
 	object[10].alpha = 255
 end event
 

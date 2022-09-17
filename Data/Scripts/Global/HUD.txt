@@ -107,11 +107,12 @@ end function
 
 
 public function EmeraldManager_AwardEmerald
-	if HPZCheck == true
+	if stage.listPos == 9
 		temp2 = 5
 	else
 		temp2 = 3
 	end if
+	
 	CheckEqual(EmeraldManager_P1Collected, temp2)
 	temp0 = checkResult
 	CheckEqual(EmeraldManager_P2Collected, temp2)
@@ -184,14 +185,14 @@ private function EmeraldManager_HUD
 		case -1
 			break
 		case 38
-			if HPZCheck == true
+			if stage.listPos == 9
 				DrawSpriteScreenFX(95, FX_INK, temp0, temp1)
 			else
 				DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
 			end if
 			break
 		default
-			if HPZCheck == true
+			if stage.listPos == 9
 				temp3 += 57
 			end if
 			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
@@ -308,7 +309,7 @@ public function HUD_Draw_Standard
 	temp2 = 8
 	temp0 += object.xoffset
 	while temp1 < EmeraldManager_P1Collected
-		if HPZCheck == true
+		if stage.listPos == 9
 			DrawSpriteScreenXY(101, temp0, temp2)
 		else
 			DrawSpriteScreenXY(44, temp0, temp2)
@@ -321,7 +322,7 @@ public function HUD_Draw_Standard
 	temp0 -= 24
 	temp1 = 0
 	while temp1 < EmeraldManager_P2Collected
-		if HPZCheck == true
+		if stage.listPos == 9
 			DrawSpriteScreenXY(101, temp0, temp2)
 		else
 			DrawSpriteScreenXY(44, temp0, temp2)
@@ -440,7 +441,7 @@ event ObjectUpdate
 	switch object.state
 	case 0
 		temp0 = 0
-		if HPZCheck == true
+		if stage.listPos == 9
 			EmeraldManager_EmeraldCount = 5
 		else
 			EmeraldManager_EmeraldCount = 3
@@ -590,7 +591,7 @@ event ObjectUpdate
 				end if
 			end if
 		end if
-		if HPZCheck == true
+		if stage.listPos == 9
 			temp1 = 4
 		else
 			temp1 = 2
@@ -815,6 +816,7 @@ event ObjectStartup
 			temp1 += 17
 			temp0++
 		loop
+		
 		if saved.radarstyle == 0
 			SpriteFrame(0, 0, 16, 16, temp1, 256) 	// 44 - New Got Emerald
 		else
@@ -885,7 +887,6 @@ event ObjectStartup
 	EmeraldManager_BonusTimer = 0
 	EmeraldManager_BonusFrame = -1
 	EmeraldManager_GotEmeralds = 0
-	HPZCheck = false
 
 	temp0 = 0
 	while temp0 < 5

@@ -115,11 +115,7 @@ end function
 
 
 public function EmeraldManager_AwardEmerald
-	if HPZCheck == true
-		temp2 = 5
-	else
-		temp2 = 3
-	end if
+	temp2 = 3
 	CheckEqual(EmeraldManager_P1Collected, temp2)
 	temp0 = checkResult
 	CheckEqual(EmeraldManager_P2Collected, temp2)
@@ -192,16 +188,9 @@ private function EmeraldManager_HUD
 		case -1
 			break
 		case 38
-			if HPZCheck == true
-				DrawSpriteScreenFX(95, FX_INK, temp0, temp1)
-			else
-				DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
-			end if
+			DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
 			break
 		default
-			if HPZCheck == true
-				temp3 += 57
-			end if
 			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
 			object.scale *= 5
 			object.scale += 512
@@ -316,11 +305,7 @@ public function HUD_Draw_Standard
 	temp2 = 8
 	temp0 += object.xoffset
 	while temp1 < EmeraldManager_P1Collected
-		if HPZCheck == true
-			DrawSpriteScreenXY(101, temp0, temp2)
-		else
-			DrawSpriteScreenXY(44, temp0, temp2)
-		end if
+		DrawSpriteScreenXY(44, temp0, temp2)
 		temp0 -= 20
 		temp1++
 	loop
@@ -329,11 +314,7 @@ public function HUD_Draw_Standard
 	temp0 -= 24
 	temp1 = 0
 	while temp1 < EmeraldManager_P2Collected
-		if HPZCheck == true
-			DrawSpriteScreenXY(101, temp0, temp2)
-		else
-			DrawSpriteScreenXY(44, temp0, temp2)
-		end if
+		DrawSpriteScreenXY(44, temp0, temp2)
 		temp0 -= 20
 		temp1++
 	loop

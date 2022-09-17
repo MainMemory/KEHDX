@@ -1092,7 +1092,6 @@ end function
 
 public function Player_ProcessUpdate
 	if options.attractMode == false
-#platform: USE_STANDALONE
 		if player.controlMode == 0
 			// No control lock active right now, process player control
 
@@ -1169,6 +1168,8 @@ public function Player_ProcessUpdate
 				foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
 					temp0 = true
 				next
+				CheckEqual(object[30].type, TypeName[Act Finish])
+				temp0 |= checkResult
 				
 				if temp0 == false
 					PlaySfx(SfxName[Menu Back], false)
@@ -1179,13 +1180,6 @@ public function Player_ProcessUpdate
 				end if
 			end if
 		end if
-#endplatform
-
-#platform: USE_ORIGINS
-		if keyPress[1].start == true
-			engine.state = 5
-		end if
-#endplatform
 
 		// Call the function for supporting physical gamepads as well
 		ProcessObjectControl()
@@ -1198,8 +1192,7 @@ public function Player_ProcessUpdate
 		// No pausing during credits
 		// (I don't think this actually does anything, though..?)
 		if credits.screen == 0
-		
-#platform: USE_STANDALONE
+			
 			// Allow skipping of the demo by pausing
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			if keyPress[0].start == true
@@ -1211,22 +1204,7 @@ public function Player_ProcessUpdate
 					Player_attractDuration = 1
 				end if
 			end if
-
-			if keyPress[0].start == true
-				if Player_attractDuration > 1
-					Player_attractDuration = 1
-				end if
-			end if
-#endplatform
-
-#platform: USE_ORIGINS
-			if keyPress[1].start == true
-				if Player_attractDuration > 1
-					Player_attractDuration = 1
-				end if
-			end if
-#endplatform
-
+			
 		end if
 
 		if player.controlMode == 0
@@ -4347,7 +4325,7 @@ public function Player_State_Death
 					player.interaction 		= true
 					player.visible 			= true
 #platform: USE_STANDALONE
-					player.controlMode 		= 0
+					player.controlMode 		= CONTROLMODE_P1
 #endplatform
 #platform: USE_ORIGINS
 					player.controlMode 		= currentPlayer
@@ -4980,7 +4958,7 @@ event ObjectStartup
 
 		player[0].groupID 				= GROUP_PLAYERS
 		player[0].state 				= Player_State_Air
-		player[0].priority 				= 1
+		player[0].priority 				= PRIORITY_ACTIVE
 		player[0].drawOrder 			= DRAWORDER_PLAYER
 		player[0].sortedDrawOrder 		= 4
 		player[0].rollingDeceleration 	= 0x2000

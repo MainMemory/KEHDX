@@ -229,7 +229,7 @@ event ObjectUpdate
 			CheckEqual(stage.listPos, STAGE_R_LABYRINTHZONE)
 			temp0 = checkResult
 			player[0].direction = checkResult
-			CheckEqual(HPZCheck, true)
+			CheckEqual(stage.listPos, 9) // StageName[R - HIDDEN PALACE ZONE]
 			temp0 |= checkResult
 			if temp0 == true
 				// Note - Knuckles originally enters HPZ rolling, but let's make him fall this time 'round

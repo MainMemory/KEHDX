@@ -34,10 +34,8 @@ private alias  0 : ACTFINISH_INIT
 private alias  1 : ACTFINISH_ENTERTEXT
 private alias  2 : ACTFINISH_ACTFINISHJINGLE
 private alias  3 : ACTFINISH_TALLYSCORE
-private alias  4 : ACTFINISH_SHOWRESULTS
-private alias  5 : ACTFINISH_CHOOSEWHERETOGO
-private alias  6 : ACTFINISH_GOTCONTINUE
-private alias  7 : ACTFINISH_LOADNEXTSTAGE
+private alias  4 : ACTFINISH_CHOOSEWHERETOGO
+private alias  5 : ACTFINISH_LOADNEXTSTAGE
 
 // Player Aliases
 private alias object.value0 : player.rings
@@ -263,17 +261,7 @@ event ObjectUpdate
 				object.timer = 0
 			end if
 		else
-			if options.vsMode == false
-				if object.totalScore >= 100000
-					object.state = ACTFINISH_GOTCONTINUE
-				else
-					object.state++
-				end if
-			else
-				object.state++
-			end if
-			
-			//Save Stuff here
+			// Save Stuff here
 			arrayPos1 = 300
 			arrayPos1 *= stage.listPos	
 			if player.score > saveRAM[arrayPos1]
@@ -308,35 +296,11 @@ event ObjectUpdate
 			
 			object.timer = 0
 			PlaySfx(SfxName[Score Total], false)
+			
+			object.state++
 		end if
 		break
-
-	case ACTFINISH_GOTCONTINUE
-		object.timer++
-		if object.timer == 60
-			object.timer = 0
-			object.hasContinue = true
-			player.continues++
-			PlaySfx(SfxName[Continue], false)
-			object.state = ACTFINISH_SHOWRESULTS
-		end if
-		break
-
-	case ACTFINISH_SHOWRESULTS
-		object.timer++
-		if object.timer == 160
-			object.timer = 0
-			if stage.listPos == 15
-				object.state = ACTFINISH_LOADNEXTSTAGE
-				object.next.listPos = 0
-				object.next.listType = PRESENTATION_STAGE
-				menu.bootMode = BOOTMODE_STAGESELECT
-			else
-				object.state = ACTFINISH_CHOOSEWHERETOGO
-			end if
-		end if
-		break
-
+		
 	case ACTFINISH_CHOOSEWHERETOGO
 		death.count = 0
 		
@@ -357,8 +321,10 @@ event ObjectUpdate
 				PlaySfx(SfxName[Score Add], false)
 			end if
 			
+			// TODO: pressing start seems to open the HW pause menu...
 			temp0 = keyPress[0].start
 			temp0 |= keyPress[0].buttonA
+			temp0 |= keyPress[0].buttonB
 			temp0 |= keyPress[0].buttonC
 			if temp0 == true
 				switch object.menuselection
@@ -371,7 +337,6 @@ event ObjectUpdate
 				case 1
 					object.next.listPos = 0
 					object.next.listType = PRESENTATION_STAGE
-					menu.bootMode = BOOTMODE_STAGESELECT
 					break
 					
 				case 2
@@ -381,6 +346,7 @@ event ObjectUpdate
 					
 				end switch
 				
+				object.timer = 0
 				object.state = ACTFINISH_LOADNEXTSTAGE
 			end if
 			
@@ -392,7 +358,6 @@ event ObjectUpdate
 				object.menuselection = -1
 			end if
 		else
-			
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			temp3 = checkResult
 			
@@ -434,7 +399,6 @@ event ObjectUpdate
 					if object.menuselection == 1
 						object.next.listPos = 0
 						object.next.listType = PRESENTATION_STAGE
-						menu.bootMode = BOOTMODE_STAGESELECT
 						object.state = ACTFINISH_LOADNEXTSTAGE
 					end if
 				else
@@ -482,13 +446,14 @@ event ObjectUpdate
 	case ACTFINISH_LOADNEXTSTAGE
 		object.timer += 4
 		SetScreenFade(0, 0, 0, object.timer)
-		if object.timer == 384
+		if object.timer >= 384
 			fadeColor = 0
 			object.timer = 0
 			starPostID = 0
 			object.direction = FLIP_NONE
 			stage.listPos = object.next.listPos
 			stage.activeList = object.next.listType
+			menu.bootMode = BOOTMODE_STAGESELECT // Always set, since the only way you'll get back to the Menus scene from here is via `Stage Select` anyways
 			LoadStage()
 		end if
 		break

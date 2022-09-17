@@ -784,9 +784,8 @@ event ObjectStartup
 
 	if stage.player2Enabled == true
 		object[1].xpos = object[0].xpos
+		object[1].xpos -= 0x100000
 	end if
-	
-	HPZCheck = true
 	
 	animalType1 = TypeName[Rocky]
 	animalType2 = TypeName[Mocky]
