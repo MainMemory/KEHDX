@@ -129,7 +129,7 @@ event ObjectUpdate
 		if checkResult > -1
 			specialMode = true
 		end if
-	break
+		break
 
 	case SEGA_FADETOTITLE
 		if object.timer < 0x100
@@ -142,13 +142,12 @@ event ObjectUpdate
 		break
 		
 	end switch
-#platform: USE_ORIGINS
-	end if
-#endplatform
 end event
 
 
 event ObjectDraw
+	SetActivePalette(2, 0, screen.ysize)
+	
 	DrawRect(0, 0, screen.xsize, screen.ysize, 0xE0, 0xE0, 0xE0, 0xFF)
 
 	switch object.state
@@ -217,41 +216,44 @@ end event
 
 
 event ObjectStartup
-	LoadSpriteSheet("KEHMenu/SEGA.gif")
+	LoadSpriteSheet("KEHMenu/Menu.gif")
 	
 	// Use the player sprites of the last character played with
 	if saved.character == 0
 		// Knuckles's Running Sprites
-		SpriteFrame(-31, -36, 62, 72, 1, 226)
-		SpriteFrame(-31, -36, 62, 72, 64, 226)
-		SpriteFrame(-29, -36, 60, 72, 127, 226)
-		SpriteFrame(-31, -36, 62, 72, 188, 226)
+		SpriteFrame(-31, -36, 62, 72, 288, 113)
+		SpriteFrame(-31, -36, 62, 72, 351, 113)
+		SpriteFrame(-29, -36, 60, 72, 414, 113)
+		SpriteFrame(-31, -36, 62, 72, 16, 68)
 	else
 		// Tikal's Running Sprites
-		SpriteFrame(-31, -36, 62, 72, 1, 153)
-		SpriteFrame(-31, -36, 62, 72, 64, 153)
-		SpriteFrame(-29, -36, 60, 72, 127, 153)
-		SpriteFrame(-31, -36, 62, 72, 188, 153)
+		SpriteFrame(-31, -36, 62, 72, 257, 260)
+		SpriteFrame(-31, -36, 62, 72, 320, 260)
+		SpriteFrame(-29, -36, 60, 72, 383, 260)
+		SpriteFrame(-31, -36, 62, 72, 444, 260)
 	end if
 	
+	// Smear Frames
+	SpriteFrame(-192, -35, 256, 70, 0, 304)
+	SpriteFrame(-384, -35, 192, 70, 0, 304)
+	SpriteFrame(-576, -35, 192, 70, 0, 304)
+	SpriteFrame(0, -35, 192, 70, 0, 304)
+	SpriteFrame(192, -35, 192, 70, 0, 304)
+	SpriteFrame(384, -35, 192, 70, 0, 304)
+	
 	// SEGA Frames
-	SpriteFrame(-192, -35, 256, 70, 1, 299)
-	SpriteFrame(-384, -35, 192, 70, 1, 299)
-	SpriteFrame(-576, -35, 192, 70, 1, 299)
-	SpriteFrame(0, -35, 192, 70, 1, 299)
-	SpriteFrame(192, -35, 192, 70, 1, 299)
-	SpriteFrame(384, -35, 192, 70, 1, 299)
-	SpriteFrame(-93, -29, 187, 58, 323, 297)
-	SpriteFrame(-93, -29, 187, 58, 323, 238)
+	SpriteFrame(-93, -29, 187, 58, 112, 192)
+	SpriteFrame(-93, -29, 187, 58, 299, 192)
 	
 	// Hide Touch overlay
 	options.touchControls = false
 	
 #platform: USE_ORIGINS
 	if game.titleMode != false
-		game.titleMode = false
 		menu.bootMode = BOOTMODE_MAINMENU
 	end if
+	
+	game.titleMode = false
 #endplatform
 	
 	temp0 = 0

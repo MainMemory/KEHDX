@@ -9,18 +9,27 @@
 // Aliases
 // ========================
 
-private alias object.value0 : KEH.timer
-private alias object.value1 : KEH.menusel
+private alias object.value0 : object.timer
+private alias object.value1 : object.menusel
 
-private alias object.value2 : KEH.usingTouch
+private alias object.value2 : object.usingTouch
 
 // Padded out for parity with other Menu objects, so that the value slot is the same across each
-private alias object.value10 : KEH.buttonLeft
-private alias object.value11 : KEH.buttonTop
-private alias object.value12 : KEH.buttonRight
-private alias object.value13 : KEH.buttonBottom
-private alias object.value14 : KEH.buttonID
-private alias object.value15 : KEH.buttonFunc
+private alias object.value10 : object.buttonLeft
+private alias object.value11 : object.buttonTop
+private alias object.value12 : object.buttonRight
+private alias object.value13 : object.buttonBottom
+private alias object.value14 : object.buttonID
+private alias object.value15 : object.buttonFunc
+
+// Similarly also padded out for the same reason
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
 
 // States
 private alias 0 : OPTIONS_INIT
@@ -40,18 +49,18 @@ private alias -1 : TOUCHINPUT_NULL
 // ========================
 
 // Button activation functions
-reserve function KEH_Button_Character
-reserve function KEH_Button_Radar
-reserve function KEH_Button_SoundTest
-reserve function KEH_Button_MusicSwitch
-reserve function KEH_Button_RadarStyle
+reserve function Options_Button_Character
+reserve function Options_Button_Radar
+reserve function Options_Button_SoundTest
+reserve function Options_Button_MusicSwitch
+reserve function Options_Button_RadarStyle
 
 
 // ========================
 // Function Definitions
 // ========================
 
-private function KEH_Button_Character
+private function Options_Button_Character
 	saved.character++
 	saved.character &= 1
 	
@@ -68,11 +77,13 @@ private function KEH_Button_Character
 	
 	WriteSaveRAM()
 	
-	KEH.menusel = MENUSEL_NULL
+	if object.usingTouch == true
+		object.menusel = MENUSEL_NULL
+	end if
 end function
 
 
-private function KEH_Button_Radar
+private function Options_Button_Radar
 	saved.radar++
 	saved.radar &= 1
 	
@@ -88,21 +99,27 @@ private function KEH_Button_Radar
 	
 	WriteSaveRAM()
 	
-	KEH.menusel = MENUSEL_NULL
+	if object.usingTouch == true
+		object.menusel = MENUSEL_NULL
+	end if
 end function
 
 
-private function KEH_Button_SoundTest
-	KEH.menusel = MENUSEL_NULL
+private function Options_Button_SoundTest
+	if object.usingTouch == true
+		object.menusel = MENUSEL_NULL
+	end if
 end function
 
 
-private function KEH_Button_MusicSwitch
-	KEH.menusel = MENUSEL_NULL
+private function Options_Button_MusicSwitch
+	if object.usingTouch == true
+		object.menusel = MENUSEL_NULL
+	end if
 end function
 
 
-private function KEH_Button_RadarStyle
+private function Options_Button_RadarStyle
 	saved.radarstyle++
 	saved.radarstyle &= 1
 	
@@ -119,7 +136,9 @@ private function KEH_Button_RadarStyle
 	
 	WriteSaveRAM()
 	
-	KEH.menusel = MENUSEL_NULL
+	if object.usingTouch == true
+		object.menusel = MENUSEL_NULL
+	end if
 end function
 
 
@@ -131,46 +150,46 @@ event ObjectUpdate
 	
 	switch object.state
 	case OPTIONS_INIT
-		KEH.timer = 320
-		KEH.usingTouch = false
+		object.timer = 320
+		object.usingTouch = false
 		
 		tileLayer[1].scrollSpeed = -0x10000
 		hParallax[0].scrollSpeed = -0x10000
 		
-		SetScreenFade(0, 0, 0, KEH.timer)
+		SetScreenFade(0, 0, 0, object.timer)
 		object.state++
 		break
 
 	case OPTIONS_FADEIN
-		if KEH.timer > 0
-			KEH.timer -= 16
+		if object.timer > 0
+			object.timer -= 16
 		else
 			PlayMusic(0)
 			object.state++
 		end if
 		
-		SetScreenFade(0, 0, 0, KEH.timer)
+		SetScreenFade(0, 0, 0, object.timer)
 		break
 
 	case OPTIONS_MAIN
-		if KEH.usingTouch == false
-			KEH.menusel += keyPress[0].down
-			KEH.menusel -= keyPress[0].up
+		if object.usingTouch == false
+			object.menusel += keyPress[0].down
+			object.menusel -= keyPress[0].up
 
-			if KEH.menusel > 4
-				KEH.menusel = 0
+			if object.menusel > 4
+				object.menusel = 0
 			end if
 
-			if KEH.menusel < 0
-				KEH.menusel = 4
+			if object.menusel < 0
+				object.menusel = 4
 			end if
 			
 			temp0 = keyPress[0].left
 			temp0 |= keyPress[0].right
 			
 			if temp0 == true
-				temp0 = KEH_Button_Character
-				temp0 += KEH.menusel
+				temp0 = Options_Button_Character
+				temp0 += object.menusel
 				CallFunction(temp0)
 			end if
 			
@@ -181,8 +200,8 @@ event ObjectUpdate
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			if checkResult > TOUCHINPUT_NULL
 				// Activate touch controls, hide the Knuckles cursor
-				KEH.usingTouch = true
-				KEH.menusel = MENUSEL_NULL
+				object.usingTouch = true
+				object.menusel = MENUSEL_NULL
 			end if
 		else
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
@@ -191,61 +210,61 @@ event ObjectUpdate
 			// Touch inputs, including the null buttons
 			
 			// Left bounds
-			KEH.buttonLeft = screen.xcenter
-			KEH.buttonLeft -= 149
+			object.buttonLeft = screen.xcenter
+			object.buttonLeft -= 149
 			
 			// Right bounds
-			KEH.buttonRight = KEH.buttonLeft
-			KEH.buttonRight += 300
+			object.buttonRight = object.buttonLeft
+			object.buttonRight += 300
 			
 			// Other values
-			KEH.buttonTop = 3
-			KEH.buttonBottom = 51
-			KEH.buttonFunc = KEH_Button_Character
+			object.buttonTop = 3
+			object.buttonBottom = 51
+			object.buttonFunc = Options_Button_Character
 			
 			// Cycle through, and look at all four buttons
-			KEH.buttonID = 0
-			while KEH.buttonID < 5
+			object.buttonID = 0
+			while object.buttonID < 5
 				CallFunction(KEH_RunButton)
 				
-				KEH.buttonTop += 48
-				KEH.buttonBottom += 48
-				KEH.buttonID++
-				KEH.buttonFunc++
+				object.buttonTop += 48
+				object.buttonBottom += 48
+				object.buttonID++
+				object.buttonFunc++
 			loop
 			
 			// Check for the exit button
 			CheckTouchRect(10, 190, 60, 220)
 			
 			if checkResult > TOUCHINPUT_NULL
-				KEH.menusel = 5
+				object.menusel = 5
 			else
 				if temp3 < 0
-					if KEH.menusel == 5
+					if object.menusel == 5
 						object.state = OPTIONS_EXIT
-						KEH.menusel = MENUSEL_NULL
+						object.menusel = MENUSEL_NULL
 					end if
 				else
-					if KEH.menusel == 5
-						KEH.menusel = MENUSEL_NULL
+					if object.menusel == 5
+						object.menusel = MENUSEL_NULL
 					end if
 				end if
 			end if
 			
-			KEH.usingTouch = input.pressButton
-			KEH.usingTouch ^= true
+			object.usingTouch = input.pressButton
+			object.usingTouch ^= true
 		end if
 		
-		menu1.selection = KEH.menusel
+		menu1.selection = object.menusel
 		menu1.selection *= 6
 		menu1.selection += 2
 		break
 		
 	case OPTIONS_EXIT
-		if KEH.timer < 256
+		if object.timer < 256
 			music.volume -= 2
-			KEH.timer += 8
-			SetScreenFade(0, 0, 0, KEH.timer)
+			object.timer += 8
+			SetScreenFade(0, 0, 0, object.timer)
 		else
 			StopMusic()
 			menu.bootMode = BOOTMODE_MAINMENU
@@ -261,35 +280,40 @@ end event
 
 event ObjectDraw
 	
+	SetActivePalette(2, 0, screen.ysize)
+	
 	// Draw the text
 	temp0 = screen.xcenter
 	DrawMenu(MENU_1, screen.xcenter, 12)
 	
-	SetActivePalette(3, 0, screen.ysize)
-	
-	// Now, draw all the yellow boxes
-	temp1 = 3
+	object.drawPos.x = screen.xcenter
+	object.drawPos.x -= 141
+	object.drawPos.y = 3
+	object.drawWidth = 279
+	object.drawHeight = 39
+	object.drawColour.r = 0xE0
+	object.drawColour.b = 0x00
 	temp0 = 0
 	while temp0 < 5
-		DrawSpriteScreenXY(0, screen.xcenter, temp1)
-		temp1 += 48
+		CheckNotEqual(temp0, object.menusel)
+		checkResult *= 0xE0
+		object.drawColour.g = checkResult
+		CallFunction(KEH_DrawSelBox)
+		object.drawPos.y += 48
 		temp0++
 	loop
 	
-	// Find the position of the current selection, and draw a red box on top of there too
-	temp1 = KEH.menusel
-	temp1 *= 48
-	temp1 += 3
-	DrawSpriteScreenXY(1, screen.xcenter, temp1)
-	
-	if KEH.usingTouch == true
+	if object.usingTouch == true
 		// The arrows don't actually do or mean anything, but they help convey that the current option is selected
-		DrawSpriteScreenXY(2, screen.xcenter, temp1)
-		DrawSpriteScreenXY(3, screen.xcenter, temp1)
+		temp0 = object.menusel
+		temp0 *= 48
+		temp0 += 3
+		
+		DrawSpriteScreenXY(2, screen.xcenter, temp0)
+		DrawSpriteScreenXY(3, screen.xcenter, temp0)
 		
 		// Back button
-		checkEqual(KEH.menusel, 5)
-		checkResult += 4
+		CheckEqual(object.menusel, 5)
 		DrawSpriteScreenXY(checkResult, 38, 202)
 	end if
 	
@@ -299,38 +323,22 @@ end event
 event ObjectStartup
 
 	// Load the sprite sheet
-	LoadSpriteSheet("KEHMenu/Options.gif")
+	LoadSpriteSheet("KEHMenu/Menu.gif")
 	
 	// No need to setup sprite frames for the text since the menu system will handle them automatically
 	
-	SpriteFrame(-141, 0, 282, 42, 129, 1)   // 0 - Yellow box
-	SpriteFrame(-141, 0, 282, 42, 129, 173) // 1 - Red box
-	
 	// Touch control Frames
-	SpriteFrame(-175, 12, 20, 20, 162, 44) // 2 - Left, Blue
-	SpriteFrame(165, 12, 20, 20, 183, 44)  // 3 - Right, Blue
+	SpriteFrame(-20, -10, 40, 20, 85, 105) // 0 - Back, Blue
+	SpriteFrame(-20, -10, 40, 20, 85, 125) // 1 - Back, Red
 	
-	SpriteFrame(-20, -10, 40, 20, 204, 44)  // 4 - Blue left right arrow
-	SpriteFrame(-20, -10, 40, 20, 204, 65)  // 5 - Red left right arrow
+	SpriteFrame(-175, 12, 20, 20, 85, 65)  // 2 - Left, Blue
+	SpriteFrame(155, 12, 20, 20, 85, 85)   // 3 - Right, Blue
 	
-	// No Options objects are placed directly into the scene normally, but if they ever are...
-	// (Left commented for the moment)
-//	foreach (TypeName[Options], arrayPos0, ALL_ENTITIES)
-//		object[arrayPos0].priority = PRIORITY_ACTIVE
-//	next
-	
-	LoadPalette("Options.act", 3, 0, 0, 256)
-	
-	CheckLower(stage.actNum, 3)
-	options.stageSelectFlag |= checkResult
-
-	options.touchControls = false
-
 	SetMusicTrack("Options.ogg", 0, true)
 	
 	// Setup the menu
 	SetupMenu(MENU_1, 0, 1, 2)
-
+	
 	// Add the entries
 	AddMenuEntry(MENU_1, "*@@PLAYER SELECT@@*", false)
 	AddMenuEntry(MENU_1, "@", false)
@@ -359,10 +367,10 @@ event ObjectStartup
 	AddMenuEntry(MENU_1, "*@@RADAR SPRITES@@*", false)
 	AddMenuEntry(MENU_1, "@", false)
 	AddMenuEntry(MENU_1, "NEW", true)
-
+	
 	menu1.selection = 2
 	menu2.selection = -1
-
+	
 	switch saved.character
 	case 0
 		EditMenuEntry(MENU_1, "KNUCKLES", 2, true)
@@ -371,7 +379,7 @@ event ObjectStartup
 		EditMenuEntry(MENU_1, "TIKAL", 2, true)
 		break
 	end switch
-
+	
 	switch saved.radar
 	case 0
 		EditMenuEntry(MENU_1, "@ON@", 8, true)
@@ -380,7 +388,7 @@ event ObjectStartup
 		EditMenuEntry(MENU_1, "OFF", 8, true)
 		break
 	end switch
-
+	
 	switch saved.radarstyle
 	case 0
 		EditMenuEntry(MENU_1, "NEW", 26, true)
@@ -389,7 +397,7 @@ event ObjectStartup
 		EditMenuEntry(MENU_1, "OLD", 26, true)
 		break
 	end switch
-
+	
 end event
 
 

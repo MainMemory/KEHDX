@@ -22,6 +22,15 @@ private alias object.value13 : object.buttonBottom
 private alias object.value14 : object.buttonID
 private alias object.value15 : object.buttonFunc
 
+// Similarly also padded out for the same reason
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
 // Kept public as it's used by the KEH_RunButton function, which is used by other objects too
 public alias 255 : MENUSEL_NULL
 
@@ -40,14 +49,19 @@ private alias -1 : TOUCHINPUT_NULL
 // Function Declarations
 // ========================
 
-// General function, used outside this script too
+// General functions that are used outside this script too
+
+// Used to process an individual button, normally meant to be in a loop
 reserve function KEH_RunButton
 
+// Saveing on sheet space a bit, this draws selection boxes with rectangles rather than making them sprites
+reserve function KEH_DrawSelBox
+
 // Button activation functions, only used in this script
-reserve function KEH_Button_Singleplayer
-reserve function KEH_Button_Competition
-reserve function KEH_Button_Options
-reserve function KEH_Button_Credits
+reserve function MainMenu_Button_Singleplayer
+reserve function MainMenu_Button_Competition
+reserve function MainMenu_Button_Options
+reserve function MainMenu_Button_Credits
 
 
 // ========================
@@ -85,26 +99,87 @@ public function KEH_RunButton
 	
 end function
 
-// Button Functions, nothing too big
 
-private function KEH_Button_Singleplayer
-	object.state = MAINMENU_STAGESELECT
-	saveRAM[250] = object.menusel
+public function KEH_DrawSelBox
+	// The tin's right, this draws a selection box
+	
+	// Preconditions:
+	// - object.drawPos.x is set to the screen-space X position to draw the box
+	// - object.drawPos.y is set to the screen-space Y position to draw the box
+	// - object.drawWidth is the width for the box to be (not including shadow)
+	// - object.drawHeight is how tall the box should be (not including shadow)
+	// - object.drawColour.[rgb] is set to the colour the main box frame should be
+	//   - Shadows are always 0x000000, though this function can be changed to allow for customising them too
+	
+	// DrawRect(int XPos, int YPos, int width, int height, int R, int G, int B, int A)
+	
+	temp1 = object.drawPos.y
+	temp1 += object.drawHeight
+	
+	temp2 = object.drawPos.x
+	temp2 += object.drawWidth
+	
+	object.drawPos.x += 2
+	object.drawPos.y += 2
+	temp1 += 2
+	temp2 += 2
+	
+	object.drawHeight++
+	
+	// TL -> TR
+	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, 0x00, 0x00, 0x00, 255)
+	
+	// TL -> BL
+	DrawRect(object.drawPos.x, object.drawPos.y, 1, object.drawHeight, 0x00, 0x00, 0x00, 255)
+	
+	// BL -> BR
+	DrawRect(object.drawPos.x, temp1, object.drawWidth, 1, 0x00, 0x00, 0x00, 255)
+	
+	// TR -> BR
+	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, 0x00, 0x00, 0x00, 255)
+	
+	object.drawPos.x -= 2
+	object.drawPos.y -= 2
+	temp1 -= 2
+	temp2 -= 2
+	
+	// TL -> TR
+	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// TL -> BL
+	DrawRect(object.drawPos.x, object.drawPos.y, 1, object.drawHeight, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// BL -> BR
+	DrawRect(object.drawPos.x, temp1, object.drawWidth, 1, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// TR -> BR
+	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	object.drawHeight--
+	
 end function
 
 
-private function KEH_Button_Competition
+// Button Functions for this script in particular, nothing too big
+
+private function MainMenu_Button_Singleplayer
+	object.state = MAINMENU_STAGESELECT
+//	saveRAM[250] = object.menusel
+end function
+
+
+private function MainMenu_Button_Competition
 	PlaySfx(SfxName[Fail], false)
 end function
 
 
-private function KEH_Button_Options
+private function MainMenu_Button_Options
 	object.state = MAINMENU_OPTIONS
-	saveRAM[250] = object.menusel
+//	saveRAM[250] = object.menusel
 end function
 
 
-private function KEH_Button_Credits
+private function MainMenu_Button_Credits
 	PlaySfx(SfxName[Fail], false)
 end function
 
@@ -116,7 +191,7 @@ end function
 event ObjectUpdate
 	switch object.state
 	case MAINMENU_SETUP
-		object.menusel = saveRAM[250]
+//		object.menusel = saveRAM[250]
 		object.timer = 320
 		object.usingTouch = false
 		
@@ -124,7 +199,6 @@ event ObjectUpdate
 		tileLayer[1].scrollSpeed = -0x10000
 		hParallax[0].scrollSpeed = -0x10000
 		
-		SetActivePalette(1, 0, screen.ysize)
 		SetScreenFade(0, 0, 0, object.timer)
 		object.state++
 		break
@@ -157,7 +231,7 @@ event ObjectUpdate
 			object.menusel &= 3
 			
 			if keyPress[0].start == true
-				temp0 = KEH_Button_Singleplayer
+				temp0 = MainMenu_Button_Singleplayer
 				temp0 += object.menusel
 				CallFunction(temp0)
 			end if
@@ -187,7 +261,7 @@ event ObjectUpdate
 			// Other values
 			object.buttonTop = 130
 			object.buttonBottom = 150
-			object.buttonFunc = KEH_Button_Singleplayer
+			object.buttonFunc = MainMenu_Button_Singleplayer
 			
 			// Cycle through, and look at all four buttons
 			object.buttonID = 0
@@ -247,6 +321,8 @@ end event
 
 event ObjectDraw
 	
+	SetActivePalette(2, 0, screen.ysize)
+	
 	// Logo and Selections
 	DrawSpriteScreenXY(0, screen.xcenter, 16)
 	DrawSpriteScreenXY(1, screen.xcenter, 133)
@@ -272,22 +348,32 @@ end event
 
 
 event ObjectStartup
-	LoadSpriteSheet("KEHMenu/MainTitle.gif")
-	SpriteFrame(-142, -3, 284, 113, 0, 201) // 0 - Knuckles' Emerald Hunt, DX!
-	SpriteFrame(-80, 0, 159, 77, 82, 112)   // 1 - Selection texts
-	SpriteFrame(0, 0, 23, 22, 33, 112)      // 2 - Tiny Knuckles, Frame 1
-	SpriteFrame(0, 0, 24, 22, 57, 112)      // 3 - Tiny Knuckles, Frame 2
-	SpriteFrame(-152, 0, 304, 10, 0, 190)   // 4 - Webpage link
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	
+	// 0 - Knuckles' Emerald Hunt, DX!
+	SpriteFrame(-142, -3, 284, 113, 128, 0)
+	
+	// 1 - Selection texts
+	//     - These are all one sprite, each option isn't split into its own sprite or anything
+	SpriteFrame(-80, 0, 159, 77, 128, 113)
+	
+	// 2-3 - Tiny Knuckles cursor frames
+	SpriteFrame(0, 0, 23, 22, 489, 1)
+	SpriteFrame(0, 0, 24, 22, 488, 24)
+	
+	// 4 - Website link (https://mm.reimuhakurei.net/?page=kehDX)
+	SpriteFrame(-152, 0, 304, 10, 112, 250)
 	
 	SetMusicTrack("SPPMenu.ogg", 1, 214596)
-	LoadPalette("MainTitle.act", 1, 0, 0, 256)
 	
-	options.touchControls = false
+	// The colours used by the menus are too many to fit in a stage palette,
+	// so just load our own entirely new palette instead
+	// (the zone icons take over half the palette lol)
+	LoadPalette("KEHDX_Menu.act", 2, 0, 0, 256)
 	
-	// No Main Menu objects are placed into a scene normally, but if they are this would make sure they're active all the time
-//	foreach (TypeName[Main Menu], arrayPos0, ALL_ENTITIES)
-//		object[arrayPos0].priority = PRIORITY_ACTIVE
-//	next
+	// Set the Selection box colour to be yellow
+	// -> Not used in this menu, but the other menus use it
+	SetPaletteEntry(0, 192, 0xE0E000)
 end event
 
 
@@ -301,8 +387,8 @@ end event
 
 
 event RSDKLoad
-	LoadSpriteSheet("KEHMenu/MainTitle.gif")
-	SpriteFrame(-142, -3, 284, 113, 0, 201)
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-142, -3, 284, 113, 128, 0)
 	
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event
