@@ -146,8 +146,6 @@ end event
 
 
 event ObjectDraw
-	SetActivePalette(2, 0, screen.ysize)
-	
 	DrawRect(0, 0, screen.xsize, screen.ysize, 0xE0, 0xE0, 0xE0, 0xFF)
 
 	switch object.state
@@ -234,12 +232,12 @@ event ObjectStartup
 	end if
 	
 	// Smear Frames
-	SpriteFrame(-192, -35, 256, 70, 0, 304)
-	SpriteFrame(-384, -35, 192, 70, 0, 304)
-	SpriteFrame(-576, -35, 192, 70, 0, 304)
-	SpriteFrame(0, -35, 192, 70, 0, 304)
-	SpriteFrame(192, -35, 192, 70, 0, 304)
-	SpriteFrame(384, -35, 192, 70, 0, 304)
+	SpriteFrame(-192, -35, 256, 70, 256, 398)
+	SpriteFrame(-384, -35, 192, 70, 256, 398)
+	SpriteFrame(-576, -35, 192, 70, 256, 398)
+	SpriteFrame(0, -35, 192, 70, 256, 398)
+	SpriteFrame(192, -35, 192, 70, 256, 398)
+	SpriteFrame(384, -35, 192, 70, 256, 398)
 	
 	// SEGA Frames
 	SpriteFrame(-93, -29, 187, 58, 112, 192)
@@ -289,8 +287,8 @@ end event
 
 
 event RSDKLoad
-	LoadSpriteSheet("KEHMenu/SEGA.gif")
-	SpriteFrame(-93, -29, 188, 58, 323, 238)	// Sega Logo				- #0
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-31, -36, 62, 72, 288, 113)
 	
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

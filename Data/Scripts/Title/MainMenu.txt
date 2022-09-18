@@ -102,6 +102,8 @@ end function
 
 public function KEH_DrawSelBox
 	// The tin's right, this draws a selection box
+	// Not used in this script, but used in Options and Stage Select
+	// Could be used for the 2PVS menu too, whenever we get to that
 	
 	// Preconditions:
 	// - object.drawPos.x is set to the screen-space X position to draw the box
@@ -111,20 +113,22 @@ public function KEH_DrawSelBox
 	// - object.drawColour.[rgb] is set to the colour the main box frame should be
 	//   - Shadows are always 0x000000, though this function can be changed to allow for customising them too
 	
-	// DrawRect(int XPos, int YPos, int width, int height, int R, int G, int B, int A)
-	
 	temp1 = object.drawPos.y
 	temp1 += object.drawHeight
 	
 	temp2 = object.drawPos.x
 	temp2 += object.drawWidth
 	
+	// To make the ends meet, don't want an empty corner!
+	object.drawHeight++
+	
+	// First do the box's Shadow, 2px off from the main box
 	object.drawPos.x += 2
 	object.drawPos.y += 2
 	temp1 += 2
 	temp2 += 2
 	
-	object.drawHeight++
+	// We're using 0x000000 for the shadow here, it's pretty solid
 	
 	// TL -> TR
 	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, 0x00, 0x00, 0x00, 255)
@@ -138,10 +142,13 @@ public function KEH_DrawSelBox
 	// TR -> BR
 	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, 0x00, 0x00, 0x00, 255)
 	
+	// Now, move back and do the actual main box
 	object.drawPos.x -= 2
 	object.drawPos.y -= 2
 	temp1 -= 2
 	temp2 -= 2
+	
+	// For this one, we're using the variable colours
 	
 	// TL -> TR
 	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
@@ -155,6 +162,7 @@ public function KEH_DrawSelBox
 	// TR -> BR
 	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
 	
+	// And now shift back a bit, undo the change from above
 	object.drawHeight--
 	
 end function
@@ -320,9 +328,6 @@ end event
 
 
 event ObjectDraw
-	
-	SetActivePalette(2, 0, screen.ysize)
-	
 	// Logo and Selections
 	DrawSpriteScreenXY(0, screen.xcenter, 16)
 	DrawSpriteScreenXY(1, screen.xcenter, 133)
@@ -366,14 +371,8 @@ event ObjectStartup
 	
 	SetMusicTrack("SPPMenu.ogg", 1, 214596)
 	
-	// The colours used by the menus are too many to fit in a stage palette,
-	// so just load our own entirely new palette instead
-	// (the zone icons take over half the palette lol)
-	LoadPalette("KEHDX_Menu.act", 2, 0, 0, 256)
-	
-	// Set the Selection box colour to be yellow
-	// -> Not used in this menu, but the other menus use it
-	SetPaletteEntry(0, 192, 0xE0E000)
+	// All the Stage Select icons get their own sheet, since they use up quite a bit of palette space
+	LoadPalette("KEHDX_MenuIcons.act", 1, 0, 0, 256)
 end event
 
 

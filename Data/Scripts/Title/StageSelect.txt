@@ -30,6 +30,10 @@ private alias object.value11 : object.minutes
 
 private alias object.value12 : object.drawPos
 
+// Used to store Sheet IDs
+private alias object.value13 : object.mainSheet
+private alias object.value14 : object.iconSheet
+
 // Used for drawing the selection box
 // Padded out to match other objects' values
 private alias object.value20 : object.drawPos.x
@@ -145,11 +149,20 @@ private function StageSelect_DrawStageEntry
 	object.drawColour.g = checkResult
 	CallFunction(KEH_DrawSelBox)
 	
+	// Draw with the Main sheet for now
+	object.spriteSheet = object.mainSheet
+		
+	// Draw all the texts
+	// (Score, Rings, Play Count, Time, Deaths, Rank, ...)
 	temp1 = 6
 	while temp1 < 12
 		DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
 		temp1++
 	loop
+	
+	// Switch to the Icons sheet and palette now that we're drawing the, well, icons
+	object.spriteSheet = object.iconSheet
+	SetActivePalette(1, 0, screen.ysize)
 	
 	temp2 = screen.xcenter
 	temp2 -= 141
@@ -160,7 +173,12 @@ private function StageSelect_DrawStageEntry
 	// Draw the zone's icon
 	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
 	
-	temp1 += MENUSEL_STGSEL_COUNT // Go from Icon Frames to Name Frames (STAGESEL_SPR_STGNAMES - STAGESEL_SPR_STGICONS, in other words)
+	// Back to the main sheet and palette now!
+	object.spriteSheet = object.mainSheet
+	SetActivePalette(0, 0, screen.ysize)
+	
+	// Go from Icon Frames to Name Frames (STAGESEL_SPR_STGNAMES - STAGESEL_SPR_STGICONS, in other words)
+	temp1 += MENUSEL_STGSEL_COUNT
 	
 	// Draw the zone's name
 	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
@@ -222,6 +240,12 @@ end function
 event ObjectUpdate
 	switch object.state
 	case 0
+		LoadSpriteSheet("KEHMenu/Menu.gif")
+		object.mainSheet = object.spriteSheet
+		
+		LoadSpriteSheet("KEHMenu/Icons.gif")
+		object.iconSheet = object.spriteSheet
+		
 		object.timer = 320
 		SetScreenFade(0, 0, 0, object.timer)
 		object.menusel = saveRAM[251]
@@ -525,9 +549,6 @@ end event
 
 
 event ObjectDraw
-	
-	SetActivePalette(2, 0, screen.ysize)
-	
 	// Select Stage Header
 	temp1 = 16
 	CallFunction(StageSelect_GetScrollOffset)
@@ -562,11 +583,14 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/Menu.gif")
+	LoadSpriteSheet("KEHMenu/Icons.gif")
+	
+	// These frames are for the "Menu" sheet
 	SpriteFrame(0, 0, 1, 1, 0, 0)           // 0 - Placeholder (formerly selection box, don't want to shift around 53 following sprite frame IDs at the moment)
 	SpriteFrame(-71, 0, 142, 7, 288, 185)   // 1 - "Select a Stage"
 	
 	SpriteFrame(-40, 0, 30, 7, 82, 0) // 2 - Time tick marks
-	SpriteFrame(0, 0, 8, 7, 48, 33)   // 3 - Rank placeholder
+	SpriteFrame(0, 0, 8, 7, 104, 17)   // 3 - Rank placeholder
 	
 	SpriteFrame(-20, -6, 40, 20, 85, 105)  // 4 - Blue back arrow
 	SpriteFrame(-20, -6, 40, 20, 85, 125)  // 5 - Red back arrow
@@ -588,15 +612,32 @@ event ObjectStartup
 		temp0++
 	loop
 	
+	// These frames are for the "Icons" sheet
 	// 22-37 - Stage Icons, both S1 and S2 (STAGESEL_SPR_STGICONS)
+	temp2 = MENUSEL_STGSEL_COUNT
+	temp2 /= 2
+	
+	// Top row
 	temp0 = 0
 	temp1 = 0
-	while temp0 < MENUSEL_STGSEL_COUNT
-		SpriteFrame(-141, 16, 32, 24, temp1, 374)
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 0)
 		temp1 += 32
 		temp0++
 	loop
 	
+	// Middle row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 24)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// Not doing anything with the bottom row for now...
+	
+	// Now, all the frames are back to the "Menu" sheet
 	// 38-53 - Stage Names (STAGESEL_SPR_STGNAMES)
 	temp0 = 0
 	temp1 = 192

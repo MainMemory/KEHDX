@@ -279,9 +279,6 @@ end event
 
 
 event ObjectDraw
-	
-	SetActivePalette(2, 0, screen.ysize)
-	
 	// Draw the text
 	temp0 = screen.xcenter
 	DrawMenu(MENU_1, screen.xcenter, 12)
