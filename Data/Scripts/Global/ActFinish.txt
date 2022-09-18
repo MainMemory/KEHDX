@@ -291,7 +291,8 @@ event ObjectUpdate
 			arrayPos1++
 	
 			saveRAM[arrayPos1] += death.count
-
+			death.count = 0
+			
 			WriteSaveRAM()
 			
 			object.timer = 0
@@ -302,8 +303,6 @@ event ObjectUpdate
 		break
 		
 	case ACTFINISH_CHOOSEWHERETOGO
-		death.count = 0
-		
 		if object.usingTouch == false
 			if keyPress[0].left == true
 				object.menuselection--

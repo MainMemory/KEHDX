@@ -268,7 +268,7 @@ event ObjectUpdate
 				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 				temp3 = checkResult
 				
-				// These buttons are really small, not much that can be done without redesigning the entire menu though
+				// These buttons are *really* small, not much that can be done without redesigning the entire menu though
 				
 				// Continue
 				
@@ -589,10 +589,7 @@ event ObjectStartup
 	invincibilityType = TypeName[Invincibility]
 	
 	LoadSpriteSheet("Global/Display.gif")
-
-	player.nodraw = 0
-	stage.ogXBoundary = stage.curXBoundary2
-
+	
 	// Pause menu
 	SpriteFrame(-40, -22, 81, 45, 137, 413)	// 0  - Frame
 	SpriteFrame(-36, -18, 73, 37, 137, 459)	// 1  - Inner
@@ -602,6 +599,8 @@ event ObjectStartup
 	SpriteFrame(-28, -3, 56, 7, 194, 397)	// 5  - Restart (Sel)
 	SpriteFrame(-16, 8, 32, 7, 137, 405)	// 6  - Exit
 	SpriteFrame(-16, 8, 32, 7, 202, 389)	// 7  - Exit (Sel)
+	
+	player.nodraw = 0
 end event
 
 

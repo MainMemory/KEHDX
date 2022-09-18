@@ -20,11 +20,18 @@ private alias object.value0 : player.rings
 // Game Mode Aliases
 private alias 2 : MODE_TIMEATTACK
 
+// Reserved object slot Aliases
+private alias 9 : SLOT_HUD
+
 // KEHDX Aliases, for a variety of things
 
 private alias object.value1 : EmeraldManager.pingTimer
 private alias object.value2 : EmeraldManager.fadeAmount
+
+// Used for shifting the HUD off of the screen
 private alias object.value3 : object.xoffset
+
+private alias object.value4 : object.waterLevelStore
 
 private alias 102400 : min_dist
 
@@ -207,7 +214,7 @@ private function EmeraldManager_HUD
 end function
 
 
-public function HUD_Draw_Standard
+private function HUD_Draw_Standard
 	temp0 = 17
 	temp0 -= object.xoffset
 	DrawSpriteScreenXY(10, temp0, 13)
@@ -395,6 +402,11 @@ public function HUD_Draw_Standard
 end function
 
 function sqrt
+	// Called to get the square root of a number
+	
+	// Preconditions:
+	// - temp0 is the number to find the square root of
+	
 	temp1 = 0x40000000
 	temp2 = 0
 	while temp1 > temp0
@@ -528,7 +540,9 @@ event ObjectUpdate
 				temp2 -= object[arrayPos0].ypos
 				temp2 >>= 16
 				CheckCurrentStageFolder("Zone09")
-				if checkResult == 1
+				if checkResult == true
+					// Account for MPZ's wrapping
+					
 					temp2 &= 0x7FF
 					temp2 += 0xFC00
 					temp2 &= 0xFFFF
@@ -643,7 +657,8 @@ event ObjectUpdate
 				CallFunction(EmeraldManager_AwardBonus)
 			end if
 			object.state++
-			stage.newXBoundary2 = stage.ogXBoundary
+			stage.newXBoundary2 = tileLayer[0].xsize
+			stage.newXBoundary2 <<= 7
 			object[0].xpos = EmeraldManager_EndX
 			object[0].ypos = EmeraldManager_EndY
 			object[0].speed = 0
@@ -874,6 +889,7 @@ event ObjectStartup
 	loop
 
 	// Setup HUD values
+	// This should be in object slot 9, the foreach is just a fancy way of checking if it even exists or not
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].inkEffect = INK_ALPHA
 		object[arrayPos0].alpha = 102

@@ -111,8 +111,6 @@ event ObjectUpdate
 			end if
 			
 			LoadStage()
-			
-			death.count++
 		end if
 
 		if object.timer > 0
@@ -145,12 +143,11 @@ event ObjectUpdate
 			music.volume -= 2
 			object.timer += 4
 		else
+			death.count++
 			LoadStage()
 		end if
 			
 		SetScreenFade(0, 0, 0, object.timer)
-		
-		death.count++
 		break
 
 	case DEATHEVENT_DEATH_TA

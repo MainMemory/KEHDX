@@ -9,7 +9,6 @@
 // Events
 // ========================
 
-
 event ObjectStartup
 	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
 		EmeraldManager_EndX = object[arrayPos0].xpos

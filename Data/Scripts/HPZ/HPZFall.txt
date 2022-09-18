@@ -35,7 +35,7 @@ event ObjectUpdate
 			object[tempObjectPos].state = HPZFALL_SPAWNED
 			object[tempObjectPos].targetPlayer = currentPlayer
 			object[tempObjectPos].direction = 0
-			object[tempObjectPos].animation = ANI_WATERSLIDE
+			object[tempObjectPos].animation = ANI_JUMPING
 			
 			currentPlayer++
 		loop
