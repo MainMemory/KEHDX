@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Image="wcon">
+  <Images>
+    <ImageFromSheet id="wcon" sheet="Global/Display.gif" sourcex="168" sourcey="18" width="16" height="16">
+      <Offset X="-8" Y="-8" />
+    </ImageFromSheet>
+  </Images>
+  <Properties>
+    <Property name="Is End" description="If this Current Tunnel is to mark the end of a tunnel." type="bool" startbit="0" length="1" />
+  </Properties>
+  <Subtypes>
+    <Subtype id="00" name="Start of Current" image="wcon" />
+	<Subtype id="01" name="End of Current" image="wcon" />
+  </Subtypes>
+</ObjDef>

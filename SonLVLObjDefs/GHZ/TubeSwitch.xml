@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ObjDef xmlns="http://www.sonicretro.org" Image="tbox">
   <Images>
-    <ImageFromSheet id="tbox" sheet="Global/Display.gif" sourcex="239" sourcey="239" width="16" height="16">
+    <ImageFromSheet id="tbox" sheet="Global/Display.gif" sourcex="168" sourcey="18" width="16" height="16">
       <Offset X="-8" Y="-8"/>
     </ImageFromSheet>
   </Images>
   <Properties>
-    <Property name="Type" type="types" startbit="0" length="1" />
+    <Property name="Type" description="How this Tube Switch should work." type="types" startbit="0" length="1" />
   </Properties>
   <Enums>
     <Enum name="types">
