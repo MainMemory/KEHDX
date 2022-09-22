@@ -87,7 +87,7 @@ end function
 event ObjectUpdate
 	temp2 = object.xpos
 	temp3 = object.ypos
-	GetTableValue(object.swingAngle, 12, StageSetupS1_oscillationTable)
+	GetTableValue(object.swingAngle, 12, StageSetup_oscillationTable)
 	object.swingAngle >>= 8
 	if object.direction == 1
 		object.swingAngle ^= 255

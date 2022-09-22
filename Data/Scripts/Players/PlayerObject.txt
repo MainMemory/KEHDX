@@ -237,10 +237,6 @@ private alias object.value0 : vsGame.timer
 // VSGame States
 private alias 2 : VSGAME_FADEOUT
 
-// KEHDX Pause Menu (Stage Setup) Aliases
-private alias object[8].value20 : pause.KEH	
-private alias object[8].value21 : player.nodraw
-
 // Animation Aliases
 private alias 39 : ANI_VICTORY
 
@@ -1166,6 +1162,7 @@ public function Player_ProcessUpdate
 			if checkResult == true
 				temp0 = options.vsMode
 				foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+					// Title Card isn't a reserved slot, so we gotta cycle throgh everything and do this instead
 					temp0 = true
 				next
 				CheckEqual(object[30].type, TypeName[Act Finish])
@@ -1176,9 +1173,15 @@ public function Player_ProcessUpdate
 					StopSfx(SfxName[Flying])
 					StopSfx(SfxName[Tired])
 					stage.state = STAGE_PAUSED
+					
+					// While paused, move the player to a standard draw order
+					player.drawOrder = player.sortedDrawOrder
+					
 					PauseMusic()
 				end if
 			end if
+			
+			keyPress[0].start = false
 		end if
 
 		// Call the function for supporting physical gamepads as well
@@ -2216,7 +2219,6 @@ end function
 
 
 public function Player_Action_DblJumpKnux
-#platform: USE_ORIGINS
 	if keyPress[1].buttonY != false
 		CheckEqual(specialStage.emeralds, 127)
 		temp0 = checkResult
@@ -2233,52 +2235,26 @@ public function Player_Action_DblJumpKnux
 			CallFunction(Player_TryTransform)
 		end if
 	end if
-#endplatform
 		
 	if player.jumpPress == true
-#platform: USE_STANDALONE
-		CheckEqual(specialStage.emeralds, 127)
-		temp0 = checkResult
-		CheckGreater(player.rings, 49)
-		temp0 &= checkResult
-		CheckNotEqual(Player_superState, SUPERSTATE_SUPER)
-		temp0 &= checkResult
-		
-		// KEHDX - Stubbed out for right now, we don't want Knuckles going Super just yet
-		temp0 = false
-		
-		if temp0 == true
-			currentPlayer = player.entityPos
-			CallFunction(Player_TryTransform)
-		else
-#endplatform
-#platform: USE_ORIGINS
-			if player.isSidekick == false // Knuckles is never a sidekick LOL
-				CallNativeFunction4(NotifyCallback, NOTIFY_STATS_CHARA_ACTION, 0, 0, 1)
-			end if
-#endplatform
-			
-			player.speed = 0x40000
-			object.yvel += 0x20000 // missing from original
-			if player.yvel < 0
-				player.yvel = 0
-			end if
-
-			if player.direction == 0
-				player.state = Player_State_GlideRight
-				player.xvel = 0x40000
-				player.timer = 0
-			else
-				player.state = Player_State_GlideLeft
-				player.xvel = -0x40000
-				player.timer = 256
-			end if
-
-			player.animation = ANI_GLIDING
-			player.frame = 2
-#platform: USE_STANDALONE
+		player.speed = 0x40000
+		object.yvel += 0x20000 // missing from original
+		if player.yvel < 0
+			player.yvel = 0
 		end if
-#endplatform
+
+		if player.direction == 0
+			player.state = Player_State_GlideRight
+			player.xvel = 0x40000
+			player.timer = 0
+		else
+			player.state = Player_State_GlideLeft
+			player.xvel = -0x40000
+			player.timer = 256
+		end if
+
+		player.animation = ANI_GLIDING
+		player.frame = 2
 	end if
 end function
 
@@ -2291,7 +2267,7 @@ public function Player_HandleDropDash
 		if temp7 >= 0
 			if temp7 == 0
 				if player.jumpPress == true
-					CheckEqual(player.character, 255)
+					CheckEqual(player.character, 255) // KEHDX - stub this out for now, not removing outright in case y'know...
 					temp0 = checkResult
 					// You can't use the Drop Dash with elemental shields
 					CheckNotEqual(player.shield, SHIELD_BUBBLE)

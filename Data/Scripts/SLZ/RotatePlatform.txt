@@ -60,12 +60,12 @@ event ObjectUpdate
 	object.xpos = object.drawPos.x
 	object.ypos = object.drawPos.y
 
-	GetTableValue(temp0, 16, StageSetupS1_oscillationTable)
+	GetTableValue(temp0, 16, StageSetup_oscillationTable)
 	temp0 <<= 8
 	temp0 &= 0xFFFF0000
 	temp0 -= 0x500000
 
-	GetTableValue(temp1, 18, StageSetupS1_oscillationTable)
+	GetTableValue(temp1, 18, StageSetup_oscillationTable)
 	temp1 <<= 8
 	temp1 &= 0xFFFF0000
 	temp1 -= 0x500000
