@@ -11,12 +11,12 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
 				default: // Origins uses Motobugs everywhere, keep this the default
 					img = new Sprite(LevelData.GetSpriteSheet("GHZ/Objects2.gif").GetSection(143, 235, 4, 4), -2, -2);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(211, 220, 4, 4), -2, -2);
 					break;
 			}

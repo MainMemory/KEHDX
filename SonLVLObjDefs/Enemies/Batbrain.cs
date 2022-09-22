@@ -11,15 +11,13 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '2': // Normally, Batbrains are only used in just this folder
-				case '1': // However, since there are more Origins Mission Zones use this object, we gotta expand a bit
-				case '3':
+				case "MZ":
 				default:
 					img = new Sprite(LevelData.GetSpriteSheet("MZ/Objects.gif").GetSection(37, 98, 14, 24), -7, -12);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(52, 68, 14, 24), -7, -12);
 					break;
 			}

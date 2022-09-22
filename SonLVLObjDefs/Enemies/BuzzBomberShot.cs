@@ -11,20 +11,19 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '1':
-				case 'M': // Origins test mission
+				case "GHZ":
 				default:
 					img = new Sprite(LevelData.GetSpriteSheet("GHZ/Objects.gif").GetSection(160, 111, 12, 12), -6, -6);
 					break;
-				case '2':
+				case "MZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MZ/Objects.gif").GetSection(37, 179, 12, 12), -6, -6);
 					break;
-				case '3':
+				case "SYZ":
 					img = new Sprite(LevelData.GetSpriteSheet("SYZ/Objects.gif").GetSection(83, 83, 12, 12), -6, -6);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(35, 51, 16, 16), -8, -8);
 					break;
 			}

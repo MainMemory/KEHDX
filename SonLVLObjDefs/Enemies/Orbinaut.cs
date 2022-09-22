@@ -12,25 +12,25 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '4':
+				case "LZ":
 				default:
 					BitmapBits sheet = LevelData.GetSpriteSheet("LZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(50, 105, 20, 20), -10, -10);
 					sprites[1] = new Sprite(sheet.GetSection(107, 1, 16, 16), -8, -8);
 					break;
-				case '5':
+				case "SLZ":
 					sheet = LevelData.GetSpriteSheet("SLZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(51, 1, 20, 20), -10, -10);
 					sprites[1] = new Sprite(sheet.GetSection(114, 1, 16, 16), -8, -8);
 					break;
-				case '6':
+				case "SBZ":
 					sheet = LevelData.GetSpriteSheet("SBZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(1, 138, 20, 20), -10, -10);
 					sprites[1] = new Sprite(sheet.GetSection(64, 142, 16, 16), -8, -8);
 					break;
-				case '7':
+				case "MBZ":
 					sheet = LevelData.GetSpriteSheet("MBZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(119, 114, 20, 20), -10, -10);
 					sprites[1] = new Sprite(sheet.GetSection(140, 135, 16, 16), -8, -8);

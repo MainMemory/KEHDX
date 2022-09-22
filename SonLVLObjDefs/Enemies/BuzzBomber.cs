@@ -12,26 +12,25 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '1':
-				case 'M': // Origins test mission
+				case "GHZ":
 				default:
 					BitmapBits sheet = LevelData.GetSpriteSheet("GHZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(98, 74, 45, 19), -23, -9);
 					sprites[1] = new Sprite(sheet.GetSection(144, 79, 35, 8), -17, -15);
 					break;
-				case '2':
+				case "MZ":
 					sheet = LevelData.GetSpriteSheet("MZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(1, 127, 45, 19), -23, -9);
 					sprites[1] = new Sprite(sheet.GetSection(38, 147, 35, 8), -17, -15);
 					break;
-				case '3':
+				case "SYZ":
 					sheet = LevelData.GetSpriteSheet("SYZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(1, 81, 45, 19), -23, -9);
 					sprites[1] = new Sprite(sheet.GetSection(38, 101, 35, 8), -17, -15);
 					break;
-				case '4':
+				case "MBZ":
 					sheet = LevelData.GetSpriteSheet("MBZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(1, 1, 45, 19), -23, -9);
 					sprites[1] = new Sprite(sheet.GetSection(38, 21, 35, 8), -17, -15);

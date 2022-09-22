@@ -12,19 +12,18 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '6':
+				case "SBZ":
 				default:
 					img = new Sprite(LevelData.GetSpriteSheet("SBZ/Objects.gif").GetSection(1, 170, 22, 37), -11, -17);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(76, 292, 22, 37), -11, -17);
 					break;
 			}
 
 			properties = new PropertySpec[2];
-			
 			properties[0] = new PropertySpec("Bomb Time", typeof(int), "Extended",
 				"How long thrown bombs will last, in seconds.", null,
 				(obj) => obj.PropertyValue & 127,

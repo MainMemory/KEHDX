@@ -12,28 +12,28 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '2':
+				case "MZ":
 				default:
 					BitmapBits sheet = LevelData.GetSpriteSheet("MZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(18, 81, 16, 22), -8, -14);
 					sprites[1] = new Sprite(sheet.GetSection(1, 81, 16, 24), -8, -14);
 					sprites[2] = new Sprite(sheet.GetSection(35, 81, 16, 16), -8, -8);
 					break;
-				case '3':
+				case "SYZ":
 					sheet = LevelData.GetSpriteSheet("SYZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(98, 98, 16, 22), -8, -14);
 					sprites[1] = new Sprite(sheet.GetSection(81, 98, 16, 24), -8, -14);
 					sprites[2] = new Sprite(sheet.GetSection(98, 121, 16, 16), -8, -8);
 					break;
-				case '6':
+				case "SBZ":
 					sheet = LevelData.GetSpriteSheet("SBZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(75, 26, 16, 22), -8, -14);
 					sprites[1] = new Sprite(sheet.GetSection(75, 1, 16, 24), -8, -14);
 					sprites[2] = new Sprite(sheet.GetSection(75, 49, 16, 16), -8, -8);
 					break;
-				case '7':
+				case "MBZ":
 					sheet = LevelData.GetSpriteSheet("MBZ/Objects.gif");
 					sprites[0] = new Sprite(sheet.GetSection(1, 68, 16, 22), -8, -14);
 					sprites[1] = new Sprite(sheet.GetSection(18, 68, 16, 24), -8, -14);

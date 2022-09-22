@@ -11,14 +11,13 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '1':
-				case 'M': // Origins test mission
+				case "GHZ":
 				default:
 					img = new Sprite(LevelData.GetSpriteSheet("GHZ/Objects.gif").GetSection(160, 111, 12, 12), -6, -6);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(35, 51, 16, 16), -8, -8); // Inaccurate to how it is in official S1 RSDK editor probably, but load the correct sheet anyways
 					break;
 			}

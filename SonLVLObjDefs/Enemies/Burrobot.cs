@@ -11,14 +11,13 @@ namespace S1ObjectDefinitions.Enemies
 
 		public override void Init(ObjectData data)
 		{
-			switch (LevelData.StageInfo.folder[LevelData.StageInfo.folder.Length-1])
+			switch (LevelData.StageInfo.folder)
 			{
-				case '4':
-				case '6': // DLC_Zone06, from Origins
+				case "LZ":
 				default:
 					img = new Sprite(LevelData.GetSpriteSheet("LZ/Objects.gif").GetSection(92, 68, 24, 46), -12, -24);
 					break;
-				case '7':
+				case "MBZ":
 					img = new Sprite(LevelData.GetSpriteSheet("MBZ/Objects.gif").GetSection(88, 217, 24, 46), -12, -24);
 					break;
 			}
