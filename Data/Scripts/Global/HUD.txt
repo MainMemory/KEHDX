@@ -33,6 +33,10 @@ private alias object.value3 : object.xoffset
 
 private alias object.value4 : object.waterLevelStore
 
+private alias object.value5 : object.milliseconds
+private alias object.value6 : object.seconds
+private alias object.value7 : object.minutes
+
 private alias 102400 : min_dist
 
 public alias saveRAM[200] : saved.radar
@@ -130,7 +134,7 @@ public function EmeraldManager_AwardEmerald
 		GetTableValue(arrayPos0, temp1, EmeraldManager_EmeraldObjects)
 		if arrayPos0 == object.entityPos
 			CreateTempObject(TypeName[Chaos Emerald], 0, player[currentPlayer].xpos, player[currentPlayer].ypos)
-			object[tempObjectPos].ypos -= 2097152
+			object[tempObjectPos].ypos -= 0x200000
 			object[tempObjectPos].state = 2
 			object[tempObjectPos].drawOrder = 5
 			object[tempObjectPos].propertyValue = currentPlayer
@@ -147,7 +151,8 @@ public function EmeraldManager_AwardEmerald
 					stage.timeEnabled = false
 				end if
 			end if
-			if options.vsMode == 0
+			
+			if options.vsMode == false
 				if EmeraldManager_BonusFrame != -1
 					CallFunction(EmeraldManager_AwardBonus)
 				end if
@@ -227,20 +232,20 @@ private function HUD_Draw_Standard
 
 	temp1 = 104
 	temp1 -= object.xoffset
-	DrawNumbers(0, temp1, 13, player.score, 6, 8, 0)
+	DrawNumbers(0, temp1, 13, player.score, 6, 8, false)
 
 	temp0 = 67
 	temp0 -= object.xoffset
 	DrawSpriteScreenXY(13, temp0, 29)
 
-	DrawNumbers(0, temp1, 29, stage.milliSeconds, 2, 8, 1)
+	DrawNumbers(0, temp1, 29, stage.milliSeconds, 2, 8, true)
 	temp0 = 80
 	temp0 -= object.xoffset
-	DrawNumbers(0, temp0, 29, stage.seconds, 2, 8, 1)
+	DrawNumbers(0, temp0, 29, stage.seconds, 2, 8, true)
 	temp0 -= 24
-	DrawNumbers(0, temp0, 29, stage.minutes, 1, 8, 1)
+	DrawNumbers(0, temp0, 29, stage.minutes, 1, 8, true)
 
-	DrawNumbers(0, temp1, 45, player[currentPlayer].rings, 3, 8, 0)
+	DrawNumbers(0, temp1, 45, player[currentPlayer].rings, 3, 8, false)
 
 	if stage.debugMode == true
 
@@ -258,14 +263,14 @@ private function HUD_Draw_Standard
 		else
 			temp2 = 13
 		end if
-		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, true)
 
 		// YPos display
 		temp0 = player[currentPlayer].ypos
 		temp0 >>= 16
 		Abs(temp0)
 		temp2 += 16
-		DrawNumbers(0, temp1, temp2, temp0, 5, 8, 1)
+		DrawNumbers(0, temp1, temp2, temp0, 5, 8, true)
 
 		// Move 42 pixels to the left
 		temp1 -= 42
@@ -304,7 +309,7 @@ private function HUD_Draw_Standard
 
 	// The actual player lives number
 	temp1 += 18
-	DrawNumbers(24, temp1, 220, player.lives, 2, 8, 0)
+	DrawNumbers(24, temp1, 220, player.lives, 2, 8, false)
 
 	if saved.radar == 0
 		CallFunction(EmeraldManager_HUD)
@@ -346,9 +351,9 @@ private function HUD_Draw_Standard
 		else
 			GetTableValue(temp0, EmeraldManager_BonusFrame, EmeraldManager_ScoreBonuses)
 			if EmeraldManager_BonusFrame < 3
-				DrawNumbers(0, 49, 61, temp0, 5, 8, 0)
+				DrawNumbers(0, 49, 61, temp0, 5, 8, false)
 			else
-				DrawNumbers(0, 41, 61, temp0, 4, 8, 0)
+				DrawNumbers(0, 41, 61, temp0, 4, 8, false)
 			end if
 		end if
 	end if
@@ -367,29 +372,12 @@ private function HUD_Draw_Standard
 
 	temp0 = temp2
 	temp0 += object.xoffset
-
-	arrayPos1 = 300
-	arrayPos1 *= stage.listPos
-	arrayPos1 += 3
-
-	object.value11 = saveRAM[arrayPos1]		
-	object.value12 = 0
-	object.value13 = 0
-	while object.value11 >= 6000
-		object.value13++
-		object.value11 -= 6000
-	loop
 	
-	while object.value11 >= 100
-		object.value12++
-		object.value11 -= 100
-	loop
-
-	DrawNumbers(0, temp0, temp3, object.value13, 1, 8, 1)
+	DrawNumbers(0, temp0, temp3, object.minutes, 1, 8, true)
 	temp0 += 24
-	DrawNumbers(0, temp0, temp3, object.value12, 2, 8, 1)
+	DrawNumbers(0, temp0, temp3, object.seconds, 2, 8, true)
 	temp0 += 24
-	DrawNumbers(0, temp0, temp3, object.value11, 2, 8, 1)
+	DrawNumbers(0, temp0, temp3, object.milliSeconds, 2, 8, true)
 
 	temp0 -= 37
 	DrawSpriteScreenXY(13, temp0, temp3)
@@ -401,7 +389,7 @@ private function HUD_Draw_Standard
 	DrawSpriteScreenXY(34, temp0, temp3)
 end function
 
-function sqrt
+private function sqrt
 	// Called to get the square root of a number
 	
 	// Preconditions:
@@ -576,13 +564,13 @@ event ObjectUpdate
 			temp0 = temp5
 			CallFunction(sqrt)
 			temp0 <<= 16 // 16.16 fixed point
-			temp0 /= 1280
-			if temp0 > 32768
-				temp0 -= 32768 // 0.5
+			temp0 /= 0x500
+			if temp0 > 0x8000
+				temp0 -= 0x8000 // 0.5
 				temp1 = temp0
-				temp1 /= 163840 // 1.4
+				temp1 /= 0x28000 // 1.4
 				temp0 += temp1
-				temp0 += 19661 // 0.3
+				temp0 += 0x4CCD // 0.3
 				temp0 *= 120
 			else
 				temp0 *= 72
@@ -687,6 +675,7 @@ event ObjectUpdate
 			object[30].type = TypeName[Act Finish]
 			object[30].drawOrder = 6
 			object[30].priority = PRIORITY_ACTIVE
+			stage.pauseEnabled = false
 		end if
 		break
 	end switch
@@ -759,23 +748,16 @@ event ObjectStartup
 	SpriteFrame(0, 0, 39, 11, 1, 131) 	// #12 - Red Rings text
 	SpriteFrame(0, 0, 29, 4, 1, 45) 	// #13 - Timer ticks
 	SpriteFrame(0, 0, 3, 11, 37, 50) 	// #14 - Timer colon
-	SpriteFrame(0, 0, 16, 16, 83, 18) 	// #15 - Sonic life icon
-	SpriteFrame(0, 0, 16, 16, 100, 18) 	// #16 - Tails life icon
-	SpriteFrame(0, 0, 16, 16, 117, 18) 	// #17 - Knuckles life icon
+	SpriteFrame(0, 0, 16, 16, 83, 18) 	// #15 - Knuckles life icon
+	SpriteFrame(0, 0, 16, 16, 100, 18) 	// #16 - Tikal life icon
+	SpriteFrame(0, 0, 16, 16, 117, 18) 	// #17 - Unknown life icon
 	SpriteFrame(0, 0, 8, 8, 1, 98) 		// #18 - Yellow X Debug Icon
 	SpriteFrame(0, 0, 8, 8, 10, 98) 	// #19 - Yellow Y Debug Icon
 	SpriteFrame(0, 0, 6, 6, 19, 98) 	// #20 - Small white x Debug Icon
 
-	SpriteFrame(0, 0, 31, 7, 185, 18) 	// #21 - Sonic name tag
-
-	// Tails or Miles
-	if options.region == false
-		SpriteFrame(0, 0, 31, 7, 217, 18) // #22 - Tails name tag
-	else
-		SpriteFrame(0, 0, 31, 7, 185, 26) // #22 - Miles name tag
-	end if
-
-	SpriteFrame(0, 0, 31, 7, 217, 26) 	// #23 - Knuckles name tag
+	SpriteFrame(0, 0, 31, 7, 185, 18) 	// #21 - Knuckles name tag
+	SpriteFrame(0, 0, 31, 7, 217, 18) 	// #22 - Knuckles name tag
+	SpriteFrame(0, 0, 31, 7, 217, 26) 	// #23 - Tikal name tag
 
 	SpriteFrame(0, 0, 8, 8, 37, 64) 	// #24 - Small number 0
 	SpriteFrame(0, 0, 8, 8, 46, 64) 	// #25 - Small number 1
@@ -793,19 +775,9 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 8, 25, 98) 	// #36 - Red X Debug Icon
 	SpriteFrame(0, 0, 8, 8, 34, 98) 	// #37 - Red Y Debug Icon
 	
-	CheckCurrentStageFolder("GHZ")
-	temp2 = checkresult
-	CheckCurrentStageFolder("MZ")
-	temp2 |= checkResult
-	CheckCurrentStageFolder("SYZ")
-	temp2 |= checkResult
-	CheckCurrentStageFolder("LZ")
-	temp2 |= checkResult
-	CheckCurrentStageFolder("SLZ")
-	temp2 |= checkResult
-	CheckCurrentStageFolder("SBZ")
-	temp2 |= checkResult
-	if temp2 == true
+	// If the folder we're in is initials, we're in an S1 level
+	CheckCurrentStageFolder("Z")
+	if checkResult == true
 		temp0 = 0
 		temp1 = 1
 		while temp0 < 6
@@ -889,10 +861,26 @@ event ObjectStartup
 	loop
 
 	// Setup HUD values
-	// This should be in object slot 9, the foreach is just a fancy way of checking if it even exists or not
+	// This should be in object slot 9 already, the foreach is just a fancy way of checking if it even exists or not
 	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].inkEffect = INK_ALPHA
 		object[arrayPos0].alpha = 102
+		
+		arrayPos1 = 300
+		arrayPos1 *= stage.listPos
+		arrayPos1 += 3
+		
+		object[arrayPos0].milliseconds = saveRAM[arrayPos1]
+			
+		object[arrayPos0].minutes = object[arrayPos0].milliseconds
+		object[arrayPos0].minutes /= 6000
+		
+		object[arrayPos0].milliseconds %= 6000
+		
+		object[arrayPos0].seconds = object[arrayPos0].milliseconds
+		object[arrayPos0].seconds /= 100
+		
+		object[arrayPos0].milliseconds %= 100
 	next
 
 	EmeraldManager_EntityCount = 0
