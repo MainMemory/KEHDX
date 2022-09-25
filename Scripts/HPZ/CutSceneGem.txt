@@ -47,7 +47,7 @@ event ObjectMain
 
 					CreateTempObject(TypeName[CutSceneGem], 2, object.xpos, object.ypos)
 					object[tempObjectPos].ixpos -= 0
-					object[tempObjectPos].iypos += 8
+					object[tempObjectPos].iypos += 0
 					object[tempObjectPos].xvel = 0
 					object[tempObjectPos].yvel = -0x1C000
 					object[tempObjectPos].state = STATE_SHARD
@@ -56,7 +56,7 @@ event ObjectMain
 
 					CreateTempObject(TypeName[CutSceneGem], 2, object.xpos, object.ypos)
 					object[tempObjectPos].ixpos -= 8
-					object[tempObjectPos].iypos += 8
+					object[tempObjectPos].iypos += 0
 					object[tempObjectPos].xvel = -0xC000
 					object[tempObjectPos].yvel = -0x20000
 					object[tempObjectPos].state = STATE_SHARD
@@ -65,7 +65,7 @@ event ObjectMain
 					
 					CreateTempObject(TypeName[CutSceneGem], 2, object.xpos, object.ypos)
 					object[tempObjectPos].ixpos += 8
-					object[tempObjectPos].iypos += 8
+					object[tempObjectPos].iypos += 0
 					object[tempObjectPos].xvel = 0xC000
 					object[tempObjectPos].yvel = -0x20000
 					object[tempObjectPos].state = STATE_SHARD
@@ -73,8 +73,8 @@ event ObjectMain
 					object[tempObjectPos].EXyvel = 0x2800
 					
 					CreateTempObject(TypeName[CutSceneGem], 2, object.xpos, object.ypos)
-					object[tempObjectPos].ixpos += 24
-					object[tempObjectPos].iypos += 8
+					object[tempObjectPos].ixpos += 16
+					object[tempObjectPos].iypos += 0
 					object[tempObjectPos].xvel = 0x18000
 					object[tempObjectPos].yvel = -0x1C000
 					object[tempObjectPos].state = STATE_SHARD
@@ -82,8 +82,8 @@ event ObjectMain
 					object[tempObjectPos].EXyvel = 0x2800
 					
 					CreateTempObject(TypeName[CutSceneGem], 2, object.xpos, object.ypos)
-					object[tempObjectPos].ixpos -= 24
-					object[tempObjectPos].iypos -= 4
+					object[tempObjectPos].ixpos -= 16
+					object[tempObjectPos].iypos += 0
 					object[tempObjectPos].xvel = -0x18000
 					object[tempObjectPos].yvel = -0x1C000
 					object[tempObjectPos].state = STATE_SHARD

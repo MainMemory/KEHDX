@@ -369,14 +369,41 @@ event ObjectMain
 		screen.xoffset++ //move the camera
 
 		if object.value47 == 86 // next part
+			object.value47 = 0
 			object.state++
 		end if 
 		break
 	case 3 //I'ma gonna break that cool rock
-		object[0].right = 1
-		object[0].state = PlayerObject_StartJump //gonna do the thing
-		object[0].jumpHold = 1
-		object.state++
+		if object.value47 == 100
+			object[0].right = 1
+			object[0].state = PlayerObject_StartJump //gonna do the thing
+			object[0].jumpHold = 1
+			object.state++
+		else
+			object.value47++
+
+			switch stage.playerListPos //Change animation based on character
+			case 0 //Knuckles
+				object[0].animation = 40 //laughing
+				break
+			case 1 //Tikal
+				object[0].animation = ANI_WAITING //lookin around
+
+				//Make Tikal look in other directions
+				if object.value47 == 25
+					object[0].direction = FLIP_X
+				end if
+				if object.value47 == 50
+					object[0].direction = FLIP_NONE
+				end if
+				if object.value47 == 75
+					object[0].direction = FLIP_X
+				end if
+				break
+			end switch
+
+			object[0].state = PlayerObject_Blank
+		end if
 		break
 	case 4 // Ok I did it
 		object[0].right = 1
