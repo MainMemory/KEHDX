@@ -35,6 +35,7 @@ private alias 8 : CUTSCENE_FADEOUT
 private alias object.state : player.state
 private alias object.xpos : player.xpos
 private alias object.speed : player.speed
+private alias object.direction : player.direction
 private alias object.animation : player.animation
 private alias object.controlmode : player.controlmode
 private alias object.tileCollisions : player.tileCollisions
@@ -205,7 +206,7 @@ event ObjectUpdate
 	
 	case CUTSCENE_STARTPAN
 		// Start panning the camera over to the Gem
-		// object[34] is the CutSceneGem object, with a hardcoded address here for ease
+		// object[34] should be the CutSceneGem object, with a hardcoded address here for ease
 		camera[0].target = 34
 		camera[0].style = 4
 		object.timer = 0
@@ -216,18 +217,53 @@ event ObjectUpdate
 		
 		object.timer++
 		
-		CheckEqual(object.timer, 86)
-		object.state += checkResult
+		if object.timer > 86
+			object.timer = 0
+			object.state++
+		end if
 		break
 		
 	case CUTSCENE_JUMP
-		player[0].right = true
-		player[0].state = Player_Action_Jump
-		player[0].jumpHold = true
+		object.timer++
+		switch object.timer
+		case 1
+			switch stage.playerListPos
+			case 0
+				// Knuckles should laugh
+				// KEHDX TODO: when updating this, karl forgot to push the updated ani file so this animation ID isn't valid atm...
+				player[0].animation = 40
+				break
+
+			case 1
+				// Tikal should look around
+				player[0].animation = ANI_WAITING
+				break
+
+			end switch
+
+			player[0].state = Player_State_Static
+			break
+
+		case 25
+		case 50
+		case 75 // KEHDX TODO: timing feels kinda weird...
+			player[0].direction ^= FACING_LEFT
+			break
+
+		case 100
+			player[0].right = true
+			player[0].jumpHold = true
+			player[0].state = Player_Action_Jump //gonna do the thing
+
+			object.timer = 0
+			object.state++
+			break
+			
+		end switch
 		
-		object.timer = 0
-		object.state++
-		// [Fallthrough]
+		// Only Tikal should turn around
+		player[0].direction *= stage.playerListPos
+		break
 	case CUTSCENE_BREAKROCK
 		CheckGreater(player[0].xpos, object[34].xpos)
 		object.state += checkResult
