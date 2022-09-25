@@ -37,6 +37,8 @@ event ObjectUpdate
 			object[tempObjectPos].direction = 0
 			object[tempObjectPos].animation = ANI_JUMPING
 			
+			player[currentPlayer].state = Player_State_Air
+
 			currentPlayer++
 		loop
 
