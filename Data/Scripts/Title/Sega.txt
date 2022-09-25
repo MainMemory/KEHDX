@@ -34,6 +34,7 @@ public alias 0 : BOOTMODE_NONE
 public alias 1 : BOOTMODE_MAINMENU
 public alias 2 : BOOTMODE_OPTIONS
 public alias 3 : BOOTMODE_STAGESELECT
+public alias 4 : BOOTMODE_COMPETITION
 
 
 // ========================
@@ -203,6 +204,7 @@ event ObjectDraw
 			temp0 = screen.xcenter
 			temp0 -= 93
 			DrawRect(temp0, 90, 42, 60, 224, 224, 224, 255)
+			
 			temp0 = screen.xcenter
 			temp0 -= 6
 			DrawRect(temp0, 90, 100, 60, 224, 224, 224, 255)
@@ -254,26 +256,35 @@ event ObjectStartup
 	game.titleMode = false
 #endplatform
 	
-	temp0 = 0
-	
 	switch menu.bootMode
 	case BOOTMODE_NONE
+	default
 		// Nothing special needed here, player just booted up the game so give them all the splashes
+		temp0 = TypeName[Sega]
 		break
-	case BOOTMODE_STAGESELECT
-		temp0++
-	case BOOTMODE_OPTIONS
-		temp0++
-	case BOOTMODE_MAINMENU
-		temp0 += 2
 		
-		foreach (TypeName[Sega], arrayPos0, ALL_ENTITIES)
-			object[arrayPos0].type = temp0
-			object[arrayPos0].priority = 1 // "PRIORITY_ACTIVE", actual name varies across decomp versions so numeric ID is used here instead
-		next
+	case BOOTMODE_MAINMENU
+		temp0 = TypeName[Main Menu]
+		break
+		
+	case BOOTMODE_OPTIONS
+		temp0 = TypeName[Options]
+		break
+		
+	case BOOTMODE_STAGESELECT
+		temp0 = TypeName[Stage Select]
+		break
+		
+	case BOOTMODE_COMPETITION
+		temp0 = TypeName[Competition L1]
 		break
 		
 	end switch
+	
+	foreach (TypeName[Sega], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].type = temp0
+		object[arrayPos0].priority = 1 // "PRIORITY_ACTIVE", actual name varies across decomp versions so numeric ID is used here instead
+	next
 end event
 
 

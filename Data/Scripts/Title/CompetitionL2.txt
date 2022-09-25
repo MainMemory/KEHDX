@@ -1,0 +1,513 @@
+// ----------------------------------
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: Competition L2 Object
+// Script Author: Lave sIime
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+// Master aliases (propertyValue == 0)
+private alias object.value0 : object.timer
+private alias object.value1 : object.selection
+private alias object.value2 : object.mainSheet
+private alias object.value3 : object.iconSheet
+private alias object.value4 : object.scrOffset
+private alias object.value5 : object.scrTarget
+
+// Box drawing aliases, used by both Master and Subs
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
+private alias 0 : COMP_MENU_INIT
+private alias 1 : COMP_MENU_FADEIN
+private alias 2 : COMP_MENU_MAIN
+private alias 3 : COMP_MENU_SCROLL
+private alias 4 : COMP_MENU_FADEOUT
+private alias 5 : COMP_MENU_BACK
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	if object.propertyValue == 0
+		switch object.state
+		case COMP_MENU_INIT
+			// We want to draw on top of the following texts
+			// (We could also set the texts' Draw Order to 2 too but this is easier)
+			object.drawOrder = 4
+			
+			LoadSpriteSheet("KEHMenu/Menu.gif")
+			object.mainSheet = object.spriteSheet
+			
+			LoadSpriteSheet("KEHMenu/Icons.gif")
+			object.iconSheet = object.spriteSheet
+			
+			arrayPos0 = object.entityPos
+			arrayPos0++
+			
+			temp0 = 1
+			temp1 = 38
+			while temp0 <= MENUSEL_STGSEL_COUNT // inclusive to reach SBZ (remember that here, stage IDs start at 1)
+				ResetObjectEntity(arrayPos0, TypeName[Competition L2], temp0, object.xpos, object.ypos)
+				object[arrayPos0].priority = 1
+				object[arrayPos0].iypos = temp1
+				
+				arrayPos0++
+				temp1 += 16
+				temp0++
+			loop
+			
+			object.timer = 256
+			object.selection = 1
+			
+			SetScreenFade(0, 0, 0, object.timer)
+			object.state++
+			break
+			
+		case COMP_MENU_FADEIN
+			if object.timer > 0
+				object.timer -= 16
+			else
+				object.timer = 0
+				object.state++
+			end if
+
+			SetScreenFade(0, 0, 0, object.timer)
+			break
+			
+		case COMP_MENU_MAIN
+			if keyPress[1].buttonB == true
+				object.state = COMP_MENU_BACK
+				return
+			end if
+			
+			if keyPress[1].start == true
+				object.state = COMP_MENU_FADEOUT
+				return
+			end if
+			
+			object.speed = 0x0000
+			
+			if keyPress[1].up == true
+				CheckGreater(object.selection, 1)
+				object.selection -= checkResult
+				
+				temp0 = checkResult
+				CheckLower(object.selection, 6)
+				temp0 &= checkResult
+				if temp0 == true
+					object.scrTarget += 0x100000
+					object.state = COMP_MENU_SCROLL
+				end if
+				
+				return
+			else
+				if keyPress[1].down == true
+					CheckGreater(MENUSEL_STGSEL_COUNT, object.selection)
+					object.selection += checkResult
+					
+					if object.selection < 7 // MENUSEL_STGSEL_END - 8, lower bounds of camera
+						object.scrTarget -= 0x100000
+						object.state = COMP_MENU_SCROLL
+					end if
+					
+					return
+				end if
+			end if
+			
+			if keyPress[1].start == true
+				PlaySfx(SfxName[Warp], false)
+				object.state = COMP_MENU_FADEOUT
+			end if
+			
+			break
+			
+		case COMP_MENU_SCROLL
+			if object.scrTarget < object.scrOffset
+				object.scrOffset -= object.speed
+				object.speed += 0x10000
+				CheckGreater(object.scrTarget, object.scrOffset)
+			else
+				object.scrOffset += object.speed
+				object.speed += 0x10000
+				CheckGreater(object.scrOffset, object.scrTarget)
+			end if
+			
+			if checkResult == true
+				object.scrOffset = object.scrTarget
+				object.state = COMP_MENU_MAIN
+			end if
+			break
+			
+		case COMP_MENU_FADEOUT
+			if object.timer < 256
+				object.timer += 16
+				SetScreenFade(0, 0, 0, object.timer)
+			else
+				// Special handling for HPZ and its intro cutscene scene
+				CheckEqual(object.selection, 9)
+				stage.listPos = checkResult
+				stage.listPos ^= 1
+				stage.listPos *= object.selection
+				stage.listPos--
+				
+				stage.activeList = checkResult
+				stage.activeList++
+				LoadStage()
+				
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if
+			break
+			break
+			
+		case COMP_MENU_BACK
+			if object.timer < 256
+				object.timer += 16
+				SetScreenFade(0, 0, 0, object.timer)
+			else
+				// Clear all the texts
+				foreach (TypeName[Competition L2], arrayPos0, ACTIVE_ENTITIES)
+					object[arrayPos0].type = TypeName[Blank Object]
+				next
+				
+				ResetObjectEntity(object.entityPos, TypeName[Competition L1], 0, object.xpos, object.ypos)
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if
+			break
+			
+		end switch
+	else
+		// we're a name object
+	end if
+end event
+
+
+event ObjectDraw
+	if object.propertyValue == 0
+		// Draw the "Select a Stage" header
+		DrawSpriteScreenXY(47, screen.xcenter, 16)
+		
+		// Both boxes are the same dimensions
+		object.drawPos.y = 30
+		object.drawWidth = 128
+		object.drawHeight = 180
+		object.drawColour.r = 0xE0
+		object.drawColour.g = 0x00
+		object.drawColour.b = 0x00
+		
+		// First, left box with all the stage names
+		object.drawPos.x = screen.xcenter
+		object.drawPos.x -= 147
+		CallFunction(KEH_DrawSelBox)
+		
+		// Then, right box with other stuff
+		object.drawPos.x += 152
+		object.drawPos.y = 30
+		CallFunction(KEH_DrawSelBox)
+		
+		// Draw the KEHDX Emblem
+		object.spriteSheet = object.mainSheet
+		temp0 = object.drawWidth
+		temp0 /= 2
+		object.drawPos.x += temp0
+		DrawSpriteScreenXY(46, object.drawPos.x, 180)
+		
+		// Now, draw the icon on top of the emblem
+		SetActivePalette(1, 0, screen.ysize)
+		object.spriteSheet = object.iconSheet
+		
+		temp0 = object.selection
+		temp0 += 47
+		DrawSpriteScreenXY(temp0, object.drawPos.x, 180)
+		
+		SetActivePalette(0, 0, screen.ysize)
+		object.spriteSheet = object.mainSheet
+		
+		// After that, come the win tallies
+		// (they just draw 0 for now cuz there ain't no one winning here just yet)
+		
+		object.drawPos.x = screen.xcenter
+		object.drawPos.x += 25
+		
+		temp2 = object.drawWidth
+		temp2 /= 2
+		
+		// First, get a head count
+		// -> Not used at the moment, though there's probably something out there that this could serve a purpose for
+		temp0 = 0
+		arrayPos0 = 0
+		while arrayPos0 < 8
+			GetBit(checkResult, vs.activePlayers, arrayPos0)
+			temp0 += checkResult
+			arrayPos0++
+		loop
+		
+		// TL - P1
+		// (Should always be active, but may as well check anyways)
+		GetBit(temp1, vs.activePlayers, 0)
+		if temp1 == true
+			temp1 = vs.playerIDs
+			temp1 &= 0xFF
+			temp1 += 65
+			DrawSpriteScreenXY(temp1, object.drawPos.x, 80)
+			
+			object.drawPos.x += 10
+			DrawSpriteScreenXY(64, object.drawPos.x, 80)
+			
+			object.drawPos.x += 20
+			DrawNumbers(36, object.drawPos.x, 76, 0, 2, 8, true)
+			
+			object.drawPos.x -= 30
+		end if
+		
+		// BL - P3
+		GetBit(temp1, vs.activePlayers, 2)
+		if temp1 == true
+			temp1 = vs.playerIDs
+			temp1 &= 0xFF0000
+			temp1 >>= 16
+			temp1 += 65
+			DrawSpriteScreenXY(temp1, object.drawPos.x, 100)
+			
+			object.drawPos.x += 10
+			DrawSpriteScreenXY(64, object.drawPos.x, 100)
+			
+			object.drawPos.x += 20
+			DrawNumbers(36, object.drawPos.x, 96, 0, 2, 8, true)
+			
+			object.drawPos.x += 34 // hardcoded derivative of temp2 (temp2 - 10 - 20)
+		else
+			object.drawPos.x += temp2
+		end if
+		
+		// TR - P2
+		GetBit(temp1, vs.activePlayers, 1)
+		if temp1 == true
+			temp1 = vs.playerIDs
+			temp1 &= 0xFF00
+			temp1 >>= 8
+			temp1 += 65
+			DrawSpriteScreenXY(temp1, object.drawPos.x, 80)
+			
+			object.drawPos.x += 10
+			DrawSpriteScreenXY(64, object.drawPos.x, 80)
+			
+			object.drawPos.x += 20
+			DrawNumbers(36, object.drawPos.x, 76, 0, 2, 8, true)
+			
+			object.drawPos.x -= 30
+			
+			object.drawPos.x += 34
+		end if
+		
+		// BR - P4
+		GetBit(temp1, vs.activePlayers, 3)
+		if temp1 == true
+			temp1 = vs.playerIDs
+			temp1 &= 0xFF000000
+			temp1 >>= 24
+			temp1 += 65
+			DrawSpriteScreenXY(temp1, object.drawPos.x, 100)
+			
+			object.drawPos.x += 10
+			DrawSpriteScreenXY(64, object.drawPos.x, 100)
+			
+			object.drawPos.x += 20
+			DrawNumbers(36, object.drawPos.x, 96, 0, 2, 8, true)
+		end if
+	else
+		// we're a name object
+		
+		object.spriteSheet = object[32].mainSheet
+		
+		temp0 = object.propertyValue
+		temp0 += 19
+		
+		temp1 = object.propertyValue
+		temp1 *= 7
+		temp1 += 185
+		
+		// Make the current selection highlighted
+		CheckNotEqual(object.propertyValue, object[32].selection)
+		checkResult *= 0xE0
+		checkResult += 0xE0E000
+		SetPaletteEntry(0, 128, checkResult)
+		
+		object.drawPos.x = screen.xcenter
+		object.drawPos.x -= 139
+		
+		object.drawPos.y = object[32].scrOffset
+		object.drawPos.y += object.ypos
+		
+		object.drawPos.y >>= 16
+		
+		if object.drawPos.y < screen.ycenter
+			// Checking for upper bounds
+			
+			temp2 = 7
+			temp3 = 0
+			
+			if object.drawPos.y < 32
+				temp3 = 32
+				temp3 -= object.drawPos.y
+				
+				temp1 += temp3
+				
+				temp2 -= temp3
+				
+				temp3 = 7
+				temp3 -= temp2
+			end if
+			
+			if temp2 > 0
+				EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+				
+				DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
+			end if
+		else
+			// Checking for lower bounds
+			
+			temp2 = 7
+			temp3 = 0
+			
+			if object.drawPos.y > 203
+				temp2 = object.drawPos.y
+				temp2 -= 203
+				
+				temp6 = 7
+				temp6 -= temp2
+				temp2 = temp6
+				
+				temp1 -= temp3
+			end if
+			
+			if object.drawPos.y < 220
+				EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+				
+				DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
+			end if
+		end if
+		
+		// Reset the selection colour, since other texts use it too
+		// -> This is only really relevant for the last Text, but it doesn't hurt to do it regardless anyways
+		SetPaletteEntry(0, 128, 0xE0E0E0)
+	end if
+end event
+
+
+event ObjectStartup
+	// This object switches between two sheets, both of which have been loaded by Stage Select already, so let's skip over reloading them for right now
+	
+	// 0-3 - [1-4]P icons, for the main Menu sheet
+	SpriteFrame(-8, 0, 16, 7, 0, 72)
+	SpriteFrame(-8, 0, 16, 7, 0, 80)
+	SpriteFrame(-8, 0, 16, 7, 0, 88)
+	SpriteFrame(-8, 0, 16, 7, 0, 96)
+	
+	// 4-19 - Stage Icons, from the Icons sheet
+	temp2 = MENUSEL_STGSEL_COUNT
+	temp2 /= 2
+	
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 0)
+		temp1 += 32
+		temp0++
+	loop
+	
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 24)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// 20-35 - Stage Names, back to the main Menu sheet
+	// (yeah we could prolly just use the menu system, but may as well discard it for consistency)
+	temp0 = 0
+	temp1 = 192
+	while temp0 < MENUSEL_STGSEL_COUNT
+		SpriteFrame(0, 0, 112, 7, 0, temp1)
+		temp1 += 7
+		temp0++
+	loop
+	
+	// 36-45 - Numbers
+	temp0 = 0
+	temp1 = 0
+	while temp0 < 10
+		SpriteFrame(0, 0, 8, 7, temp1, 25)
+		temp1 += 8
+		temp0++
+	loop
+	
+	// 46 - KEHDX Emblem
+	// (i made the lettering myself [lave], if you're wondering why it looks bad..)
+	SpriteFrame(-40, -25, 79, 49, 113, 261)
+	
+	// 47 - "Select a Stage"
+	SpriteFrame(-71, 0, 142, 7, 288, 185)
+	
+	// 48-63 - Stage Icons, for the Icons sheet
+	temp2 = MENUSEL_STGSEL_COUNT
+	temp2 /= 2
+	
+	// Top row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-16, -12, 32, 24, temp1, 0)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// Middle row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-16, -12, 32, 24, temp1, 24)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// 64 - (The letter) X
+	// Cropped from font portion of sheet
+	SpriteFrame(0, -4, 8, 7, 64, 57)
+	
+	// 65 - Knuckles life icon
+	SpriteFrame(-8, -8, 16, 16, 0, 104)
+	
+	// 66 - Tikal life icon
+	SpriteFrame(-8, -8, 16, 16, 0, 120)
+	
+	// Note - 
+	
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-50, -8, 100, 16, 128, 154)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

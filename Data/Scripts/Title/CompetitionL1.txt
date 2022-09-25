@@ -1,0 +1,480 @@
+// ----------------------------------
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: Competition L1 Object
+// Script Author: Lave sIime
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+// Master aliases (propertyValue == 0)
+private alias object.value0 : object.timer
+private alias object.value1 : object.selection
+
+private alias 0 : COMP_MASTER_INIT
+private alias 1 : COMP_MASTER_FADEIN
+private alias 2 : COMP_MASTER_MAIN
+private alias 3 : COMP_MASTER_NEXT
+private alias 4 : COMP_MASTER_EXIT
+
+// Child aliases (propertyValue > 0, where propertyValue is playerID)
+// values 0/1 are same as Master
+private alias object.value2 : object.active
+private alias object.value3 : object.selected
+
+// Box drawing aliases, padded out to match expected input params
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
+private alias 0 : COMP_SUB_OPEN
+private alias 1 : COMP_SUB_SELECT
+private alias 2 : COMP_SUB_SELECTED
+private alias 3 : COMP_SUB_HOLD
+
+private alias 1 : COMP_CHARACTER_MAX
+
+// Touch Input Aliases
+private alias -1 : TOUCHINPUT_NULL
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	if object.propertyValue == 0
+		// Master object
+		
+		switch object.state
+		case COMP_MASTER_INIT
+			arrayPos0 = object.entityPos
+			arrayPos0 += 8
+			
+			// Set up base box positions
+			// -> We're storing this data in some unused Blank Objects, for ease in looping a few lines later on
+			object[arrayPos0].xpos = screen.xcenter
+			object[arrayPos0].xpos -= 170
+			object[arrayPos0].ypos = 24
+			
+			arrayPos0++
+			object[arrayPos0].xpos = screen.xcenter
+			object[arrayPos0].xpos += 20
+			object[arrayPos0].ypos = 24
+			
+			arrayPos0++
+			object[arrayPos0].xpos = screen.xcenter
+			object[arrayPos0].xpos -= 170
+			object[arrayPos0].ypos = 124
+			
+			arrayPos0++
+			object[arrayPos0].xpos = screen.xcenter
+			object[arrayPos0].xpos += 20
+			object[arrayPos0].ypos = 124
+			
+			// Now, actually set up the boxes
+			
+			arrayPos0 = object.entityPos
+			arrayPos0++
+			arrayPos1 = arrayPos0
+			arrayPos1 += 7
+			
+			temp0 = 1
+			while temp0 < 5
+				ResetObjectEntity(arrayPos0, TypeName[Competition L1], temp0, object.xpos, object.ypos)
+				object[arrayPos0].priority = 1
+				object[arrayPos0].drawPos.x = object[arrayPos1].xpos
+				object[arrayPos0].drawPos.y = object[arrayPos1].ypos
+				object[arrayPos0].drawWidth = 127
+				object[arrayPos0].drawHeight = 87
+				object[arrayPos0].drawColour.r = 0xE0
+				object[arrayPos0].drawColour.g = 0xE0
+				object[arrayPos0].drawColour.b = 0x00
+				
+				arrayPos0++
+				arrayPos1++
+				temp0++
+			loop
+			
+			object.timer = 320
+			
+			// 0.75 BG scroll speed cuz why not
+			tileLayer[1].scrollSpeed = -0xC000
+			hParallax[0].scrollSpeed = -0xC000
+			
+			// Bitfield containing all active players
+			vs.activePlayers = 0
+			
+			// DDCCBBAA byte order, holding player IDs
+			vs.playerIDs = 0
+			
+			SetScreenFade(0, 0, 0, object.timer)
+			object.state++
+			break
+
+		case COMP_MASTER_FADEIN
+			if object.timer > 0
+				object.timer -= 16
+			else
+				PlayMusic(0)
+				object.timer = 0
+				object.state++
+			end if
+			
+			SetScreenFade(0, 0, 0, object.timer)
+			break
+
+		case COMP_MASTER_MAIN
+			// TODO: add touch exit button, you can't really do much from mobile so may as well allow them to exit 
+			break
+			
+		case COMP_MASTER_NEXT
+			if object.timer < 256
+				object.timer += 16
+				SetScreenFade(0, 0, 0, object.timer)
+			else
+				arrayPos0 = object.entityPos
+				arrayPos0++
+				
+				// Clear all the Competition boxes
+				temp0 = 4
+				while temp0 > 0
+					ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, object.xpos, object.ypos)
+					arrayPos0++
+					temp0--
+				loop
+				
+				ResetObjectEntity(object.entityPos, TypeName[Competition L2], 0, object.xpos, object.ypos)
+				
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if
+			break
+			
+		case COMP_MASTER_EXIT
+			if object.timer < 256
+				music.volume -= 2
+				object.timer += 16
+				SetScreenFade(0, 0, 0, object.timer)
+			else
+				StopMusic()
+				
+				arrayPos0 = object.entityPos
+				arrayPos0++
+				
+				// Clear all the Competition boxes
+				temp0 = 4
+				while temp0 > 0
+					ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, object.xpos, object.ypos)
+					arrayPos0++
+					temp0--
+				loop
+				
+				menu.bootMode = BOOTMODE_MAINMENU
+				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+				
+				SetScreenFade(0, 0, 0, 0xFF)
+			end if
+			break
+			
+		end switch
+	else
+		// Get the input index of the assigned player
+		arrayPos0 = object.propertyValue
+		
+		switch object.state
+		case COMP_SUB_OPEN
+			checkResult = keyPress[arrayPos0].up
+			checkResult |= keyPress[arrayPos0].down
+			checkResult |= keyPress[arrayPos0].left
+			checkResult |= keyPress[arrayPos0].right
+			checkResult |= keyPress[arrayPos0].buttonA
+			checkResult |= keyPress[arrayPos0].buttonC
+			checkResult |= keyPress[arrayPos0].start
+			
+			if checkResult == true
+				object.active = true
+				object.state++
+			else
+				CheckEqual(keyPress[arrayPos0].buttonB, true)
+				temp0 = checkResult
+				CheckEqual(object.propertyValue, 1)
+				temp0 &= checkResult
+				if temp0 == true
+					// If P1's trying to go back, then return to the Main Menu
+					object.active = false
+					object[-1].state = COMP_MASTER_EXIT
+				end if
+			end if
+			break
+			
+		case COMP_SUB_SELECT
+			object.selection += keyPress[arrayPos0].left
+			object.selection += keyPress[arrayPos0].right
+			
+			// There's only two characters for now...
+			object.selection &= COMP_CHARACTER_MAX
+			
+			if keyPress[arrayPos0].start == true
+				// Lock in the character
+				
+				object.frame = 0
+				object.selected = true
+				object.state++
+			else
+				// Keeping this nested, just in case the player's good enough to hit start and back at once
+				if keyPress[arrayPos0].buttonB == true
+					// Go back and make the box open
+					
+					object.selection = 0
+					object.active = false
+					object.state--
+				end if
+			end if
+			break
+			
+		case COMP_SUB_SELECTED
+			if keyPress[arrayPos0].buttonB == true
+				// If the player wants to return, then allow them to choose their character again
+				
+				object.frame = 0
+				object.selected = false
+				object.state--
+			else
+				// Nested for the same reason as above, this time inverse because of the player 1 check
+				CheckEqual(keyPress[arrayPos0].start, true)
+				temp0 = checkResult
+				CheckEqual(object.propertyValue, 1)
+				temp0 &= checkResult
+				if temp0 == true
+					// See if we can start the game
+					
+					temp0 = false
+					temp1 = -1
+					
+					foreach (TypeName[Competition L1], arrayPos1, ACTIVE_ENTITIES)
+						// Make sure it's not currently choosing a character;
+						// It can either be blank (no player), or be locked in (ready player)
+						
+						CheckEqual(object[arrayPos1].state, COMP_SUB_SELECT)
+						temp0 |= checkResult
+						
+						// Gather a player count too
+						
+						CheckEqual(object[arrayPos1].state, COMP_SUB_SELECTED)
+						temp1 += checkResult
+					next
+					
+					// If all boxes are ready
+					if temp0 == false
+						// If we have more than 1 player
+						if temp1 > 1
+							object[-1].state = COMP_MASTER_NEXT
+							
+							foreach (TypeName[Competition L1], arrayPos1, ACTIVE_ENTITIES)
+								CheckEqual(object[arrayPos1].state, COMP_SUB_SELECTED)
+								SetBit(vs.activePlayers, object[arrayPos1].propertyValue, checkResult)
+								
+								if object[arrayPos1].state > COMP_SUB_OPEN
+									object[arrayPos1].state = COMP_SUB_HOLD
+								end if
+								
+								// Get amount to bit shift by
+								temp1 = object[arrayPos1].propertyValue
+								temp1--
+								temp1 <<= 3
+								
+								temp0 = object[arrayPos1].selection
+								temp0 <<= temp1
+								temp1 = temp0
+								Not(temp1)
+								
+								vs.playerIDs &= temp1
+								vs.playerIDs |= temp0
+							next
+							
+							// Property values start at 1, we want player 1 to be the first bit though
+							vs.activePlayers >>= 1
+						else
+							// Intentionally only playing it if player count isn't meet
+							PlaySfx(SfxName[Fail], false)
+						end if
+					end if
+				end if
+			end if
+			break
+			
+		case COMP_SUB_HOLD
+			// Used when fading out, to make sure the player doesn't have a change of heart
+			
+			// Not much is really done here, just hold for a few frames...
+			break
+			
+		end switch
+	end if
+end event
+
+
+event ObjectDraw
+	if object.propertyValue == 0
+		// Master shouldn't draw anything, return
+		return
+	end if
+	
+	// If we're here, we're an individual child object, assigned to a specific player ID
+	
+	// Draw the box as red if a player's inhabiting it
+	CheckNotEqual(object.active, true)
+	object.drawColour.g = checkResult
+	object.drawColour.g *= 0xE0
+	CallFunction(KEH_DrawSelBox)
+	
+	// Turn box pos into normal pos, focus on its centre
+	// -> Needed in order to use DrawObjectAnimation()
+	object.xpos = object.drawWidth
+	object.xpos /= 2
+	object.xpos += object.drawPos.x
+	object.xpos <<= 16
+	
+	object.ypos = object.drawHeight
+	object.ypos /= 2
+	object.ypos += object.drawPos.y
+	object.ypos <<= 16
+	
+	switch object.state
+	case COMP_SUB_OPEN
+		// Signal that the box is open for use, with a "Waiting for [X]P"
+		
+		// First, the player number
+		temp0 = object.propertyValue
+		temp0 += 3
+		DrawSprite(temp0)
+		
+		// Then, the waiting for text
+		DrawSprite(8)
+		break
+		
+	case COMP_SUB_SELECT
+		// Focus on the target player's input index
+		arrayPos0 = object.propertyValue
+		
+		object.ixpos += 2
+		
+		// Draw the blue/highlighted version of the left arrow frame, based on if the player is holding left or not
+		temp0 = keyDown[arrayPos0].left
+		temp0 += 2
+		DrawSprite(temp0)
+		
+		// Right button is just flipped version of the frame
+		object.direction = 1
+		
+		// Same process here
+		temp0 = keyDown[arrayPos0].right
+		temp0 += 2
+		DrawSpriteFX(temp0, FX_FLIP, object.xpos, object.ypos)
+		
+		// Fix orientation
+		object.direction = 0
+		
+		object.ixpos -= 2
+		// [Fallthrough]
+	case COMP_SUB_SELECTED
+	case COMP_SUB_HOLD
+		temp0 = 0
+		
+		// Structered this way for future additions...
+		switch object.selection
+		case 0
+		default
+			LoadAnimation("Knuckles.ani")
+			temp0 = ANI_WAITING
+			break
+			
+		case 1
+			LoadAnimation("Tikal.ani")
+			temp0 = 2 // "ANI_SELECTED" (custom animation, takes the slot of the previously blank "Waiting")
+			break
+			
+		end switch
+		
+		// Different sprite based on if they're selected or not
+		if object.selected == true
+			object.animation = temp0
+			
+			// A ProcessAnimation in an ObjectDraw... this isn't too good of a move, but I suppose it isn't the worst either...
+			ProcessAnimation()
+			
+			// TODO: what i did for tikal's selected animation isn't the best...
+			// make it better
+		else
+			object.animation = 0
+			object.frame = 0
+		end if
+		
+		DrawObjectAnimation()
+		
+		// Move a few pixels up
+		object.iypos -= 35
+		
+		// Draw the player tag
+		temp0 = object.propertyValue
+		temp0 += 3
+		DrawSprite(temp0)
+		
+		// And now, move a few pixels back down
+		object.iypos -= 35
+		break
+		
+	end switch
+	
+end event
+
+
+event ObjectStartup
+
+	// All the menus use just about the same sheet
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	
+	// 0-1 - Back Button Frames
+	SpriteFrame(-20, -10, 40, 20, 85, 105)
+	SpriteFrame(-20, -10, 40, 20, 85, 125)
+	
+	// 2-3 - Arrow Frames
+	SpriteFrame(-88, -8, 20, 20, 85, 65)
+	SpriteFrame(-88, -8, 20, 20, 106, 65)
+	
+	// 4-7 - [1-4]P icons
+	SpriteFrame(-8, 0, 16, 7, 0, 72)
+	SpriteFrame(-8, 0, 16, 7, 0, 80)
+	SpriteFrame(-8, 0, 16, 7, 0, 88)
+	SpriteFrame(-8, 0, 16, 7, 0, 96)
+	
+	// 8 - "Waiting For" text
+	SpriteFrame(-28, -24, 56, 15, 446, 67)
+	
+	// For their little icon appearences
+	LoadAnimation("Knuckles.ani")
+	LoadAnimation("Tikal.ani")
+	
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-50, -8, 100, 16, 128, 154)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

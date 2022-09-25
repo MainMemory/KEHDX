@@ -14,6 +14,8 @@ private alias object.value1 : object.menusel
 
 private alias object.value2 : object.usingTouch
 
+private alias object.value3 : object.fadeType
+
 // Padded out for parity with other Menu objects, so that the value slot is the same across each
 private alias object.value10 : object.buttonLeft
 private alias object.value11 : object.buttonTop
@@ -38,8 +40,7 @@ public alias 255 : MENUSEL_NULL
 private alias 0 : MAINMENU_SETUP
 private alias 1 : MAINMENU_FADEIN
 private alias 2 : MAINMENU_MAIN
-private alias 3 : MAINMENU_STAGESELECT
-private alias 4 : MAINMENU_OPTIONS
+private alias 3 : MAINMENU_FADEOUT
 
 // Touch Input Aliases
 private alias -1 : TOUCHINPUT_NULL
@@ -81,19 +82,18 @@ public function KEH_RunButton
 	// - object.buttonID is the button ID of the button
 	// - object.buttonFunc is the function ID of the button, to be called if the button was pressed
 	
-	CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
-		
-	if checkResult > TOUCHINPUT_NULL
-		object.menusel = object.buttonID
-	else
-		if temp3 < 0
-			if object.menusel == object.buttonID
-				CallFunction(object.buttonFunc)
-			end if
+	if temp3 > -1
+		CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
+		if checkResult > -1
+			object.menusel = object.buttonID
 		else
 			if object.menusel == object.buttonID
 				object.menusel = MENUSEL_NULL
 			end if
+		end if
+	else
+		if object.menusel == object.buttonID
+			CallFunction(object.buttonFunc)
 		end if
 	end if
 	
@@ -171,18 +171,31 @@ end function
 // Button Functions for this script in particular, nothing too big
 
 private function MainMenu_Button_Singleplayer
-	object.state = MAINMENU_STAGESELECT
+	object.fadeType = TypeName[Stage Select]
+	menu.bootMode = BOOTMODE_STAGESELECT
+	object.state = MAINMENU_FADEOUT
 //	saveRAM[250] = object.menusel
 end function
 
 
 private function MainMenu_Button_Competition
-	PlaySfx(SfxName[Fail], false)
+	if engine.onlineActive == true
+		// (Online version of object goes here)
+//		object.fadeType = TypeName[Competition O1]
+		object.fadeType = TypeName[Main Menu]
+		PlaySfx(SfxName[Fail], false)
+	else
+		object.fadeType = TypeName[Competition L1]
+	end if
+	menu.bootMode = BOOTMODE_COMPETITION
+	object.state = MAINMENU_FADEOUT
 end function
 
 
 private function MainMenu_Button_Options
-	object.state = MAINMENU_OPTIONS
+	object.fadeType = TypeName[Options]
+	menu.bootMode = BOOTMODE_OPTIONS
+	object.state = MAINMENU_FADEOUT
 //	saveRAM[250] = object.menusel
 end function
 
@@ -283,37 +296,19 @@ event ObjectUpdate
 			loop
 			
 			object.usingTouch = input.pressButton
+			object.usingTouch |= keyPress[0].down
+			object.usingTouch |= keyPress[0].up
 			object.usingTouch ^= true
 		end if
 		break
-			
-	case MAINMENU_STAGESELECT
-		if object.timer < 256
-			object.timer += 8
-			music.volume -= 2
-			SetScreenFade(0, 0, 0, object.timer)
-		else
-			if TypeName[Stage Select] > 0
-				menu.bootMode = BOOTMODE_STAGESELECT
-				ResetObjectEntity(object.entityPos, TypeName[Stage Select], 0, object.xpos, object.ypos)
-			else
-				stage.listPos = 0
-				LoadStage()
-			end if
-			menu.bootMode = BOOTMODE_STAGESELECT
-			StopMusic()
-			SetScreenFade(0, 0, 0, 0xFF)
-		end if
-		break
 		
-	case MAINMENU_OPTIONS
+	case MAINMENU_FADEOUT
 		if object.timer < 256
 			object.timer += 8
 			music.volume -= 2
 			SetScreenFade(0, 0, 0, object.timer)
 		else
-			menu.bootMode = BOOTMODE_OPTIONS
-			ResetObjectEntity(object.entityPos, TypeName[Options], 0, object.xpos, object.ypos)
+			ResetObjectEntity(object.entityPos, object.fadeType, 0, object.xpos, object.ypos)
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
 		end if

@@ -49,19 +49,19 @@ private alias object.value26 : object.drawColour.b
 private alias object.value0 : object.score
 private alias object.value1 : object.rings
 private alias object.value2 : object.playcount
-private alias object.value3 : object.milliseconds
-private alias object.value4 : object.seconds
-private alias object.value5 : object.minutes
-private alias object.value6 : object.deaths
-private alias object.value7 : object.rank
+private alias object.value3 : object.deaths
+private alias object.value4 : object.rank
+// values 9/10/11 are same milli/sec/mins as main obj
 
 // object.menusel Aliases
-private alias 0  : MENUSEL_STGSEL_START // EHZ
-private alias 15 : MENUSEL_STGSEL_END   // SBZ
-private alias 16 : MENUSEL_STGSEL_COUNT // MENUSEL_STGSEL_END + 1
+// Also used by Comp Menu Local 2
+public alias 0  : MENUSEL_STGSEL_START // EHZ
+public alias 15 : MENUSEL_STGSEL_END   // SBZ
+public alias 16 : MENUSEL_STGSEL_COUNT // MENUSEL_STGSEL_END + 1
 
 // The lowest bounds of the camrea
 // Used for touch input scrolling
+// ((MENUSEL_STGSEL_END - 2) * 72)
 private alias 936 : STAGESEL_SCROLL_LOWBOUNDS
 
 // How tall each row should be
@@ -226,7 +226,7 @@ private function StageSelect_DrawStageEntry
 	temp1 += 12
 	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].deaths, 3, 7, false)
 	
-	// Here would be rank... if there was one
+	// Here would be rank... if there was one!
 	temp1 += 12
 	DrawSpriteScreenXY(object[arrayPos0].rank, temp2, temp1)
 	
@@ -607,7 +607,7 @@ event ObjectStartup
 	temp0 = 0
 	temp1 = 0
 	while temp0 < 10
-		SpriteFrame(0, 0, 8, 7, temp1, 0)
+		SpriteFrame(0, 0, 8, 7, temp1, 25)
 		temp1 += 8
 		temp0++
 	loop
@@ -710,7 +710,7 @@ end event
 
 event RSDKLoad
 	LoadSpriteSheet("KEHMenu/Menu.gif")
-	SpriteFrame(71, 3, 142, 7, 0, 305)
+	SpriteFrame(-80, -8, 159, 16, 128, 113)
 	
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

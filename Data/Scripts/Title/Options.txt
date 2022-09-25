@@ -234,20 +234,19 @@ event ObjectUpdate
 			loop
 			
 			// Check for the exit button
-			CheckTouchRect(10, 190, 60, 220)
-			
-			if checkResult > TOUCHINPUT_NULL
-				object.menusel = 5
-			else
-				if temp3 < 0
-					if object.menusel == 5
-						object.state = OPTIONS_EXIT
-						object.menusel = MENUSEL_NULL
-					end if
+			if temp3 > TOUCHINPUT_NULL
+				CheckTouchRect(10, 190, 60, 220)
+				if checkResult > TOUCHINPUT_NULL
+					object.menusel = object.buttonID
 				else
-					if object.menusel == 5
+					if object.menusel == object.buttonID
 						object.menusel = MENUSEL_NULL
 					end if
+				end if
+			else
+				if object.menusel == object.buttonID
+					object.state = OPTIONS_EXIT
+					object.menusel = MENUSEL_NULL
 				end if
 			end if
 			
@@ -408,8 +407,8 @@ end event
 
 
 event RSDKLoad
-	LoadSpriteSheet("KEHMenu/Options.gif")
-	SpriteFrame(0, 0, 32, 128, 129, 44)
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-50, -8, 100, 16, 128, 154)
 	
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event
