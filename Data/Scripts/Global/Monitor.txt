@@ -13,6 +13,9 @@ private alias object.value1  : object.timer
 private alias object.value3  : object.rewardPlayer
 private alias object.value31 : object.altContents
 
+// KEHDX - Set from editor to make Teleport monitors not set bounds
+private alias object.value2  : object.noBounds
+
 // Player Aliases
 private alias object.propertyValue : player.character
 private alias object.yvel : player.yvel
@@ -142,7 +145,7 @@ event ObjectUpdate
 	end if
 	
 	if object.propertyValue == MONITOR_TELEPORT
-		if stage.listPos != 13
+		if object.noBounds == false
 			temp0 = object.ixpos
 			temp0 += 30
 			stage.newXBoundary2 = temp0
@@ -155,7 +158,7 @@ event ObjectUpdate
 
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 		if object.propertyValue == MONITOR_TELEPORT
-			if stage.listPos != 13
+			if object.noBounds == false
 				temp0 = object[currentPlayer].collisionRight
 				temp0 <<= 16
 				temp0 += object[currentPlayer].xpos
@@ -288,6 +291,7 @@ end event
 
 event ObjectDraw
 	DrawSprite(0)
+	
 	switch StageSetup_monitorOverlayFrame
 	case 0
 	case 1
@@ -360,7 +364,7 @@ event ObjectStartup
 		object[arrayPos0].altContents >>= 4
 		object[arrayPos0].propertyValue &= 15
 		
-		if object[arrayPos0].propertyValue != 13	
+		if object[arrayPos0].propertyValue != MONITOR_TELEPORT
 			CallFunction(EmeraldManager_AddEntity)	
 		end if
 		
@@ -475,4 +479,6 @@ event RSDKLoad
 	AddEnumVariable("Teleport", 13)
 	AddEnumVariable("Random", 14)
 	AddEnumVariable("Shields Toggle", 15)
+	
+	SetVariableAlias(ALIAS_VAR_VAL2, "noBounds")
 end event
