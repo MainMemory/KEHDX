@@ -10,11 +10,14 @@
 // ========================
 // Aliases
 // ========================
+
 private alias object.value1 : object.constBubbleTimer
 private alias object.value2 : object.randBubbleTimer
 private alias object.value3 : object.proccessActEffects
 private alias object.value8 : object.nextTrackID // stores the track that should play after the drowning one stops
 
+private alias 0 : CPZSETUP_WATERINITIAL
+private alias 1 : CPZSETUP_WATERMOVED
 
 // Player Aliases
 private alias object.type : player.type
@@ -66,16 +69,12 @@ private alias 0 : TRACK_STAGE
 private alias 2 : TRACK_INVINCIBLE
 private alias 6 : TRACK_DROWNING
 
-// HUD Aliases
-private alias object.value4 : object.waterLevelStore
-
-private alias 9 : SLOT_HUD
-
 
 // ========================
 // Function Declarations
 // ========================
 
+reserve function Water_ProcessCPZAct1
 reserve function Water_ProcessCPZAct2
 reserve function Water_SpawnSmallAirBubble
 reserve function Water_SpawnCountDownBubble
@@ -94,13 +93,44 @@ private value Water_activateFlag = 0
 // Tables
 // ========================
 
-// In KEHDX we're always in Act 2, took out the (already empty) A1 ver for simplicity's sake
+public table Water_processActTable
+	0, 0, 0
+end table
+
+
+// ========================
+// Function Definitions
+// ========================
+
+private function Water_ProcessCPZAct1
+	// Called to update water position, when in Act 1
+	
+	// Preconditions:
+	// - temp0 is the player's x position, 1:1
+	// - temp1 is the player's y position, 1:1
+	
+	// With that all out of the way though, Water doesn't do anything in Act 1, so no code!
+end function
+
+
 private function Water_ProcessCPZAct2
-	if temp0 <= 4608
+	// Called to update water position, when in Act 2
+	
+	// Just like above...
+	// Preconditions:
+	// - temp0 is the player's x position, 1:1
+	// - temp1 is the player's y position, 1:1
+	
+	// Only check this all if we haven't touched the water yet
+	if object.state == CPZSETUP_WATERINITIAL
 		stage.newWaterLevel = 0x7100000
-	else
+		
+		// 7808 is around where the vertical block climbing section starts (you know what i'm talking about)
 		if temp0 >= 7808
 			stage.newWaterLevel = 0x5100000
+			
+			// Mark the flag, now that we've moved the Water
+			object.state++
 		end if
 	end if
 end function
@@ -152,7 +182,7 @@ private function Water_SpawnSmallAirBubble
 end function
 
 
-public function Water_SpawnCountDownBubble
+private function Water_SpawnCountDownBubble
 	CreateTempObject(TypeName[Countdown Bubble], temp0, player[currentPlayer].xpos, player[currentPlayer].ypos)
 	object[tempObjectPos].drawOrder = 5
 	object[tempObjectPos].yvel = -0x8800
@@ -168,7 +198,7 @@ public function Water_SpawnCountDownBubble
 end function
 
 
-public function Water_ResetDrownMusic
+private function Water_ResetDrownMusic
 	if currentPlayer == 0
 		arrayPos0 = Water_waterSlotID
 		arrayPos0 += currentPlayer
@@ -202,7 +232,7 @@ event ObjectUpdate
 	temp1 >>= 16
 
 	arrayPos0 = object.entityPos
-	CallFunction(Water_ProcessCPZAct2)
+	CallFunction(object.proccessActEffects)
 
 	if object.ypos < stage.newWaterLevel
 		object.ypos += 0x10000
@@ -548,23 +578,37 @@ end event
 
 
 event ObjectStartup
-	
-#platform: DUMMY
+	SetTableValue(Water_ProcessCPZAct1, 1, Water_processActTable)
+	SetTableValue(Water_ProcessCPZAct2, 2, Water_processActTable)
+
 	if options.vsMode == true
 		foreach (TypeName[Water], arrayPos0, ALL_ENTITIES)
 			object[arrayPos0].type = TypeName[Blank Object]
 		next
 	end if
-#endplatform
-	
+
 	foreach (TypeName[Water], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].priority = PRIORITY_ACTIVE
 		object[arrayPos0].drawOrder = 5
 		object[arrayPos0].inkEffect = INK_ALPHA
 		object[arrayPos0].alpha = 0xA0
-		stage.newWaterLevel = object[arrayPos0].ypos
+		
+		// Huh? In-game credits?
+		// This is just a leftover from the S1 LZ Water script, where Water would be specially set up for the credits demo
+		// In this game there's no such thing though, this never really hits
+		if credits.screen == 0
+			stage.newWaterLevel = object[arrayPos0].ypos
+		else
+			stage.waterState = 1
+			stage.newWaterLevel = 0x4C80000
+			temp0 = object[0].xpos
+			temp0 >>= 16
+			temp1 = object[0].ypos
+			temp1 >>= 16
+		end if
 		Water_waterSlotID = arrayPos0
-		CallFunction(Water_ProcessCPZAct2)
+		GetTableValue(object[arrayPos0].proccessActEffects, stage.actNum, Water_processActTable)
+		CallFunction(object[arrayPos0].proccessActEffects)
 		stage.waterLevel = stage.newWaterLevel
 		stage.waterLevel >>= 16
 		object[arrayPos0].ypos = stage.newWaterLevel
@@ -577,11 +621,10 @@ event ObjectStartup
 			arrayPos0 = Water_waterSlotID
 			object[arrayPos0].ypos = stage.newWaterLevel
 		else
-			stage.waterState = 0
+			if credits.screen == 0
+				stage.waterState = 0
+			end if
 		end if
-		
-		// KEHDX - Store the water level, so we can restore it when needed later
-		object[SLOT_HUD].waterLevelStore = object[arrayPos0].ypos
 	next
 
 	Water_activateFlag = false
@@ -598,11 +641,10 @@ event ObjectStartup
 			player[currentPlayer].airAcceleration >>= 1
 			player[currentPlayer].airDeceleration >>= 1
 			player[currentPlayer].gravityStrength = 0x1000
-			if stage.playerListPos == 2
-				player[currentPlayer].jumpStrength = 0x30000
-			else
-				player[currentPlayer].jumpStrength = 0x38000
-			end if
+			
+			// KEHDX note - we should never get here (shouldn't start in water) but we've changed this part anyways, to force Knux jump height
+			player[currentPlayer].jumpStrength = 0x30000
+			
 			player[currentPlayer].jumpCap = -0x20000
 			arrayPos0 = Water_waterSlotID
 			arrayPos0 += currentPlayer
@@ -620,16 +662,12 @@ event ObjectStartup
 end event
 
 
+// ========================
+// Editor Events
+// ========================
+
 event RSDKDraw
-	// draw it a few times to make it sufficiently long enough
-	// (should be thrice if my logic is right)
-	temp0 = object.xpos
-	temp1 = 700
-	temp1 += object.ypos
-	while temp0 < temp1
-		DrawSpriteXY(0, temp0, object.ypos)
-		temp0 += 256
-	loop
+	DrawSprite(0)
 end event
 
 

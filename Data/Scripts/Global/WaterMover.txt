@@ -1,0 +1,121 @@
+// ----------------------------------
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: Chaos Emerald Object
+// Script Author: Lave sIime
+// ----------------------------------
+
+// What this object does is move water position, nothing too complicated
+// -> This is as opposed to handling it with hardcoded values in code, which is the boring and unfun option
+
+// This object is normally used in CPZ and LZ, though it can be used in other zones with water too
+// (Do note the use of 'Water_processActTable' though)
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.leftBoundary
+
+// Player Aliases
+private alias object.xpos : player.xpos
+private alias object.ypos : player.ypos
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	if object.propertyValue == 0
+		CheckGreater(player[0].xpos, object.xpos)
+	else
+		CheckLower(player[0].xpos, object.xpos)
+	end if
+	
+	if checkResult == true
+		stage.newWaterLevel = object.ypos
+	end if
+end event
+
+
+event ObjectStartup
+	foreach (TypeName[Water Mover], arrayPos0, ALL_ENTITIES)
+		if options.vsMode == true
+			// Nope, no water here so no moving it needed either
+			
+			object[arrayPos0].type = TypeName[Blank Object]
+		else
+			object[arrayPos0].priority = PRIORITY_XBOUNDS
+			
+			// With in-between objects like this it would probably be wise to check for starting from a checkpoint,
+			// but KEHDX doesn't have any checkpoints so we can skip that
+		end if
+	next
+	
+	// Now that we're here, we don't need the water to manage any of its own stuff
+	// (Player_State_Static is a dummy function)
+	SetTableValue(Player_State_Static, stage.actNum, Water_processActTable)
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKEdit
+	if editor.returnVariable == true
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			checkResult = object.propertyValue
+			break
+			
+		case 0 // type
+			checkResult = object.propertyValue
+			break
+			
+		end switch
+	else
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			object.propertyValue = editor.variableValue
+			break
+			
+		case 0 // type
+			object.propertyValue = temp0
+			break
+			
+		end switch
+	end if
+end event
+
+
+event RSDKDraw
+	if editor.showGizmos == true
+		// Draw a little peek of where the water will be moved to
+		// Intentionally ignoring editor.drawingOverlay here
+		
+		temp0 = object.xpos
+		temp0 -= 0x140000
+		temp1 = object.xpos
+		temp1 += 0x180000
+		
+		if object.propertyValue == 0
+			DrawArrow(temp0, object.ypos, temp1, object.ypos, 0xFF, 0xFF, 0x00)
+		else
+			DrawArrow(temp1, object.ypos, temp0, object.ypos, 0xFF, 0xFF, 0x00)
+		end if
+	end if
+	
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-8, -8, 16, 16, 168, 18)
+	
+	AddEditorVariable("type")
+	SetActiveVariable("type")
+	AddEnumVariable("Left Adjust", 0) // Only apply once player crosses left->right
+	AddEnumVariable("Right Adjust", 1) // Only apply once player crosses right->left
+end event

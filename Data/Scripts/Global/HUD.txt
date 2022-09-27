@@ -31,11 +31,9 @@ private alias object.value2 : EmeraldManager.fadeAmount
 // Used for shifting the HUD off of the screen
 private alias object.value3 : object.xoffset
 
-private alias object.value4 : object.waterLevelStore
-
-private alias object.value5 : object.milliseconds
-private alias object.value6 : object.seconds
-private alias object.value7 : object.minutes
+private alias object.value4 : object.milliseconds
+private alias object.value5 : object.seconds
+private alias object.value6 : object.minutes
 
 private alias 102400 : min_dist
 

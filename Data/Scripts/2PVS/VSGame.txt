@@ -58,12 +58,8 @@ private alias 1 : SHIELD_NORMAL
 private alias 13 : STAGE_R_LABYRINTHZONE    // StageName[R - LABYRINTH ZONE]
 private alias 9  : STAGE_R_HIDDENPALACEZONE // StageName[R - HIDDEN PALACE ZONE]
 
-// HUD Aliases
-private alias object.value4 : object.waterLevelStore
-
-private alias 9 : SLOT_HUD
-
 // KEHDX note - lots of dummy platform checks are here, that's for when we reimplement 2PVS later
+
 
 // ========================
 // Events
@@ -242,11 +238,6 @@ event ObjectUpdate
 			object.timer -= 16
 		else
 			object.type = TypeName[Blank Object]
-			
-			// This'll resolve as 0 with a silent error, if not applicable
-			if TypeName[Water] > 0
-				stage.waterLevel = object[SLOT_HUD].waterLevelStore
-			end if
 			
 			// Not a good solution, but it works
 			// This manages starting exceptions - LZ and HPZ are started falling (see below) and LZ in particular should be started facing left
