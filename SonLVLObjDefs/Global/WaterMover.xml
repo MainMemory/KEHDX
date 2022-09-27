@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ObjDef xmlns="http://www.sonicretro.org" Image="trigger">
+<ObjDef xmlns="http://www.sonicretro.org" Image="water">
   <Images>
-    <ImageFromSheet id="trigger" sheet="Global/Display.gif" sourcex="168" sourcey="18" width="16" height="16">
+    <ImageFromSheet id="water" sheet="Global/Display.gif" sourcex="110" sourcey="113" width="16" height="16">
       <Offset X="-8" Y="-8"/>
     </ImageFromSheet>
   </Images>
   <Properties>
-    <Property name="Behaviour" description="The direction from water movement will trigger." type="trigdirs" startbit="0" length="1" />
+    <Property name="Behaviour" description="The direction from which water movement will trigger." type="dirs" startbit="0" length="1" />
   </Properties>
   <Enums>
-    <Enum name="trigdirs">
+    <Enum name="dirs">
       <EnumMember name="Left" />
       <EnumMember name="Right" />
     </Enum>
