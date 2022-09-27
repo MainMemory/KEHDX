@@ -12,9 +12,13 @@
 private alias object.value0 : object.timer
 private alias object.value1 : object.menusel
 
+// Used for touch controls, as one could've guessed
 private alias object.value2 : object.usingTouch
 
+// When fading out, this is the type the object will become afterwards
 private alias object.value3 : object.fadeType
+
+private alias object.value4 : object.flash
 
 // Padded out for parity with other Menu objects, so that the value slot is the same across each
 private alias object.value10 : object.buttonLeft
@@ -214,6 +218,7 @@ event ObjectUpdate
 	case MAINMENU_SETUP
 //		object.menusel = saveRAM[250]
 		object.timer = 320
+		object.inkEffect = 3
 		object.usingTouch = false
 		
 		// Set BG speed, 1.0 pixel per frame
@@ -229,6 +234,7 @@ event ObjectUpdate
 			object.timer -= 8
 		else
 			PlayMusic(1)
+			object.timer = 0
 			object.state++
 		end if
 
@@ -323,12 +329,15 @@ end event
 
 
 event ObjectDraw
-	// Logo and Selections
+
+	// Draw the shiny new logo
 	DrawSpriteScreenXY(0, screen.xcenter, 16)
+	DrawSpriteScreenFX(0, FX_INK, screen.xcenter, 16)
+
+	// Then, draw the texts underneath that
 	DrawSpriteScreenXY(1, screen.xcenter, 133)
 
 	// Little Knuckles
-	
 	temp0 = object.menusel
 	temp0 *= 20
 	temp0 += 132

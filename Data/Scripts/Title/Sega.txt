@@ -276,7 +276,12 @@ event ObjectStartup
 		break
 		
 	case BOOTMODE_COMPETITION
-		temp0 = TypeName[Competition L1]
+		if engine.onlineActive == true
+			temp0 = TypeName[Competition L1]
+		else
+			// TODO: online ver of menu goes here
+			temp0 = TypeName[Competition L1]
+		end if
 		break
 		
 	end switch

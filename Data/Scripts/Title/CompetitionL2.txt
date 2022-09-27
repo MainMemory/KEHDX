@@ -15,6 +15,9 @@ private alias object.value2 : object.mainSheet
 private alias object.value3 : object.iconSheet
 private alias object.value4 : object.scrOffset
 private alias object.value5 : object.scrTarget
+private alias object.value6 : object.dim
+private alias object.value6 : object.fadeOverlay
+private alias object.value7 : object.readyPlayers
 
 // Box drawing aliases, used by both Master and Subs
 private alias object.value20 : object.drawPos.x
@@ -25,12 +28,17 @@ private alias object.value24 : object.drawColour.r
 private alias object.value25 : object.drawColour.g
 private alias object.value26 : object.drawColour.b
 
+private alias object.value27 : object.targetPos.x
+private alias object.value28 : object.targetPos.y
+
 private alias 0 : COMP_MENU_INIT
 private alias 1 : COMP_MENU_FADEIN
 private alias 2 : COMP_MENU_MAIN
 private alias 3 : COMP_MENU_SCROLL
-private alias 4 : COMP_MENU_FADEOUT
-private alias 5 : COMP_MENU_BACK
+private alias 4 : COMP_MENU_READY
+private alias 5 : COMP_MENU_DISPLAY
+private alias 6 : COMP_MENU_FADEGAME
+private alias 7 : COMP_MENU_FADEBACK
 
 
 // ========================
@@ -39,6 +47,8 @@ private alias 5 : COMP_MENU_BACK
 
 event ObjectUpdate
 	if object.propertyValue == 0
+		object.dim = false
+		
 		switch object.state
 		case COMP_MENU_INIT
 			// We want to draw on top of the following texts
@@ -86,12 +96,54 @@ event ObjectUpdate
 			
 		case COMP_MENU_MAIN
 			if keyPress[1].buttonB == true
-				object.state = COMP_MENU_BACK
+				object.state = COMP_MENU_FADEBACK
 				return
 			end if
 			
 			if keyPress[1].start == true
-				object.state = COMP_MENU_FADEOUT
+				object.state = COMP_MENU_READY
+				
+				arrayPos0 = object.entityPos
+				arrayPos0 += 20
+				arrayPos1 = object.entityPos
+				arrayPos1 += 32
+				arrayPos2 = arrayPos1
+				arrayPos2 += 4
+				
+				temp1 = vs.activePlayers
+				temp1 <<= 1
+				
+				temp3 = vs.playerIDs
+				
+				temp0 = 1
+				while temp0 < 5
+					GetBit(temp2, temp1, temp0)
+					temp2 *= TypeName[Competition L1]
+					ResetObjectEntity(arrayPos0, temp2, temp0, object.xpos, object.ypos)
+					object[arrayPos0].priority = 1
+					object[arrayPos0].drawPos.x = object[arrayPos2].xpos
+					object[arrayPos0].drawPos.y = object[arrayPos1].ypos
+					object[arrayPos0].targetPos.x = object[arrayPos1].xpos
+					object[arrayPos0].targetPos.y = object[arrayPos1].ypos
+					object[arrayPos0].drawWidth = 127
+					object[arrayPos0].drawHeight = 87
+					object[arrayPos0].drawColour.r = 0xE0
+					object[arrayPos0].drawColour.g = 0xE0
+					object[arrayPos0].drawColour.b = 0x00
+					object[arrayPos0].animationSpeed = 30
+					object[arrayPos0].drawOrder = 4
+					object[arrayPos0].state = 4 // COMP_SUB_READY
+					
+					object[arrayPos0].selection = temp3
+					object[arrayPos0].selection &= 0xFF
+					
+					arrayPos0++
+					arrayPos1++
+					arrayPos2++
+					temp3 >>= 8
+					temp0++
+				loop
+				
 				return
 			end if
 			
@@ -124,11 +176,6 @@ event ObjectUpdate
 				end if
 			end if
 			
-			if keyPress[1].start == true
-				PlaySfx(SfxName[Warp], false)
-				object.state = COMP_MENU_FADEOUT
-			end if
-			
 			break
 			
 		case COMP_MENU_SCROLL
@@ -148,12 +195,74 @@ event ObjectUpdate
 			end if
 			break
 			
-		case COMP_MENU_FADEOUT
+		case COMP_MENU_READY
+			if object.readyPlayers != vs.activePlayers
+				object.dim = true
+				
+				// SetTileLayerEntry(int value, int layer, int chunkX, int chunkY)
+				
+				object.readyPlayers <<= 1
+				
+				arrayPos0 = 1
+				while arrayPos0 < 5
+					temp0 = keyPress[arrayPos0].start
+					temp0 <<= arrayPos0
+					object.readyPlayers |= temp0
+					
+					arrayPos0++
+				loop
+				
+				object.readyPlayers >>= 1
+				
+				// To exit, let's also make sure we're fully faded in first
+				// -> it just looks kinda weird to slide the boxes in then slide them off right after
+				CheckEqual(object.alpha, 0x80)
+				temp0 = checkResult
+				CheckEqual(keyPress[1].buttonB, true)
+				temp0 &= checkResult
+				if temp0 == true
+					object.dim = false
+					object.readyPlayers = 0
+					object.state = COMP_MENU_MAIN
+					
+					arrayPos0 = object.entityPos
+					arrayPos0 += 20
+					
+					temp0 = 1
+					while temp0 < 5
+						object[arrayPos0].state = 5 // COMP_SUB_READY_OUT
+						
+						arrayPos0++
+						temp0++
+					loop
+				end if
+				
+				// Update box movements
+				
+			else
+				object.dim = true
+				
+				object.timer = 0
+				object.state = COMP_MENU_DISPLAY
+			end if
+			break
+			
+		case COMP_MENU_DISPLAY
+			object.dim = true
+			
+			object.timer++
+			CheckEqual(object.timer, 60)
+			object.state += checkResult
+			break
+			
+		case COMP_MENU_FADEGAME
+			object.dim = true
+			
 			if object.timer < 256
 				object.timer += 16
 				SetScreenFade(0, 0, 0, object.timer)
 			else
-				// Special handling for HPZ and its intro cutscene scene
+				// Special handling for HPZ and its intro cutscene scene, on another list
 				CheckEqual(object.selection, 9)
 				stage.listPos = checkResult
 				stage.listPos ^= 1
@@ -169,7 +278,7 @@ event ObjectUpdate
 			break
 			break
 			
-		case COMP_MENU_BACK
+		case COMP_MENU_FADEBACK
 			if object.timer < 256
 				object.timer += 16
 				SetScreenFade(0, 0, 0, object.timer)
@@ -185,14 +294,34 @@ event ObjectUpdate
 			break
 			
 		end switch
+		
+		// Update overlay
+		// KEHDX TODO: blur bg, BG layer 2's set up already so it should just be swapping the two
+		if object.dim == true
+			// Fade in, as needed
+			if object.alpha < 0x80
+				object.alpha += 16
+			end if
+		else
+			// Fade out, as needed
+			if object.alpha > 0
+				object.alpha -= 16
+			end if
+		end if
+		
 	else
-		// we're a name object
+		if object.propertyValue < 0x80
+			// we're a name object
+			// we don't need to do anything at the moment, though i'm leaving this condition here for now in case plans change
+		end if
 	end if
 end event
 
 
 event ObjectDraw
 	if object.propertyValue == 0
+		// We're the master object
+		
 		// Draw the "Select a Stage" header
 		DrawSpriteScreenXY(47, screen.xcenter, 16)
 		
@@ -251,6 +380,8 @@ event ObjectDraw
 			arrayPos0++
 		loop
 		
+		DrawNumbers(36, 30, 30, object.readyPlayers, 2, 8, true)
+		
 		// TL - P1
 		// (Should always be active, but may as well check anyways)
 		GetBit(temp1, vs.activePlayers, 0)
@@ -305,8 +436,6 @@ event ObjectDraw
 			DrawNumbers(36, object.drawPos.x, 76, 0, 2, 8, true)
 			
 			object.drawPos.x -= 30
-			
-			object.drawPos.x += 34
 		end if
 		
 		// BR - P4
@@ -324,82 +453,86 @@ event ObjectDraw
 			object.drawPos.x += 20
 			DrawNumbers(36, object.drawPos.x, 96, 0, 2, 8, true)
 		end if
+		
+		DrawRect(0, 0, screen.xsize, screen.ysize, 0x00, 0x20, 0x50, object.alpha)
 	else
-		// we're a name object
-		
-		object.spriteSheet = object[32].mainSheet
-		
-		temp0 = object.propertyValue
-		temp0 += 19
-		
-		temp1 = object.propertyValue
-		temp1 *= 7
-		temp1 += 185
-		
-		// Make the current selection highlighted
-		CheckNotEqual(object.propertyValue, object[32].selection)
-		checkResult *= 0xE0
-		checkResult += 0xE0E000
-		SetPaletteEntry(0, 128, checkResult)
-		
-		object.drawPos.x = screen.xcenter
-		object.drawPos.x -= 139
-		
-		object.drawPos.y = object[32].scrOffset
-		object.drawPos.y += object.ypos
-		
-		object.drawPos.y >>= 16
-		
-		if object.drawPos.y < screen.ycenter
-			// Checking for upper bounds
+		if object.propertyValue < 0x80
+			// We're a name object
 			
-			temp2 = 7
-			temp3 = 0
+			object.spriteSheet = object[32].mainSheet
 			
-			if object.drawPos.y < 32
-				temp3 = 32
-				temp3 -= object.drawPos.y
+			temp0 = object.propertyValue
+			temp0 += 19
+			
+			temp1 = object.propertyValue
+			temp1 *= 7
+			temp1 += 185
+			
+			// Make the current selection highlighted
+			CheckNotEqual(object.propertyValue, object[32].selection)
+			checkResult *= 0xE0
+			checkResult += 0xE0E000
+			SetPaletteEntry(0, 128, checkResult)
+			
+			object.drawPos.x = screen.xcenter
+			object.drawPos.x -= 139
+			
+			object.drawPos.y = object[32].scrOffset
+			object.drawPos.y += object.ypos
+			
+			object.drawPos.y >>= 16
+			
+			if object.drawPos.y < screen.ycenter
+				// Checking for upper bounds
 				
-				temp1 += temp3
+				temp2 = 7
+				temp3 = 0
 				
-				temp2 -= temp3
+				if object.drawPos.y < 32
+					temp3 = 32
+					temp3 -= object.drawPos.y
+					
+					temp1 += temp3
+					
+					temp2 -= temp3
+					
+					temp3 = 7
+					temp3 -= temp2
+				end if
 				
-				temp3 = 7
-				temp3 -= temp2
+				if temp2 > 0
+					EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+					
+					DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
+				end if
+			else
+				// Checking for lower bounds
+				
+				temp2 = 7
+				temp3 = 0
+				
+				if object.drawPos.y > 203
+					temp2 = object.drawPos.y
+					temp2 -= 203
+					
+					temp6 = 7
+					temp6 -= temp2
+					temp2 = temp6
+					
+					temp1 -= temp3
+				end if
+				
+				if object.drawPos.y < 220
+					EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+					
+					DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
+				end if
 			end if
 			
-			if temp2 > 0
-				EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
-				
-				DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
-			end if
-		else
-			// Checking for lower bounds
-			
-			temp2 = 7
-			temp3 = 0
-			
-			if object.drawPos.y > 203
-				temp2 = object.drawPos.y
-				temp2 -= 203
-				
-				temp6 = 7
-				temp6 -= temp2
-				temp2 = temp6
-				
-				temp1 -= temp3
-			end if
-			
-			if object.drawPos.y < 220
-				EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
-				
-				DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
-			end if
+			// Reset the selection colour, since other texts use it too
+			// -> This is only really relevant for the last Text, but it doesn't hurt to do it regardless anyways
+			SetPaletteEntry(0, 128, 0xE0E0E0)
 		end if
-		
-		// Reset the selection colour, since other texts use it too
-		// -> This is only really relevant for the last Text, but it doesn't hurt to do it regardless anyways
-		SetPaletteEntry(0, 128, 0xE0E0E0)
 	end if
 end event
 
@@ -491,7 +624,16 @@ event ObjectStartup
 	// 66 - Tikal life icon
 	SpriteFrame(-8, -8, 16, 16, 0, 120)
 	
-	// Note - 
+	// Set the "blurry" version of the BG, used for the ready prompt
+	SetLayerDeformation(3, 128, 4, 0, 0, 0)
+	temp0 = 0
+	temp1 = -1
+	temp1 = -7
+	while temp0 < 0x100
+		temp1 ^= 1
+		SetLayerDeformation(2, 16, temp1, 1, temp0, 2)
+		temp0 += 2
+	loop
 	
 end event
 

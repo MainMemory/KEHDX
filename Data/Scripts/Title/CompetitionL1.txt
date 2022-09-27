@@ -21,7 +21,7 @@ private alias 4 : COMP_MASTER_EXIT
 // Child aliases (propertyValue > 0, where propertyValue is playerID)
 // values 0/1 are same as Master
 private alias object.value2 : object.active
-private alias object.value3 : object.selected
+private alias object.value3 : object.ready
 
 // Box drawing aliases, padded out to match expected input params
 private alias object.value20 : object.drawPos.x
@@ -32,12 +32,20 @@ private alias object.value24 : object.drawColour.r
 private alias object.value25 : object.drawColour.g
 private alias object.value26 : object.drawColour.b
 
+private alias object.value27 : object.targetPos.x
+private alias object.value28 : object.targetPos.y
+
 private alias 0 : COMP_SUB_OPEN
 private alias 1 : COMP_SUB_SELECT
 private alias 2 : COMP_SUB_SELECTED
 private alias 3 : COMP_SUB_HOLD
+private alias 4 : COMP_SUB_READY_IN
+private alias 5 : COMP_SUB_READY_OUT
 
 private alias 1 : COMP_CHARACTER_MAX
+
+// Competition L2 Aliases
+private alias object.value7 : object.readyPlayers
 
 // Touch Input Aliases
 private alias -1 : TOUCHINPUT_NULL
@@ -54,7 +62,7 @@ event ObjectUpdate
 		switch object.state
 		case COMP_MASTER_INIT
 			arrayPos0 = object.entityPos
-			arrayPos0 += 8
+			arrayPos0 += 32
 			
 			// Set up base box positions
 			// -> We're storing this data in some unused Blank Objects, for ease in looping a few lines later on
@@ -77,12 +85,28 @@ event ObjectUpdate
 			object[arrayPos0].xpos += 20
 			object[arrayPos0].ypos = 124
 			
+			// Then, offscreen positions
+			// -> These aren't used here, but they're used by Competition L2's menu, for the ready prompt
+			arrayPos0++
+			object[arrayPos0].xpos = -127
+			
+			arrayPos0++
+			object[arrayPos0].xpos = screen.xsize
+			object[arrayPos0].xpos -= 0x10
+			
+			arrayPos0++
+			object[arrayPos0].xpos = -127
+			
+			arrayPos0++
+			object[arrayPos0].xpos = screen.xsize
+			object[arrayPos0].xpos -= 0x10
+			
 			// Now, actually set up the boxes
 			
 			arrayPos0 = object.entityPos
 			arrayPos0++
 			arrayPos1 = arrayPos0
-			arrayPos1 += 7
+			arrayPos1 += 31
 			
 			temp0 = 1
 			while temp0 < 5
@@ -106,6 +130,10 @@ event ObjectUpdate
 			// 0.75 BG scroll speed cuz why not
 			tileLayer[1].scrollSpeed = -0xC000
 			hParallax[0].scrollSpeed = -0xC000
+			
+			// "Blur" version of BG, same properties
+			tileLayer[2].scrollSpeed = -0xC000
+			hParallax[1].scrollSpeed = -0xC000
 			
 			// Bitfield containing all active players
 			vs.activePlayers = 0
@@ -223,7 +251,7 @@ event ObjectUpdate
 				// Lock in the character
 				
 				object.frame = 0
-				object.selected = true
+				object.ready = true
 				object.state++
 			else
 				// Keeping this nested, just in case the player's good enough to hit start and back at once
@@ -242,7 +270,7 @@ event ObjectUpdate
 				// If the player wants to return, then allow them to choose their character again
 				
 				object.frame = 0
-				object.selected = false
+				object.ready = false
 				object.state--
 			else
 				// Nested for the same reason as above, this time inverse because of the player 1 check
@@ -314,6 +342,79 @@ event ObjectUpdate
 			// Not much is really done here, just hold for a few frames...
 			break
 			
+		case COMP_SUB_READY_IN
+			temp0 = object[32].readyPlayers
+			temp0 <<= 1
+			GetBit(object.active, temp0, object.propertyValue)
+			GetBit(object.ready, temp0, object.propertyValue)
+			
+			temp1 = object.propertyValue
+			temp1--
+			GetBit(temp0, temp1, 0)
+			if temp0 == false
+				// left row
+				
+				if object.drawPos.x < object.targetPos.x
+					object.drawPos.x += object.speed
+					object.speed += 1
+					
+					if object.drawPos.x > object.targetPos.x
+						object.speed = 0
+						object.drawPos.x = object.targetPos.x
+					end if
+				end if
+			else
+				// right row
+				
+				if object.drawPos.x > object.targetPos.x
+					object.drawPos.x += object.speed
+					object.speed -= 1
+					
+					if object.drawPos.x < object.targetPos.x
+						object.speed = 0
+						object.drawPos.x = object.targetPos.x
+					end if
+				end if
+			end if
+			break
+			
+		case COMP_SUB_READY_OUT
+			object.active = false
+			object.ready = false
+			
+			temp1 = object.propertyValue
+			temp1--
+			GetBit(temp0, temp1, 0)
+			if temp0 == true
+				// right row
+				
+				if object.drawPos.x < screen.xsize
+					object.drawPos.x += object.speed
+					object.speed += 1
+					
+					if object.drawPos.x > screen.xsize
+						object.type = TypeName[Blank Object]
+					end if
+				end if
+			else
+				// left row
+				
+				temp0 = object.drawWidth
+				temp0 += 12
+				FlipSign(temp0)
+				
+				if object.drawPos.x > temp0
+					object.drawPos.x += object.speed
+					object.speed -= 1
+					
+					if object.drawPos.x < temp0
+						object.type = TypeName[Blank Object]
+					end if
+				end if
+			end if
+			break
+			break
+			
 		end switch
 	end if
 end event
@@ -382,6 +483,16 @@ event ObjectDraw
 		
 		object.ixpos -= 2
 		// [Fallthrough]
+	case COMP_SUB_READY_IN
+	case COMP_SUB_READY_OUT
+		if object.targetPos.x != 0
+			temp0 = 0xE0E000
+			temp0 += object.drawColour.g
+			SetPaletteEntry(0, 128, temp0)
+			
+			DrawSprite(9)
+		end if
+		// [Fallthrough]
 	case COMP_SUB_SELECTED
 	case COMP_SUB_HOLD
 		temp0 = 0
@@ -390,32 +501,42 @@ event ObjectDraw
 		switch object.selection
 		case 0
 		default
-			LoadAnimation("Knuckles.ani")
+			object.type = TypeName[Ani Holder 1]
 			temp0 = ANI_WAITING
 			break
 			
 		case 1
-			LoadAnimation("Tikal.ani")
+			object.type = TypeName[Ani Holder 2]
 			temp0 = 2 // "ANI_SELECTED" (custom animation, takes the slot of the previously blank "Waiting")
 			break
 			
 		end switch
 		
 		// Different sprite based on if they're selected or not
-		if object.selected == true
-			object.animation = temp0
+		if object.ready == true
+			if object.targetPos.x == 0
+				object.animation = temp0
+			else
+				object.animation = 39 // ANI_VICTORY
+				object.prevAnimation = 39
+			end if
 			
-			// A ProcessAnimation in an ObjectDraw... this isn't too good of a move, but I suppose it isn't the worst either...
 			ProcessAnimation()
-			
-			// TODO: what i did for tikal's selected animation isn't the best...
-			// make it better
 		else
 			object.animation = 0
 			object.frame = 0
 		end if
 		
+		if object.animation != object.prevAnimation
+			// Reset values if needed
+			object.prevAnimation = object.animation
+			object.frame = 0
+			object.animationTimer = 0
+		end if
+		
 		DrawObjectAnimation()
+		
+		object.type = TypeName[Competition L1]
 		
 		// Move a few pixels up
 		object.iypos -= 35
@@ -427,6 +548,9 @@ event ObjectDraw
 		
 		// And now, move a few pixels back down
 		object.iypos -= 35
+		
+		// Restore selection colour to what it should be
+		SetPaletteEntry(0, 128, 0xE0E0E0)
 		break
 		
 	end switch
@@ -456,9 +580,8 @@ event ObjectStartup
 	// 8 - "Waiting For" text
 	SpriteFrame(-28, -24, 56, 15, 446, 67)
 	
-	// For their little icon appearences
-	LoadAnimation("Knuckles.ani")
-	LoadAnimation("Tikal.ani")
+	// 9 - "Ready" text
+	SpriteFrame(-20, 28, 40, 7, 0, 0)
 	
 end event
 
