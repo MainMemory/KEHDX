@@ -108,7 +108,7 @@ event ObjectUpdate
 			
 			temp0 = 1
 			temp1 = 38
-			while temp0 <= MENUSEL_STGSEL_COUNT // inclusive to reach SBZ (remember that here, stage IDs start at 1)
+			while temp0 <= SELECTION_STGSEL_COUNT // inclusive to reach SBZ (remember that here, stage IDs start at 1)
 				ResetObjectEntity(arrayPos0, TypeName[Competition L2], temp0, object.xpos, object.ypos)
 				object[arrayPos0].priority = 1
 				object[arrayPos0].iypos = temp1
@@ -203,7 +203,7 @@ event ObjectUpdate
 				return
 			else
 				if keyPress[1].down == true
-					CheckGreater(MENUSEL_STGSEL_COUNT, object.selection)
+					CheckGreater(SELECTION_STGSEL_COUNT, object.selection)
 					object.selection += checkResult
 					
 					CallFunction(CompetitionL2_CheckSelBounds)
@@ -581,7 +581,7 @@ event ObjectStartup
 	SpriteFrame(-8, 0, 16, 7, 0, 96)
 	
 	// 4-19 - Stage Icons, from the Icons sheet
-	temp2 = MENUSEL_STGSEL_COUNT
+	temp2 = SELECTION_STGSEL_COUNT
 	temp2 /= 2
 	
 	// Top row
@@ -606,7 +606,7 @@ event ObjectStartup
 	// (yeah we could prolly just use the menu system, but we couldn't wrap crop the frames if they were text)
 	temp0 = 0
 	temp1 = 192
-	while temp0 < MENUSEL_STGSEL_COUNT
+	while temp0 < SELECTION_STGSEL_COUNT
 		// It is worth noting too, these values set here are absolutely useless since they get overwritten with EditFrame anyways
 		SpriteFrame(0, 0, 112, 7, 0, temp1)
 		temp1 += 7

@@ -10,7 +10,7 @@
 // ========================
 
 private alias object.value0 : object.timer
-private alias object.value1 : object.menusel
+private alias object.value1 : object.selection
 
 // When fading out, this is the type the object will become afterwards
 private alias object.value3 : object.fadeType
@@ -35,7 +35,7 @@ private alias object.value25 : object.drawColour.g
 private alias object.value26 : object.drawColour.b
 
 // Kept public as it's used by the KEH_RunButton function, which is used by other objects too
-public alias 255 : MENUSEL_NULL
+public alias 255 : SELECTION_NULL
 
 // States
 private alias 0 : MAINMENU_SETUP
@@ -83,17 +83,17 @@ public function KEH_RunButton
 	// - object.buttonID is the button ID of the button
 	// - object.buttonFunc is the function ID of the button, to be called if the button was pressed
 	
-	if temp3 > -1
+	if temp3 > TOUCHINPUT_NULL
 		CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
-		if checkResult > -1
-			object.menusel = object.buttonID
+		if checkResult > TOUCHINPUT_NULL
+			object.selection = object.buttonID
 		else
-			if object.menusel == object.buttonID
-				object.menusel = MENUSEL_NULL
+			if object.selection == object.buttonID
+				object.selection = SELECTION_NULL
 			end if
 		end if
 	else
-		if object.menusel == object.buttonID
+		if object.selection == object.buttonID
 			CallFunction(object.buttonFunc)
 		end if
 	end if
@@ -175,7 +175,7 @@ private function MainMenu_Button_Singleplayer
 	object.fadeType = TypeName[Stage Select]
 	menu.bootMode = BOOTMODE_STAGESELECT
 	object.state = MAINMENU_FADEOUT
-//	saveRAM[250] = object.menusel
+//	saveRAM[250] = object.selection
 end function
 
 
@@ -197,7 +197,7 @@ private function MainMenu_Button_Options
 	object.fadeType = TypeName[Options]
 	menu.bootMode = BOOTMODE_OPTIONS
 	object.state = MAINMENU_FADEOUT
-//	saveRAM[250] = object.menusel
+//	saveRAM[250] = object.selection
 end function
 
 
@@ -213,9 +213,16 @@ end function
 event ObjectUpdate
 	switch object.state
 	case MAINMENU_SETUP
-//		object.menusel = saveRAM[250]
+//		object.selection = saveRAM[250]
 		object.timer = 320
 		object.inkEffect = 3
+		
+		if options.physicalControls == false
+			// If using touch, then don't have a default selection
+			// (Plus, starting with the cursor already on something can cause issues...)
+			
+			object.selection = SELECTION_NULL
+		end if
 		
 		// Set BG speed, 1.0 pixel per frame
 		tileLayer[1].scrollSpeed = -0x10000
@@ -242,20 +249,20 @@ event ObjectUpdate
 			// Assuming physical controls, this is the default
 			
 			if keyPress[0].up == true
-				object.menusel--
+				object.selection--
 				PlaySfx(SfxName[Score Add], false)
 			end if
 			
 			if keyPress[0].down == true
-				object.menusel++
+				object.selection++
 				PlaySfx(SfxName[Score Add], false)
 			end if
 			
-			object.menusel &= 3
+			object.selection &= 3
 			
 			if keyPress[0].start == true
 				temp0 = MainMenu_Button_Singleplayer
-				temp0 += object.menusel
+				temp0 += object.selection
 				CallFunction(temp0)
 			end if
 			
@@ -264,7 +271,7 @@ event ObjectUpdate
 			if checkResult > TOUCHINPUT_NULL
 				// ... then activate touch controls, and hide the Knuckles cursor too
 				options.physicalControls = false
-				object.menusel = MENUSEL_NULL
+				object.selection = SELECTION_NULL
 			end if
 		else
 			// Seeing if the player's got a finger on the screen at all
@@ -300,7 +307,6 @@ event ObjectUpdate
 			options.physicalControls = input.pressButton
 			options.physicalControls |= keyPress[0].down
 			options.physicalControls |= keyPress[0].up
-			options.physicalControls ^= true
 		end if
 		break
 		
@@ -334,7 +340,7 @@ event ObjectDraw
 	DrawSpriteScreenXY(1, screen.xcenter, 133)
 
 	// Little Knuckles
-	temp0 = object.menusel
+	temp0 = object.selection
 	temp0 *= 20
 	temp0 += 132
 	

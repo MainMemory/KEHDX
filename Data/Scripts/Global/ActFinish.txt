@@ -8,6 +8,7 @@
 // ========================
 // Aliases
 // ========================
+
 private alias object.value0  : object.timer
 private alias object.value1  : object.textPos
 private alias object.value2  : object.gotThroughTextPos
@@ -22,11 +23,16 @@ private alias object.value10 : object.hasPerfectBonus
 private alias object.value11 : object.totalScore
 private alias object.value12 : object.hasContinue
 
-private alias object.value13 : object.menuselection		
-private alias object.value14 : object.next.listPos		
-private alias object.value15 : object.next.listType
+// KEHDX values
+private alias object.value13 : object.selection
 
-private alias object.value15 : object.usingTouch
+private alias -1 : SELECTION_NULL
+private alias  0 : SELECTION_NEXT
+private alias  1 : SELECTION_STAGESELECT
+private alias  2 : SELECTION_RESTART
+private alias  3 : SELECTION_MAX
+
+private alias object.value14 : object.usingTouch
 
 // States
 private alias -1 : ACTFINISH_NORESULTS
@@ -34,19 +40,50 @@ private alias  0 : ACTFINISH_INIT
 private alias  1 : ACTFINISH_ENTERTEXT
 private alias  2 : ACTFINISH_ACTFINISHJINGLE
 private alias  3 : ACTFINISH_TALLYSCORE
-private alias  4 : ACTFINISH_CHOOSEWHERETOGO
+private alias  4 : ACTFINISH_MENU
 private alias  5 : ACTFINISH_LOADNEXTSTAGE
 
 // Player Aliases
 private alias object.value0 : player.rings
 
-// Game Modes
-private alias 0 : MODE_NOSAVE
-private alias 1 : MODE_NORMAL
-private alias 2 : MODE_TIMEATTACK
-
 // Menu Boot Mode Aliases	
 private alias 3 : BOOTMODE_STAGESELECT
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// Do note, if these are ever edited/more are added, make sure to keep the order of these intact and retain them being in the same order as the SELECTION_* values
+reserve function ActFinish_Button_Next
+reserve function ActFinish_Button_StageSelect
+reserve function ActFinish_Button_Restart
+
+
+// ========================
+// Function Definitions
+// ========================
+
+private function ActFinish_Button_Next
+	// Corresponds to SELECTION_NEXT
+	
+	stage.listPos++
+end function
+
+
+private function ActFinish_Button_StageSelect
+	// Corresponds to SELECTION_STAGESELECT
+	
+	stage.listPos = 0
+	stage.activeList = PRESENTATION_STAGE
+end function
+
+
+private function ActFinish_Button_Restart
+	// Corresponds to SELECTION_RESTART
+	
+	// Not much needs to be done here, all the correct stage infos should be set already
+end function
 
 
 // ========================
@@ -54,6 +91,8 @@ private alias 3 : BOOTMODE_STAGESELECT
 // ========================
 
 event ObjectUpdate
+	// Hide the Touch Controls UI
+	// -> We don't need any DPad here, we got our own buttons to touch directly
 	options.touchControls = false
 	
 	// Move the camera to the player's position
@@ -110,11 +149,9 @@ event ObjectUpdate
 
 		case 9
 			if stage.debugMode == false
-				if options.gameMode < MODE_TIMEATTACK
-					if stage.seconds == 59
-						// Cutting it really close there - give the player a ton of points
-						object.timeBonus = 100000
-					end if
+				if stage.seconds == 59
+					// Cutting it really close there - give the player a ton of points
+					object.timeBonus = 100000
 				end if
 			end if
 			break
@@ -132,6 +169,7 @@ event ObjectUpdate
 		// 2 = Not needed at all for perfect
 		
 		// The tallying system seems to be a bit off, though...
+		// KEHDX TODO: it would be p cool to repurpose this for something, right?
 
 		switch stage.playerListPos
 		case 0
@@ -156,7 +194,7 @@ event ObjectUpdate
 
 		end switch
 
-		// Perfect Bonus
+		// Perfect Bonus!
 		if temp0 == 0
 			object.hasPerfectBonus = true
 			object.perfectBonus = 500000
@@ -258,65 +296,87 @@ event ObjectUpdate
 		if temp0 == true
 			object.timer++
 			if object.timer == 2
-				PlaySfx(SfxName[Score Add], false)
 				object.timer = 0
+				
+				PlaySfx(SfxName[Score Add], false)
 			end if
 		else
-			// Save Stuff here
-			arrayPos1 = 300
-			arrayPos1 *= stage.listPos	
-			if player.score > saveRAM[arrayPos1]
-				saveRAM[arrayPos1] = player.score
+			// KEHDX - Save all the stuff here
+			
+			arrayPos0 = 300
+			arrayPos0 *= stage.listPos
+			
+			// If Debug Mode is active most of this won't save, for obvious reasons
+			// (plus, i don't wanna ruin my legit times on accident when testing stuff or anything, already happened once :[)
+			if stage.debugMode == false
+				if player.score > saveRAM[arrayPos0]
+					// Max Score
+					saveRAM[arrayPos0] = player.score
+				end if
+				
+				arrayPos0++
+				if player[0].rings > saveRAM[arrayPos0]
+					// Max Ring count
+					saveRAM[arrayPos0] = player[0].rings
+				end if
+				
+				// Play count
+				arrayPos0++
+				saveRAM[arrayPos0]++
+				
+				// Best Time
+				arrayPos0++
+				timeAttack.result = stage.seconds
+				timeAttack.result *= 100
+				temp0 = stage.minutes
+				temp0 *= 6000
+				timeAttack.result += temp0
+				timeAttack.result += stage.milliSeconds
+				if timeAttack.result < saveRAM[arrayPos0]
+					saveRAM[arrayPos0] = timeAttack.result
+				end if
+				
+				// Death count, written down below regardless of Debug Mode
+				arrayPos0++
+			else
+				// With Debug Mode active, only save the not-as-important stuff, such as Death count and Play count
+				
+				// Play count
+				arrayPos0 += 2
+				saveRAM[arrayPos0]++
+				
+				// Death count, save pos is set here but it's actually saved right down below
+				arrayPos0 += 2
 			end if
 			
-			arrayPos1++
-			if object[0].value0 > saveRAM[arrayPos1]
-				saveRAM[arrayPos1] = object[0].value0
-			end if
-			arrayPos1++
-			
-			saveRAM[arrayPos1]++
-			arrayPos1++
-
-			timeAttack.result = stage.seconds
-			timeAttack.result *= 100
-			temp0 = stage.minutes
-			temp0 *= 6000
-			timeAttack.result += temp0
-			timeAttack.result += stage.milliSeconds
-
-			if timeAttack.result < saveRAM[arrayPos1]
-				saveRAM[arrayPos1] = timeAttack.result
-			end if
-
-			arrayPos1++
-	
-			saveRAM[arrayPos1] += death.count
+			// The Death count isn't too important of a thing, so always save it anyways
+			// (Assumes arrayPos0 is set to the correct pos before it gets here)
+			saveRAM[arrayPos0] += death.count
 			death.count = 0
 			
 			WriteSaveRAM()
 			
-			object.timer = 0
 			PlaySfx(SfxName[Score Total], false)
 			
+			object.timer = 0
 			object.state++
 		end if
 		break
 		
-	case ACTFINISH_CHOOSEWHERETOGO
+	case ACTFINISH_MENU
 		if object.usingTouch == false
 			if keyPress[0].left == true
-				object.menuselection--
-				if object.menuselection < 0
-					object.menuselection = 2
+				object.selection--
+				if object.selection < SELECTION_NEXT
+					object.selection = SELECTION_RESTART
 				end if
 				
 				PlaySfx(SfxName[Score Add], false)
 			end if
 			
 			if keyPress[0].right == true			
-				object.menuselection++
-				object.menuselection %= 3
+				object.selection++
+				object.selection %= SELECTION_MAX
 				
 				PlaySfx(SfxName[Score Add], false)
 			end if
@@ -326,26 +386,10 @@ event ObjectUpdate
 			temp0 |= keyPress[0].buttonB
 			temp0 |= keyPress[0].buttonC
 			if temp0 == true
-				switch object.menuselection
-				case 0
-					object.next.listPos = stage.listPos
-					object.next.listPos++
-					object.next.listType = REGULAR_STAGE
-					break
-					
-				case 1
-					object.next.listPos = 0
-					object.next.listType = PRESENTATION_STAGE
-					break
-					
-				case 2
-					object.next.listPos = stage.listPos
-					object.next.listType = REGULAR_STAGE
-					break
-					
-				end switch
+				temp0 = ActFinish_Button_Next
+				temp0 += object.selection
+				CallFunction(temp0)
 				
-				object.timer = 0
 				object.state = ACTFINISH_LOADNEXTSTAGE
 			end if
 			
@@ -354,81 +398,47 @@ event ObjectUpdate
 				// Activate touch controls if screen tapped
 				object.usingTouch = true
 				
-				object.menuselection = -1
+				object.selection = SELECTION_NULL
 			end if
 		else
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			temp3 = checkResult
 			
 			temp0 = screen.xcenter
-			temp0 -= 180
+			temp0 -= 200
 			temp1 = temp0
-			temp1 += 60
+			temp1 += 100
 			
-			CheckTouchRect(temp0, 200, temp1, 235)
+			temp2 = SELECTION_NEXT
 			
-			if checkResult > -1
-				object.menuselection = 0
-			else
-				if temp3 < 0
-					if object.menuselection == 0
-						object.next.listPos = stage.listPos
-						object.next.listPos++
-						object.next.listType = REGULAR_STAGE
-						object.state = ACTFINISH_LOADNEXTSTAGE
-					end if
+			while temp2 < 3
+				CheckTouchRect(temp0, 200, temp1, 235)
+				
+				if checkResult > -1
+					object.selection = temp2
 				else
-					if object.menuselection == 0
-						object.menuselection = -1
+					if temp3 < 0
+						if object.selection == temp2
+							temp0 = ActFinish_Button_Next
+							temp0 += object.selection
+							CallFunction(temp0)
+							
+							object.state = ACTFINISH_LOADNEXTSTAGE
+						end if
+					else
+						if object.selection == temp2
+							object.selection = SELECTION_NULL
+						end if
 					end if
 				end if
-			end if
-			
-			temp0 = screen.xcenter
-			temp0 -= 50
-			temp1 = temp0
-			temp1 += 120
-			
-			CheckTouchRect(temp0, 200, temp1, 235)
-			
-			if checkResult > -1
-				object.menuselection = 1
-			else
-				if temp3 < 0
-					if object.menuselection == 1
-						object.next.listPos = 0
-						object.next.listType = PRESENTATION_STAGE
-						object.state = ACTFINISH_LOADNEXTSTAGE
-					end if
-				else
-					if object.menuselection == 1
-						object.menuselection = -1
-					end if
-				end if
-			end if
-			
-			temp0 = temp1
-			temp0 += 50
-			temp1 = temp0
-			temp1 += 80
-			
-			CheckTouchRect(temp0, 200, temp1, 235)
-			
-			if checkResult > -1
-				object.menuselection = 2
-			else
-				if temp3 < 0
-					if object.menuselection == 2
-						object.next.listPos = stage.listPos
-						object.next.listType = REGULAR_STAGE
-						object.state = ACTFINISH_LOADNEXTSTAGE
-					end if
-				else
-					if object.menuselection == 2
-						object.menuselection = -1
-					end if
-				end if
-			end if
+				
+				temp0 = temp1
+				temp0 += 50
+				temp1 = temp0
+				temp1 += 100
+				
+				temp2++
+			loop
 			
 			temp0 = keyPress[0].up
 			temp0 |= keyPress[0].down
@@ -437,7 +447,7 @@ event ObjectUpdate
 			temp0 |= keyPress[0].start
 			if temp0 == true
 				object.usingTouch = false
-				object.menuselection = 0
+				object.selection = SELECTION_NEXT
 			end if
 		end if
 		break
@@ -450,19 +460,16 @@ event ObjectUpdate
 			object.timer = 0
 			starPostID = 0
 			object.direction = FLIP_NONE
-			stage.listPos = object.next.listPos
-			stage.activeList = object.next.listType
 			menu.bootMode = BOOTMODE_STAGESELECT // Always set, since the only way you'll get back to the Menus scene from here is via `Stage Select` anyways
 			LoadStage()
 		end if
 		break
-
+		
 	end switch
 end event
 
 
 event ObjectDraw
-
 	// Enforce above-water palette
 	SetActivePalette(0, 0, screen.ysize)
 
@@ -520,35 +527,44 @@ event ObjectDraw
 		temp6++
 		DrawNumbers(14, temp7, temp6, object.perfectBonus, 5, 8, 0)
 	end if
-
-	temp7 = object.totalPos
-	temp7 += screen.xcenter
-	temp6 += 104
-
-	if object.state == ACTFINISH_CHOOSEWHERETOGO
-		switch object.menuselection
-		case -1
-			temp0 = -32
+	
+	if object.state == ACTFINISH_MENU
+		switch object.selection
+		case SELECTION_NULL
+			// Should only be used by Touch Controls
+			temp0 = -64
 			break
-		case 0
-			temp0 = 58
+			
+		case SELECTION_NEXT
+			temp0 = screen.xcenter
+			temp0 -= 154
 			break
-		case 1
+			
+		case SELECTION_STAGESELECT
 			temp0 = screen.xcenter
 			temp0 += 36
 			break
-		case 2
+			
+		case SELECTION_RESTART
 			temp0 = screen.xsize
 			temp0 -= 37
 			break
+			
 		end switch
+		
+		// Cursor
 		DrawSpriteScreenXY(24, temp0, 228)
 		
+		// "Next" text
 		temp0 = screen.xcenter
 		temp0 -= 160
 		DrawSpriteScreenXY(25, 53, 228)
+		
+		// "Stage Select" text
 		temp0 += 160
 		DrawSpriteScreenXY(26, temp0, 228)
+		
+		// "Restart" text
 		temp0 = screen.xsize
 		temp0 -= 53
 		DrawSpriteScreenXY(29, temp0, 228)
@@ -557,7 +573,6 @@ end event
 
 
 event ObjectStartup
-
 	LoadSpriteSheet("Global/Display.gif")
 
 	// Assign sprite frames based on current character in play
@@ -599,15 +614,14 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 11, 28, 62)				// #21 - Number 7
 	SpriteFrame(0, 0, 8, 11, 1, 74) 				// #22 - Number 8
 	SpriteFrame(0, 0, 8, 11, 10, 74)				// #23 - Number 9
-
-
+	
 	SpriteFrame(0, -15, 16, 16, 137, 316)			// #24 Triangle
 	SpriteFrame(-17, -13, 34, 11, 154, 316)			// #25 Next
 	SpriteFrame(-47, -13, 95, 11, 154, 328)			// #26 Stage Select
 	SpriteFrame(-72, 0, 44, 48, 185, 340) 			// #27 "SCORE, TIME, RINGS" Text with results Triangle
 	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 Timer ticks
 	SpriteFrame(-28, -13, 56, 11, 189, 316)			// #29 Restart
-
+	
 	SpriteFrame(0, 1, 8, 8, 127, 64)		// #30 - '-'
 	SpriteFrame(0, 0, 8, 11, 28, 86)		// #31 - F
 	SpriteFrame(0, 0, 8, 11, 19, 86)		// #32 - E
@@ -617,7 +631,6 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 11, 19, 74)		// #36 - A
 	SpriteFrame(0, 0, 8, 11, 120, 48)		// #37 - S
 	SpriteFrame(0, 1, 8, 8, 136, 64)		// #38 - +
-	
 end event
 
 

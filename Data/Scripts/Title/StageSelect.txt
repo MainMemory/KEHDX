@@ -10,7 +10,7 @@
 // ========================
 
 private alias object.value0 : object.timer
-private alias object.value1 : object.menusel
+private alias object.value1 : object.selection
 
 private alias object.value2 : object.drawPos
 
@@ -52,15 +52,15 @@ private alias object.value3 : object.deaths
 private alias object.value4 : object.rank
 // values 9/10/11 are same milli/sec/mins as main obj
 
-// object.menusel Aliases
+// object.selection Aliases
 // Also used by Comp Menu Local 2
-public alias 0  : MENUSEL_STGSEL_START // EHZ
-public alias 15 : MENUSEL_STGSEL_END   // SBZ
-public alias 16 : MENUSEL_STGSEL_COUNT // MENUSEL_STGSEL_END + 1
+public alias 0  : SELECTION_STGSEL_START // EHZ
+public alias 15 : SELECTION_STGSEL_END   // SBZ
+public alias 16 : SELECTION_STGSEL_COUNT // SELECTION_STGSEL_END + 1
 
 // The lowest bounds of the camrea
 // Used for touch input scrolling
-// ((MENUSEL_STGSEL_END - 2) * 72)
+// ((SELECTION_STGSEL_END - 2) * 72)
 private alias 936 : STAGESEL_SCROLL_LOWBOUNDS
 
 // How tall each row should be
@@ -146,7 +146,7 @@ private function StageSelect_DrawStageEntry
 	object.drawHeight = 55
 	object.drawColour.r = 0xE0
 	object.drawColour.b = 0x00
-	CheckNotEqual(temp0, object.menusel)
+	CheckNotEqual(temp0, object.selection)
 	checkResult *= 0xE0
 	object.drawColour.g = checkResult
 	CallFunction(KEH_DrawSelBox)
@@ -180,7 +180,7 @@ private function StageSelect_DrawStageEntry
 	SetActivePalette(0, 0, screen.ysize)
 	
 	// Go from Icon Frames to Name Frames (STAGESEL_SPR_STGNAMES - STAGESEL_SPR_STGICONS, in other words)
-	temp1 += MENUSEL_STGSEL_COUNT
+	temp1 += SELECTION_STGSEL_COUNT
 	
 	// Draw the zone's name
 	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
@@ -239,7 +239,7 @@ private function StageSelect_CheckBoxBounds
 	temp0 = 32
 	CallFunction(StageSelect_GetScrollOffset)
 	
-	temp1 = object.menusel
+	temp1 = object.selection
 	temp1 *= STAGESEL_STAGEROWSIZE
 	temp0 += temp1
 	
@@ -275,10 +275,10 @@ event ObjectUpdate
 		
 		object.timer = 320
 		SetScreenFade(0, 0, 0, object.timer)
-		object.menusel = saveRAM[251]
+		object.selection = saveRAM[251]
 		
 		object.scrollAngle = 0
-		object.scrollPosTarget = object.menusel
+		object.scrollPosTarget = object.selection
 		object.scrollPosTarget *= STAGESEL_STAGEROWSIZE
 		
 		// If returning from SBZ or anywhere else down the list, keep a cap
@@ -335,8 +335,8 @@ event ObjectUpdate
 			end if
 			
 			if keyPress[0].up == true
-				if object.menusel > MENUSEL_STGSEL_START
-					object.menusel--
+				if object.selection > SELECTION_STGSEL_START
+					object.selection--
 					
 					object.scrollAngle = 0
 					
@@ -353,8 +353,8 @@ event ObjectUpdate
 			end if
 			
 			if keyPress[0].down == true
-				if object.menusel < MENUSEL_STGSEL_END
-					object.menusel++
+				if object.selection < SELECTION_STGSEL_END
+					object.selection++
 					
 					object.scrollAngle = 0
 					
@@ -369,7 +369,7 @@ event ObjectUpdate
 			
 			if keyPress[0].start == true	
 				object.state = 5
-				saveRAM[251] = object.menusel
+				saveRAM[251] = object.selection
 			end if
 			
 			// If the player's touched the screen at all...
@@ -378,7 +378,7 @@ event ObjectUpdate
 			if checkResult > TOUCHINPUT_NULL
 				// ... then activate touch controls, and hide the Knuckles cursor too
 				options.physicalControls = false
-				object.menusel = MENUSEL_NULL
+				object.selection = SELECTION_NULL
 			end if
 		else
 			// Using Touch Controls
@@ -408,20 +408,20 @@ event ObjectUpdate
 				temp4 = 0
 				
 				if checkResult > TOUCHINPUT_NULL
-					object.menusel = 254
+					object.selection = 254
 					
 					temp4 = 5
 				else
 					if temp3 < 0
-						if object.menusel == 254
+						if object.selection == 254
 							object.state = 6
-							object.menusel = MENUSEL_NULL
+							object.selection = SELECTION_NULL
 							
 							temp4 = 5
 						end if
 					else
-						if object.menusel == 254
-							object.menusel = MENUSEL_NULL
+						if object.selection == 254
+							object.selection = SELECTION_NULL
 						end if
 					end if
 				end if
@@ -447,12 +447,12 @@ event ObjectUpdate
 				
 				if arrayPos0 > TOUCHINPUT_NULL
 					object.dragging = true
-					object.menusel = MENUSEL_NULL
+					object.selection = SELECTION_NULL
 					
 					object.dragposPrev = touchscreen[arrayPos0].ypos
 				else
 					temp0 = 0
-					while temp0 < MENUSEL_STGSEL_COUNT
+					while temp0 < SELECTION_STGSEL_COUNT
 						temp1 = 32
 						CallFunction(StageSelect_GetScrollOffset)
 						temp2 = temp0
@@ -463,18 +463,18 @@ event ObjectUpdate
 						CheckTouchRect(63, temp1, 360, temp2)
 						
 						if checkResult > TOUCHINPUT_NULL
-							object.menusel = temp0
+							object.selection = temp0
 							
-							temp0 = MENUSEL_NULL
+							temp0 = SELECTION_NULL
 						else
 							if temp3 < 0
-								if object.menusel == temp0
+								if object.selection == temp0
 									object.state = 5
-									saveRAM[251] = object.menusel
+									saveRAM[251] = object.selection
 								end if
 							else
-								if object.menusel == temp0
-									object.menusel = MENUSEL_NULL
+								if object.selection == temp0
+									object.selection = SELECTION_NULL
 								end if
 							end if
 						end if
@@ -517,7 +517,7 @@ event ObjectUpdate
 				object.scrollPosTarget = object.scrollOverride
 				object.scrollPosTarget /= STAGESEL_STAGEROWSIZE
 				object.scrollPosTarget++
-				object.menusel = object.scrollPosTarget
+				object.selection = object.scrollPosTarget
 				object.scrollPosTarget *= STAGESEL_STAGEROWSIZE
 				
 				if object.scrollPosTarget > STAGESEL_SCROLL_LOWBOUNDS
@@ -531,10 +531,10 @@ event ObjectUpdate
 
 	case 5
 		// If HPZ was selected, we should go to the special cutscene instead
-		CheckEqual(object.menusel, 9)
+		CheckEqual(object.selection, 9)
 		stage.listPos = checkResult
 		stage.listPos ^= 1
-		stage.listPos *= object.menusel
+		stage.listPos *= object.selection
 		
 		stage.activeList = checkResult
 		stage.activeList++
@@ -578,7 +578,7 @@ event ObjectDraw
 	if options.physicalControls == false
 		// Draw the back button
 		
-		checkEqual(object.menusel, 254)
+		checkEqual(object.selection, 254)
 		checkResult += 4
 		DrawSpriteScreenXY(checkResult, 38, temp1)
 	end if
@@ -590,7 +590,7 @@ event ObjectDraw
 	object.drawPos = temp1
 	
 	temp0 = 0
-	while temp0 < MENUSEL_STGSEL_COUNT
+	while temp0 < SELECTION_STGSEL_COUNT
 		
 		// Pass it off to the external function
 		CallFunction(StageSelect_DrawStageEntry)
@@ -635,7 +635,7 @@ event ObjectStartup
 	
 	// These frames are for the "Icons" sheet
 	// 22-37 - Stage Icons, both S1 and S2 (STAGESEL_SPR_STGICONS)
-	temp2 = MENUSEL_STGSEL_COUNT
+	temp2 = SELECTION_STGSEL_COUNT
 	temp2 /= 2
 	
 	// Top row
@@ -662,7 +662,7 @@ event ObjectStartup
 	// 38-53 - Stage Names (STAGESEL_SPR_STGNAMES)
 	temp0 = 0
 	temp1 = 192
-	while temp0 < MENUSEL_STGSEL_COUNT
+	while temp0 < SELECTION_STGSEL_COUNT
 		SpriteFrame(-101, 9, 112, 7, 0, temp1)
 		temp1 += 7
 		temp0++
@@ -674,7 +674,7 @@ event ObjectStartup
 	
 	// Set up all saved values, load them into entities instead
 	temp0 = 0
-	while temp0 < MENUSEL_STGSEL_COUNT
+	while temp0 < SELECTION_STGSEL_COUNT
 		// KEHDX TODO: 300 values per save? if there's only 5 values per save then we could trim down a bit,
 		//       and add something cool like replays in place instead with all that freed room
 		
