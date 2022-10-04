@@ -346,6 +346,7 @@ event ObjectUpdate
 		end if
 		
 		// The Grabber's gone now, give the Emerald
+		currentPlayer = 0
 		CallFunction(EmeraldManager_AwardEmerald)
 	end if
 end event

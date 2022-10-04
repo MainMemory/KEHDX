@@ -201,9 +201,6 @@ event ObjectUpdate
 		// The object is still a Crawlton, it's safe to move it back
 		object.xpos = temp6
 		object.ypos = temp7
-		if object.outOfBounds == true
-			
-		end if
 	end if
 end event
 

@@ -21,6 +21,11 @@ private alias 0 : BOMB_ANI_WALK
 private alias 1 : BOMB_ANI_IDLE
 private alias 2 : BOMB_ANI_EXPLODING
 
+// Chaos Emerald Aliases
+private alias object.value1 : object.originPos.Y
+
+private alias 1 : EMERALD_ITEM
+
 // ========================
 // Function Declarations
 // ========================
@@ -64,14 +69,14 @@ private function Bomb_DebugSpawn
 end function
 
 
-private function Bomb_BecomeEmerald	
+private function Bomb_BecomeEmerald
 	temp1 = 0
 	while temp1 < EmeraldManager_EmeraldCount
 		GetTableValue(temp2, temp1, EmeraldManager_EmeraldObjects)
 		if temp2 == object.entityPos
 			ResetObjectEntity(object.entityPos, TypeName[Chaos Emerald], 0, object.xpos, object.ypos)
-			object.value0 = object.ypos
-			object.state = BOMB_IDLE
+			object.originPos.Y = object.ypos
+			object.state = EMERALD_ITEM
 		end if
 		
 		temp1++	

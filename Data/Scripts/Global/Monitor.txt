@@ -70,6 +70,7 @@ reserve function Monitor_DebugSpawn
 // ========================
 // Static Values
 // ========================
+
 private value Monitor_startDebugID = 0
 
 
@@ -82,7 +83,7 @@ private table Monitor_RandomPool
 	1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13
 end table
 
-// This table uses S3 Monitor_RingTypes as well!
+// This table uses S3 shields as well!
 private table Monitor_RingTypes
 	1, 6, 7, 8, 10, 11
 end table
@@ -349,7 +350,7 @@ event ObjectStartup
 	Monitor_startDebugID = DebugMode_ObjCount
 	Monitor_startDebugID--
 	temp0 = MONITOR_BLANK
-	while temp0 != 9
+	while temp0 < MONITOR_COUNT
 		if temp2 == true
 			SetTableValue(TypeName[Monitor], DebugMode_ObjCount, DebugMode_TypesTable)
 			SetTableValue(Monitor_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
@@ -365,7 +366,10 @@ event ObjectStartup
 		object[arrayPos0].propertyValue &= 15
 		
 		if object[arrayPos0].propertyValue != MONITOR_TELEPORT
-			CallFunction(EmeraldManager_AddEntity)	
+			CallFunction(EmeraldManager_AddEntity)
+		else
+			// In stages like ARZ it's possible to get higher than the Monitor's bounds, and go too far and die off to the far right beyond that...
+			object[arrayPos0].priority = PRIORITY_XBOUNDS
 		end if
 		
 		object[arrayPos0].frame = object[arrayPos0].propertyValue

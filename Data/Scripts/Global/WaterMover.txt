@@ -5,7 +5,7 @@
 // ----------------------------------
 
 // What this object does is move water position, nothing too complicated
-// -> This is as opposed to handling it with hardcoded values in code, which is the boring and unfun option
+// - This is as opposed to handling it with hardcoded values in code, which is the boring and unfun option
 
 // This object is normally used in CPZ and LZ, though it can be used in other zones with water too
 // (Do note the use of 'Water_processActTable' in this script though)
@@ -16,7 +16,6 @@
 
 // Player Aliases
 private alias object.xpos : player.xpos
-private alias object.ypos : player.ypos
 
 
 // ========================
