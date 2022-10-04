@@ -1,0 +1,244 @@
+// ----------------------------------
+// RSDK Project: Sonic 1
+// Script Description: Ball Hog Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+private alias object.value1 : object.timer
+
+private alias object.value0 : ballHogBomb.bombTime
+
+// Player aliases
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+
+// ========================
+// Function Declarations
+// ========================
+reserve function BallHog_DebugDraw
+reserve function BallHog_DebugSpawn
+
+// ========================
+// Tables
+// ========================
+private table BallHog_frameTable
+	0,  2,  3,  2,  0,  2,  3,  2,  0,  2,  3,  2,  0,  1, 0
+end table
+
+private table BallHog_frameDelayTable
+	20, 20, 10, 10, 20, 20, 10, 10, 20, 20, 10, 10, 20, 10
+end table
+
+
+private function BallHog_DebugDraw
+	DrawSpriteFX(0, FX_FLIP, object.xpos, object.ypos)
+end function
+
+
+private function BallHog_DebugSpawn
+	CreateTempObject(TypeName[Ball Hog], 0, object.xpos, object.ypos)
+	object[tempObjectPos].direction = object.direction
+	object[tempObjectPos].propertyValue = 1
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+
+	// Check collision with players
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		BoxCollisionTest(C_TOUCH, object.entityPos, -12, -18, 12, 18, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+		if checkResult == true
+			CallFunction(Player_BadnikBreak)
+			
+			if object.type == TypeName[Blank Object]	
+				CallFunction(EmeraldManager_AwardEmerald)	
+			end if
+		end if
+	next
+
+	// Sidestep a little
+	if object.frame == 3
+		object.ypos += object.yvel
+		object.yvel += 0x95C0
+		ObjectTileCollision(0, 0, 20, 0)
+		if checkResult == false
+			object.animationTimer = 2
+		end if
+	end if
+
+	// Update animation & ball lobbing
+	object.animationTimer--
+
+	if object.animationTimer <= 0
+
+		GetTableValue(object.animationTimer, object.timer, BallHog_frameDelayTable)
+		GetTableValue(object.frame, object.timer, BallHog_frameTable)
+
+		object.timer++
+		if object.timer >= 14
+			object.timer = 0
+		end if
+
+		if object.frame == 3
+			object.yvel = -0x29999
+			object.ypos += object.yvel
+			object.yvel += 0x95C0
+		end if
+
+		if object.frame == 1
+			// Drop a bomb ball
+
+			CreateTempObject(TypeName[Ball Hog Bomb], 0, object.xpos, object.ypos)
+
+			// Make the bomb match the hog's direction
+			if object.direction == 0
+				object[tempObjectPos].xpos -= 0x40000
+				object[tempObjectPos].xvel = -0x10000
+			else
+				object[tempObjectPos].xpos += 0x40000
+				object[tempObjectPos].xvel = 0x10000
+			end if
+
+			object[tempObjectPos].ypos += 0xC0000
+			ballHogBomb[tempObjectPos].bombTime = object.propertyValue
+			ballHogBomb[tempObjectPos].bombTime *= 60
+
+		end if
+
+	end if
+
+end event
+
+
+event ObjectDraw
+	DrawSpriteFX(object.frame, FX_FLIP, object.xpos, object.ypos)
+end event
+
+
+event ObjectStartup
+	CheckCurrentStageFolder("SBZ")
+	if checkResult == true
+		LoadSpriteSheet("SBZ/Objects.gif")
+		SpriteFrame(-11, -17, 22, 37, 1, 170)
+		SpriteFrame(-11, -17, 22, 37, 24, 170)
+		SpriteFrame(-12, -12, 24, 32, 47, 175)
+		SpriteFrame(-11, -20, 22, 40, 72, 167)
+	end if
+
+	CheckCurrentStageFolder("MBZ")
+	if checkResult == true
+		LoadSpriteSheet("MBZ/Objects.gif")
+		SpriteFrame(-11, -17, 22, 37, 76, 292)
+		SpriteFrame(-11, -17, 22, 37, 99, 292)
+		SpriteFrame(-12, -12, 24, 32, 122, 297)
+		SpriteFrame(-11, -20, 22, 40, 147, 289)
+	end if
+
+	foreach (TypeName[Ball Hog], arrayPos0, ALL_ENTITIES)
+		temp0 = object[arrayPos0].propertyValue
+		temp0 &= 128
+		if temp0 != 0
+			object[arrayPos0].direction = FACING_LEFT
+			object[arrayPos0].propertyValue &= 127
+		end if
+		
+		CallFunction(EmeraldManager_AddEntity)
+	next
+
+	SetTableValue(TypeName[Ball Hog], DebugMode_ObjCount, DebugMode_TypesTable)
+	SetTableValue(BallHog_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
+	SetTableValue(BallHog_DebugSpawn, DebugMode_ObjCount, DebugMode_SpawnTable)
+	DebugMode_ObjCount++
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKEdit
+	if editor.returnVariable == true
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			checkResult = object.propertyValue
+			break
+		case 0 // bombTime
+			checkResult = object.propertyValue
+			checkResult &= 0x7F
+			break
+		case 1 // direction
+			checkResult = object.propertyValue
+			checkResult &= 0x80
+			CheckGreater(checkResult, 0x7F)
+			break
+		end switch
+	else
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			object.propertyValue = editor.variableValue
+			break
+		case 0 // bombTime
+			object.propertyValue &= 0x80
+			object.propertyValue |= editor.variableValue
+			break
+		case 1 // direction
+			object.propertyValue &= 0x7F
+
+			temp0 = editor.variableValue
+			temp0 <<= 7
+			object.propertyValue |= temp0
+			break
+		end switch
+	end if
+end event
+
+
+event RSDKDraw
+	temp0 = object.propertyValue
+	temp0 &= 0x80
+	object.direction = FACING_RIGHT
+	if temp0 != false
+		object.direction = FACING_LEFT
+	end if
+
+	DrawSpriteFX(0, FX_FLIP, object.xpos, object.ypos)
+end event
+
+
+event RSDKLoad
+	CheckCurrentStageFolder("SBZ")
+	if checkResult == true
+		LoadSpriteSheet("SBZ/Objects.gif")
+		SpriteFrame(-11, -17, 22, 37, 1, 170)
+		SpriteFrame(-11, -17, 22, 37, 24, 170)
+		SpriteFrame(-12, -12, 24, 32, 47, 175)
+		SpriteFrame(-11, -20, 22, 40, 72, 167)
+	end if
+	
+	CheckCurrentStageFolder("Zone07")
+	if checkResult == true
+		LoadSpriteSheet("MBZ/Objects.gif")
+		SpriteFrame(-11, -17, 22, 37, 76, 292)
+		SpriteFrame(-11, -17, 22, 37, 99, 292)
+		SpriteFrame(-12, -12, 24, 32, 122, 297)
+		SpriteFrame(-11, -20, 22, 40, 147, 289)
+	end if
+
+	AddEditorVariable("bombTime")
+
+	AddEditorVariable("direction")
+	SetActiveVariable("direction")
+	AddEnumVariable("Left", 0)
+	AddEnumVariable("Right", 1)
+end event

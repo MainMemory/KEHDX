@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org">
+  <Images>
+    <ImageFromSheet id="main" sheet="SBZ/Objects.gif" sourcex="317" sourcey="339" width="64" height="64">
+      <Offset X="-32" Y="-32" />
+    </ImageFromSheet>
+    <ImageFromSheet id="sec" sheet="SBZ/Objects.gif" sourcex="2" sourcey="472" width="32" height="40">
+      <Offset X="-32" Y="-8" />
+    </ImageFromSheet>
+  </Images>
+  <ImageSets>
+    <ImageSet id="tubecover">
+      <ImageRef image="sec" />
+      <ImageRef image="main" />
+    </ImageSet>
+  </ImageSets>
+  <DefaultImage>
+    <ImageSetRef set="tubecover" />
+  </DefaultImage>
+</ObjDef>

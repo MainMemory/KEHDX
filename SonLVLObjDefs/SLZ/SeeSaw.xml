@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Image="seesaw">
+  <Images>
+    <ImageFromSheet id="seesaw" sheet="SLZ/Objects.gif" sourcex="84" sourcey="59" width="91" height="56">
+      <Offset X="-42" Y="-44"/>
+    </ImageFromSheet>
+    <ImageFromSheet id="orb" sheet="SLZ/Objects.gif" sourcex="156" sourcey="1" width="24" height="22">
+      <Offset X="-12" Y="-11"/>
+    </ImageFromSheet>
+  </Images>
+  <ImageSets>
+    <ImageSet id="hasorb">
+      <ImageRef image="seesaw" />
+      <ImageRef image="orb" >
+        <Offset X="40" Y="-8" />
+      </ImageRef>
+    </ImageSet>
+    <ImageSet id="noorb">
+      <ImageRef image="seesaw" />
+    </ImageSet>
+  </ImageSets>
+  <DefaultImage>
+    <ImageSetRef set="noorb" />
+  </DefaultImage>
+  <Properties>
+    <Property name="Remove Orb" type="bool" startbit="7" length="1" />
+  </Properties>
+  <Subtypes>
+    <Subtype id="00" name="Has Orb">
+      <ImageSetRef set="hasorb" />
+    </Subtype>
+    <Subtype id="ff" name="No Orb">
+      <ImageSetRef set="noorb" />
+    </Subtype>
+  </Subtypes>
+</ObjDef>

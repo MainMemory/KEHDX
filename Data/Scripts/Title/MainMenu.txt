@@ -1,0 +1,399 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Sega Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.timer
+private alias object.value1 : object.selection
+
+// When fading out, this is the type the object will become afterwards
+private alias object.value3 : object.fadeType
+
+private alias object.value4 : object.flash
+
+// Padded out for parity with other Menu objects, so that the value slot is the same across each
+private alias object.value10 : object.buttonLeft
+private alias object.value11 : object.buttonTop
+private alias object.value12 : object.buttonRight
+private alias object.value13 : object.buttonBottom
+private alias object.value14 : object.buttonID
+private alias object.value15 : object.buttonFunc
+
+// Similarly also padded out for the same reason
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
+// Kept public as it's used by the KEH_RunButton function, which is used by other objects too
+public alias 255 : SELECTION_NULL
+
+// States
+private alias 0 : MAINMENU_SETUP
+private alias 1 : MAINMENU_FADEIN
+private alias 2 : MAINMENU_MAIN
+private alias 3 : MAINMENU_FADEOUT
+
+// Touch Input Aliases
+private alias -1 : TOUCHINPUT_NULL
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// General functions that are used outside this script too
+
+// Used to process an individual button, normally meant to be in a loop
+reserve function KEH_RunButton
+
+// Saveing on sheet space a bit, this draws selection boxes with rectangles rather than making them sprites
+reserve function KEH_DrawSelBox
+
+// Button activation functions, only used in this script
+reserve function MainMenu_Button_Singleplayer
+reserve function MainMenu_Button_Competition
+reserve function MainMenu_Button_Options
+reserve function MainMenu_Button_Credits
+
+
+// ========================
+// Function Definitions
+// ========================
+
+public function KEH_RunButton
+	
+	// This function is called to update a button, with the values specified
+	
+	// Preconditions:
+	// - temp3 is if the screen is held at all or not (-1, 0, or above)
+	// - object.buttonLeft is the XPos of the left bounds of the button
+	// - object.buttonRight is the XPos of the right bounds of the button
+	// - object.buttonTop is the YPos of the top bounds of the button
+	// - object.buttonBottom is the YPos of the lower bounds of the button
+	// - object.buttonID is the button ID of the button
+	// - object.buttonFunc is the function ID of the button, to be called if the button was pressed
+	
+	if temp3 > TOUCHINPUT_NULL
+		CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
+		if checkResult > TOUCHINPUT_NULL
+			object.selection = object.buttonID
+		else
+			if object.selection == object.buttonID
+				object.selection = SELECTION_NULL
+			end if
+		end if
+	else
+		if object.selection == object.buttonID
+			CallFunction(object.buttonFunc)
+		end if
+	end if
+	
+end function
+
+
+public function KEH_DrawSelBox
+	// The tin's right, this draws a selection box
+	// Not used in this script, but used in Options and Stage Select
+	// Could be used for the 2PVS menu too, whenever we get to that
+	
+	// Preconditions:
+	// - object.drawPos.x is set to the screen-space X position to draw the box
+	// - object.drawPos.y is set to the screen-space Y position to draw the box
+	// - object.drawWidth is the width for the box to be (not including shadow)
+	// - object.drawHeight is how tall the box should be (not including shadow)
+	// - object.drawColour.[rgb] is set to the colour the main box frame should be
+	//   - Shadows are always 0x000000, though this function can be changed to allow for customising them too
+	
+	temp1 = object.drawPos.y
+	temp1 += object.drawHeight
+	
+	temp2 = object.drawPos.x
+	temp2 += object.drawWidth
+	
+	// To make the ends meet, don't want an empty corner!
+	object.drawHeight++
+	
+	// First do the box's Shadow, 2px off from the main box
+	object.drawPos.x += 2
+	object.drawPos.y += 2
+	temp1 += 2
+	temp2 += 2
+	
+	// We're using 0x000000 for the shadow here, it's pretty solid
+	
+	// TL -> TR
+	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, 0x00, 0x00, 0x00, 255)
+	
+	// TL -> BL
+	DrawRect(object.drawPos.x, object.drawPos.y, 1, object.drawHeight, 0x00, 0x00, 0x00, 255)
+	
+	// BL -> BR
+	DrawRect(object.drawPos.x, temp1, object.drawWidth, 1, 0x00, 0x00, 0x00, 255)
+	
+	// TR -> BR
+	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, 0x00, 0x00, 0x00, 255)
+	
+	// Now, move back and do the actual main box
+	object.drawPos.x -= 2
+	object.drawPos.y -= 2
+	temp1 -= 2
+	temp2 -= 2
+	
+	// For this one, we're using the variable colours
+	
+	// TL -> TR
+	DrawRect(object.drawPos.x, object.drawPos.y, object.drawWidth, 1, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// TL -> BL
+	DrawRect(object.drawPos.x, object.drawPos.y, 1, object.drawHeight, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// BL -> BR
+	DrawRect(object.drawPos.x, temp1, object.drawWidth, 1, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// TR -> BR
+	DrawRect(temp2, object.drawPos.y, 1, object.drawHeight, object.drawColour.r, object.drawColour.g, object.drawColour.b, 255)
+	
+	// And now shift back a bit, undo the change from above
+	object.drawHeight--
+	
+end function
+
+
+// Button Functions for this script in particular, nothing too big
+
+private function MainMenu_Button_Singleplayer
+	object.fadeType = TypeName[Stage Select]
+	menu.bootMode = BOOTMODE_STAGESELECT
+	object.state = MAINMENU_FADEOUT
+//	saveRAM[250] = object.selection
+end function
+
+
+private function MainMenu_Button_Competition
+	if engine.onlineActive == true
+		// (Online version of object goes here)
+//		object.fadeType = TypeName[Competition O1]
+		object.fadeType = TypeName[Main Menu]
+		PlaySfx(SfxName[Fail], false)
+	else
+		object.fadeType = TypeName[Competition L1]
+	end if
+	menu.bootMode = BOOTMODE_COMPETITION
+	object.state = MAINMENU_FADEOUT
+end function
+
+
+private function MainMenu_Button_Options
+	object.fadeType = TypeName[Options]
+	menu.bootMode = BOOTMODE_OPTIONS
+	object.state = MAINMENU_FADEOUT
+//	saveRAM[250] = object.selection
+end function
+
+
+private function MainMenu_Button_Credits
+	PlaySfx(SfxName[Fail], false)
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case MAINMENU_SETUP
+//		object.selection = saveRAM[250]
+		object.timer = 320
+		object.inkEffect = 3
+		
+		if options.physicalControls == false
+			// If using touch, then don't have a default selection
+			// (Plus, starting with the cursor already on something can cause issues...)
+			
+			object.selection = SELECTION_NULL
+		end if
+		
+		// Set BG speed, 1.0 pixel per frame
+		tileLayer[1].scrollSpeed = -0x10000
+		hParallax[0].scrollSpeed = -0x10000
+		
+		SetScreenFade(0, 0, 0, object.timer)
+		object.state++
+		break
+
+	case MAINMENU_FADEIN
+		if object.timer > 0
+			object.timer -= 8
+		else
+			PlayMusic(1)
+			object.timer = 0
+			object.state++
+		end if
+
+		SetScreenFade(0, 0, 0, object.timer)
+		break
+		
+	case MAINMENU_MAIN
+		if options.physicalControls == true
+			// Assuming physical controls, this is the default
+			
+			if keyPress[0].up == true
+				object.selection--
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			if keyPress[0].down == true
+				object.selection++
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			object.selection &= 3
+			
+			if keyPress[0].start == true
+				temp0 = MainMenu_Button_Singleplayer
+				temp0 += object.selection
+				CallFunction(temp0)
+			end if
+			
+			// If the player's touched the screen at all...
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > TOUCHINPUT_NULL
+				// ... then activate touch controls, and hide the Knuckles cursor too
+				options.physicalControls = false
+				object.selection = SELECTION_NULL
+			end if
+		else
+			// Seeing if the player's got a finger on the screen at all
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Get the base XPos of the button, center screen aligned
+			
+			// Left bounds
+			object.buttonLeft = screen.xcenter
+			object.buttonLeft -= 80
+			
+			// Right bounds
+			object.buttonRight = object.buttonLeft
+			object.buttonRight += 180
+			
+			// Other values
+			object.buttonTop = 130
+			object.buttonBottom = 150
+			object.buttonFunc = MainMenu_Button_Singleplayer
+			
+			// Cycle through, and look at all four buttons
+			object.buttonID = 0
+			while object.buttonID < 4
+				CallFunction(KEH_RunButton)
+				
+				object.buttonTop += 20
+				object.buttonBottom += 20
+				object.buttonID++
+				object.buttonFunc++
+			loop
+			
+			options.physicalControls = input.pressButton
+			options.physicalControls |= keyPress[0].down
+			options.physicalControls |= keyPress[0].up
+		end if
+		break
+		
+	case MAINMENU_FADEOUT
+		if object.timer < 256
+			object.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			ResetObjectEntity(object.entityPos, object.fadeType, 0, object.xpos, object.ypos)
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
+	end switch
+	
+	// Animation for the Knuckles cursor
+	object.animationTimer++
+	object.animationTimer %= 60
+end event
+
+
+event ObjectDraw
+
+	// Draw the shiny new logo
+	DrawSpriteScreenXY(0, screen.xcenter, 16)
+	DrawSpriteScreenFX(0, FX_INK, screen.xcenter, 16)
+
+	// Then, draw the texts underneath that
+	DrawSpriteScreenXY(1, screen.xcenter, 133)
+
+	// Little Knuckles
+	temp0 = object.selection
+	temp0 *= 20
+	temp0 += 132
+	
+	temp1 = screen.xcenter
+	temp1 -= 109
+	
+	object.frame = object.animationTimer
+	object.frame >>= 5
+	object.frame += 2
+	DrawSpriteScreenXY(object.frame, temp1, temp0)
+	
+	// Website link
+	DrawSpriteScreenXY(4, screen.xcenter, 216)
+	
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	
+	// 0 - Knuckles' Emerald Hunt, DX!
+	SpriteFrame(-142, -3, 284, 113, 128, 0)
+	
+	// 1 - Selection texts
+	//     - These are all one sprite, each option isn't split into its own sprite or anything
+	SpriteFrame(-80, 0, 159, 77, 128, 113)
+	
+	// 2-3 - Tiny Knuckles cursor frames
+	SpriteFrame(0, 0, 23, 22, 489, 1)
+	SpriteFrame(0, 0, 24, 22, 488, 24)
+	
+	// 4 - Website link (https://mm.reimuhakurei.net/?page=kehDX)
+	SpriteFrame(-152, 0, 304, 10, 112, 250)
+	
+	SetMusicTrack("SPPMenu.ogg", 1, 214596)
+	
+	// All the Stage Select icons get their own sheet, since they use up quite a bit of palette space
+	LoadPalette("KEHDX_MenuIcons.act", 1, 0, 0, 256)
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-142, -3, 284, 113, 128, 0)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

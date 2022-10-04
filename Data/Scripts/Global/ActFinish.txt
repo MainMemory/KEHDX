@@ -1,0 +1,647 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: Act Finish Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0  : object.timer
+private alias object.value1  : object.textPos
+private alias object.value2  : object.gotThroughTextPos
+private alias object.value3  : object.timePos
+private alias object.value4  : object.ringPos
+private alias object.value5  : object.perfectPos
+private alias object.value6  : object.totalPos
+private alias object.value7  : object.timeBonus
+private alias object.value8  : object.ringBonus
+private alias object.value9  : object.perfectBonus
+private alias object.value10 : object.hasPerfectBonus
+private alias object.value11 : object.totalScore
+private alias object.value12 : object.hasContinue
+
+// KEHDX values
+private alias object.value13 : object.selection
+
+private alias -1 : SELECTION_NULL
+private alias  0 : SELECTION_NEXT
+private alias  1 : SELECTION_STAGESELECT
+private alias  2 : SELECTION_RESTART
+private alias  3 : SELECTION_MAX
+
+private alias object.value14 : object.usingTouch
+
+// States
+private alias -1 : ACTFINISH_NORESULTS
+private alias  0 : ACTFINISH_INIT
+private alias  1 : ACTFINISH_ENTERTEXT
+private alias  2 : ACTFINISH_ACTFINISHJINGLE
+private alias  3 : ACTFINISH_TALLYSCORE
+private alias  4 : ACTFINISH_MENU
+private alias  5 : ACTFINISH_LOADNEXTSTAGE
+
+// Player Aliases
+private alias object.value0 : player.rings
+
+// Menu Boot Mode Aliases	
+private alias 3 : BOOTMODE_STAGESELECT
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// Do note, if these are ever edited/more are added, make sure to keep the order of these intact and retain them being in the same order as the SELECTION_* values
+reserve function ActFinish_Button_Next
+reserve function ActFinish_Button_StageSelect
+reserve function ActFinish_Button_Restart
+
+
+// ========================
+// Function Definitions
+// ========================
+
+private function ActFinish_Button_Next
+	// Corresponds to SELECTION_NEXT
+	
+	stage.listPos++
+end function
+
+
+private function ActFinish_Button_StageSelect
+	// Corresponds to SELECTION_STAGESELECT
+	
+	stage.listPos = 0
+	stage.activeList = PRESENTATION_STAGE
+end function
+
+
+private function ActFinish_Button_Restart
+	// Corresponds to SELECTION_RESTART
+	
+	// Not much needs to be done here, all the correct stage infos should be set already
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	// Hide the Touch Controls UI
+	// -> We don't need any DPad here, we got our own buttons to touch directly
+	options.touchControls = false
+	
+	// Move the camera to the player's position
+	screen.cameraX = object[0].ixpos	
+	screen.cameraY = object[0].iypos
+	
+	switch object.state
+	case ACTFINISH_INIT
+		object.drawOrder = 6
+		object.priority = PRIORITY_ACTIVE
+		object.textPos = -384
+		object.gotThroughTextPos = 384
+		object.timePos = 640
+		object.ringPos = 656
+		object.perfectPos = 672
+		object.totalPos = 688
+
+		switch stage.minutes
+		case 0
+			if stage.seconds < 30
+				object.timeBonus = 50000
+			else
+				if stage.seconds < 45
+					object.timeBonus = 10000
+				else
+					object.timeBonus = 5000
+				end if
+			end if
+			break
+
+		case 1
+			if stage.seconds < 30
+				object.timeBonus = 4000
+			else
+				object.timeBonus = 3000
+			end if
+			break
+
+		case 2
+			object.timeBonus = 2000
+			break
+
+		case 3
+			object.timeBonus = 1000
+			break
+
+		case 4
+			object.timeBonus = 500
+			break
+
+		case 5
+			object.timeBonus = 100
+			break
+
+		case 9
+			if stage.debugMode == false
+				if stage.seconds == 59
+					// Cutting it really close there - give the player a ton of points
+					object.timeBonus = 100000
+				end if
+			end if
+			break
+
+		end switch
+
+		object.ringBonus = player[0].rings
+		object.ringBonus *= 100
+
+		// Calculate Perfect Bonus
+
+		// Ring Property Values
+		// 0 = All
+		// 1 = Not needed by Sonic for perfect
+		// 2 = Not needed at all for perfect
+		
+		// The tallying system seems to be a bit off, though...
+		// KEHDX TODO: it would be p cool to repurpose this for something, right?
+
+		switch stage.playerListPos
+		case 0
+		case 3
+			temp0 = 0
+			foreach (TypeName[Ring], arrayPos0, ALL_ENTITIES)
+				if object[arrayPos0].propertyValue <= 1
+					temp0++
+				end if
+			next
+			break
+
+		case 1
+		case 2
+			temp0 = 0
+			foreach (TypeName[Ring], arrayPos0, ALL_ENTITIES)
+				if object[arrayPos0].propertyValue != 2
+					temp0++
+				end if
+			next
+			break
+
+		end switch
+
+		// Perfect Bonus!
+		if temp0 == 0
+			object.hasPerfectBonus = true
+			object.perfectBonus = 500000
+			if stage.debugMode == false
+				CallNativeFunction2(SetAchievement, 6, 100)
+			end if
+		end if
+		
+		object.state++
+		break
+
+	case ACTFINISH_ENTERTEXT
+		if object.textPos < 0
+			object.textPos += 16
+		end if
+
+		if object.gotThroughTextPos > 0
+			object.gotThroughTextPos -= 16
+		end if
+
+		if object.timePos > 0
+			object.timePos -= 16
+		end if
+
+		if object.ringPos > 0
+			object.ringPos -= 16
+		end if
+
+		if object.perfectPos > 0
+			object.perfectPos -= 16
+		end if
+
+		if object.totalPos > 0
+			object.totalPos -= 16
+		else
+			object.state++
+		end if
+		break
+
+	case ACTFINISH_ACTFINISHJINGLE
+		object.timer++
+		if object.timer > 299
+			object.timer = 0
+			object.state++
+		end if
+		break
+
+	case ACTFINISH_TALLYSCORE
+		temp1 = keyDown[0].buttonA
+		temp1 |= keyDown[0].buttonB
+		temp1 |= keyDown[0].buttonC
+		temp1 |= keyDown[0].start
+		temp1 |= touchscreen[0].down
+		if temp1 == true
+			temp2 = 2000
+			if temp2 > object.timeBonus
+				temp2 = object.timeBonus
+			end if
+			
+			temp3 = 2000
+			if temp3 > object.ringBonus
+				temp3 = object.ringBonus
+			end if
+			
+			temp4 = 2000
+			if temp4 > object.perfectBonus
+				temp4 = object.perfectBonus
+			end if
+		else
+			temp2 = 100
+			temp3 = 100
+			temp4 = 100
+		end if
+
+		if object.timeBonus > 0
+			object.timeBonus -= temp2
+			object.totalScore += temp2
+			player.score += temp2
+		end if
+		
+		if object.ringBonus > 0
+			object.ringBonus -= temp3
+			object.totalScore += temp3
+			player.score += temp3
+		end if
+		
+		if object.perfectBonus > 0
+			object.perfectBonus -= temp4
+			object.totalScore += temp4
+			player.score += temp4
+		end if
+		
+		CheckGreater(object.ringBonus, 0)
+		temp0 = checkResult
+		CheckGreater(object.timeBonus, 0)
+		temp0 |= checkResult
+		CheckGreater(object.perfectBonus, 0)
+		temp0 |= checkResult
+		if temp0 == true
+			object.timer++
+			if object.timer == 2
+				object.timer = 0
+				
+				PlaySfx(SfxName[Score Add], false)
+			end if
+		else
+			// KEHDX - Save all the stuff here
+			
+			arrayPos0 = 300
+			arrayPos0 *= stage.listPos
+			
+			// If Debug Mode is active most of this won't save, for obvious reasons
+			// (plus, i don't wanna ruin my legit times on accident when testing stuff or anything, already happened once :[)
+			if stage.debugMode == false
+				if player.score > saveRAM[arrayPos0]
+					// Max Score
+					saveRAM[arrayPos0] = player.score
+				end if
+				
+				arrayPos0++
+				if player[0].rings > saveRAM[arrayPos0]
+					// Max Ring count
+					saveRAM[arrayPos0] = player[0].rings
+				end if
+				
+				// Play count
+				arrayPos0++
+				saveRAM[arrayPos0]++
+				
+				// Best Time
+				arrayPos0++
+				timeAttack.result = stage.seconds
+				timeAttack.result *= 100
+				temp0 = stage.minutes
+				temp0 *= 6000
+				timeAttack.result += temp0
+				timeAttack.result += stage.milliSeconds
+				if timeAttack.result < saveRAM[arrayPos0]
+					saveRAM[arrayPos0] = timeAttack.result
+				end if
+				
+				// Death count, written down below regardless of Debug Mode
+				arrayPos0++
+			else
+				// With Debug Mode active, only save the not-as-important stuff, such as Death count and Play count
+				
+				// Play count
+				arrayPos0 += 2
+				saveRAM[arrayPos0]++
+				
+				// Death count, save pos is set here but it's actually saved right down below
+				arrayPos0 += 2
+			end if
+			
+			// The Death count isn't too important of a thing, so always save it anyways
+			// (Assumes arrayPos0 is set to the correct pos before it gets here)
+			saveRAM[arrayPos0] += death.count
+			death.count = 0
+			
+			WriteSaveRAM()
+			
+			PlaySfx(SfxName[Score Total], false)
+			
+			object.timer = 0
+			object.state++
+		end if
+		break
+		
+	case ACTFINISH_MENU
+		if object.usingTouch == false
+			if keyPress[0].left == true
+				object.selection--
+				if object.selection < SELECTION_NEXT
+					object.selection = SELECTION_RESTART
+				end if
+				
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			if keyPress[0].right == true			
+				object.selection++
+				object.selection %= SELECTION_MAX
+				
+				PlaySfx(SfxName[Score Add], false)
+			end if
+			
+			temp0 = keyPress[0].start
+			temp0 |= keyPress[0].buttonA
+			temp0 |= keyPress[0].buttonB
+			temp0 |= keyPress[0].buttonC
+			if temp0 == true
+				temp0 = ActFinish_Button_Next
+				temp0 += object.selection
+				CallFunction(temp0)
+				
+				object.state = ACTFINISH_LOADNEXTSTAGE
+			end if
+			
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > -1
+				// Activate touch controls if screen tapped
+				object.usingTouch = true
+				
+				object.selection = SELECTION_NULL
+			end if
+		else
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			temp0 = screen.xcenter
+			temp0 -= 200
+			temp1 = temp0
+			temp1 += 100
+			
+			temp2 = SELECTION_NEXT
+			
+			while temp2 < 3
+				CheckTouchRect(temp0, 200, temp1, 235)
+				
+				if checkResult > -1
+					object.selection = temp2
+				else
+					if temp3 < 0
+						if object.selection == temp2
+							temp0 = ActFinish_Button_Next
+							temp0 += object.selection
+							CallFunction(temp0)
+							
+							object.state = ACTFINISH_LOADNEXTSTAGE
+						end if
+					else
+						if object.selection == temp2
+							object.selection = SELECTION_NULL
+						end if
+					end if
+				end if
+				
+				temp0 = temp1
+				temp0 += 50
+				temp1 = temp0
+				temp1 += 100
+				
+				temp2++
+			loop
+			
+			temp0 = keyPress[0].up
+			temp0 |= keyPress[0].down
+			temp0 |= keyPress[0].left
+			temp0 |= keyPress[0].right
+			temp0 |= keyPress[0].start
+			if temp0 == true
+				object.usingTouch = false
+				object.selection = SELECTION_NEXT
+			end if
+		end if
+		break
+		
+	case ACTFINISH_LOADNEXTSTAGE
+		object.timer += 4
+		SetScreenFade(0, 0, 0, object.timer)
+		if object.timer >= 384
+			fadeColor = 0
+			object.timer = 0
+			starPostID = 0
+			object.direction = FLIP_NONE
+			menu.bootMode = BOOTMODE_STAGESELECT // Always set, since the only way you'll get back to the Menus scene from here is via `Stage Select` anyways
+			LoadStage()
+		end if
+		break
+		
+	end switch
+end event
+
+
+event ObjectDraw
+	// Enforce above-water palette
+	SetActivePalette(0, 0, screen.ysize)
+
+	temp7 = object.textPos
+	temp7 += screen.xcenter
+
+	DrawSpriteScreenXY(0, temp7, 32)
+	DrawSpriteScreenXY(1, temp7, 32)
+
+	temp7 = object.gotThroughTextPos
+	temp7 += screen.xcenter
+	DrawSpriteScreenXY(2, temp7, 50)
+
+	temp7 = object.timePos
+	temp7 += screen.xcenter
+	DrawSpriteScreenXY(27, temp7, 80)
+	temp7 += 88
+	DrawNumbers(14, temp7, 80, player.score, 6, 8, 0)
+	DrawNumbers(14, temp7, 110, player[0].rings, 6, 8, 0)
+
+	temp7 = object.timePos
+	temp7 += screen.xcenter
+	temp7 += 42
+	DrawSpriteScreenXY(28, temp7, 95)
+	DrawNumbers(14, temp7, 95, stage.minutes, 2, 8, 1)
+	temp7 += 20
+	DrawNumbers(14, temp7, 95, stage.seconds, 2, 8, 1)
+	temp7 += 26
+	DrawNumbers(14, temp7, 95, stage.milliSeconds, 2, 8, 1)
+
+	temp7 = object.timePos
+	temp7 += screen.xcenter
+	temp6 = 136
+	DrawSpriteScreenXY(8, temp7, temp6)
+	DrawSpriteScreenXY(13, temp7, temp6)
+	temp7 += 88
+	temp6++
+	DrawNumbers(14, temp7, temp6, object.timeBonus, 6, 8, 0)
+
+	temp7 = object.ringPos
+	temp7 += screen.xcenter
+	temp6 += 15
+	DrawSpriteScreenXY(9, temp7, temp6)
+	DrawSpriteScreenXY(13, temp7, temp6)
+	temp7 += 88	
+	temp6++
+	DrawNumbers(14, temp7, temp6, object.ringBonus, 5, 8, 0)
+	temp6 += 15
+	if object.hasPerfectBonus == true
+		temp7 = object.perfectPos
+		temp7 += screen.xcenter
+		DrawSpriteScreenXY(10, temp7, temp6)
+		DrawSpriteScreenXY(11, temp7, temp6)
+		temp7 += 88
+		temp6++
+		DrawNumbers(14, temp7, temp6, object.perfectBonus, 5, 8, 0)
+	end if
+	
+	if object.state == ACTFINISH_MENU
+		switch object.selection
+		case SELECTION_NULL
+			// Should only be used by Touch Controls
+			temp0 = -64
+			break
+			
+		case SELECTION_NEXT
+			temp0 = screen.xcenter
+			temp0 -= 154
+			break
+			
+		case SELECTION_STAGESELECT
+			temp0 = screen.xcenter
+			temp0 += 36
+			break
+			
+		case SELECTION_RESTART
+			temp0 = screen.xsize
+			temp0 -= 37
+			break
+			
+		end switch
+		
+		// Cursor
+		DrawSpriteScreenXY(24, temp0, 228)
+		
+		// "Next" text
+		temp0 = screen.xcenter
+		temp0 -= 160
+		DrawSpriteScreenXY(25, 53, 228)
+		
+		// "Stage Select" text
+		temp0 += 160
+		DrawSpriteScreenXY(26, temp0, 228)
+		
+		// "Restart" text
+		temp0 = screen.xsize
+		temp0 -= 53
+		DrawSpriteScreenXY(29, temp0, 228)
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("Global/Display.gif")
+
+	// Assign sprite frames based on current character in play
+	switch stage.playerListPos
+	case 0
+		// Knuckles
+		SpriteFrame(-94, 0, 128, 16, 34, 188)		// #0 - "KNUCKLES" large text
+		SpriteFrame(40, 0, 48, 16, 1, 205)			// #1 - "GOT" large text
+		break
+	
+	case 1
+		// Tikal
+		SpriteFrame(-63, 0, 71, 16, 144, 222)		// #0 - "TIKAL" large text
+		SpriteFrame(16, 0, 48, 16, 1, 205)			// #1 - "GOT" large text
+		break
+	
+	end switch
+
+	// Remaining frames are the same for everyone
+	SpriteFrame(-63, 0, 125, 16, 50, 205) 			// #2  - "THROUGH" large text
+	SpriteFrame(33, 0, 46, 16, 163, 205) 			// #3  - "ACT" large text
+	SpriteFrame(33, 0, 62, 16, 83, 1) 				// #4  - "ZONE" large text
+	SpriteFrame(88, 0, 16, 29, 42, 1) 				// #5  - "1" act number
+	SpriteFrame(88, 0, 23, 29, 59, 1) 				// #6  - "2" act number
+	SpriteFrame(88, 0, 23, 32, 42, 31) 				// #7  - "3" act number
+	SpriteFrame(-91, 1, 31, 11, 2, 17) 				// #8  - "TIME" text (cropped out from existing HUD set)
+	SpriteFrame(-92, 1, 32, 11, 1, 33) 				// #9  - "RINGS" text (also cropped out from existing HUD set)
+	SpriteFrame(-104, 1, 56, 11, 66, 35)			// #10 - "PERFECT" text
+	SpriteFrame(-40, 0, 44, 16, 190, 1) 			// #11 - "BONUS" text
+	SpriteFrame(-71, 0, 40, 16, 141, 340) 			// #12 - "RANK" text
+	SpriteFrame(-52, 0, 44, 16, 190, 1) 			// #13 - "BONUS" text, but with different offset
+	SpriteFrame(0, 0, 8, 11, 1, 50) 				// #14 - Number 0
+	SpriteFrame(0, 0, 8, 11, 10, 50)				// #15 - Number 1
+	SpriteFrame(0, 0, 8, 11, 19, 50)				// #16 - Number 2
+	SpriteFrame(0, 0, 8, 11, 28, 50)				// #17 - Number 3
+	SpriteFrame(0, 0, 8, 11, 1, 62) 				// #18 - Number 4
+	SpriteFrame(0, 0, 8, 11, 10, 62)				// #19 - Number 5
+	SpriteFrame(0, 0, 8, 11, 19, 62)				// #20 - Number 6
+	SpriteFrame(0, 0, 8, 11, 28, 62)				// #21 - Number 7
+	SpriteFrame(0, 0, 8, 11, 1, 74) 				// #22 - Number 8
+	SpriteFrame(0, 0, 8, 11, 10, 74)				// #23 - Number 9
+	
+	SpriteFrame(0, -15, 16, 16, 137, 316)			// #24 Triangle
+	SpriteFrame(-17, -13, 34, 11, 154, 316)			// #25 Next
+	SpriteFrame(-47, -13, 95, 11, 154, 328)			// #26 Stage Select
+	SpriteFrame(-72, 0, 44, 48, 185, 340) 			// #27 "SCORE, TIME, RINGS" Text with results Triangle
+	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 Timer ticks
+	SpriteFrame(-28, -13, 56, 11, 189, 316)			// #29 Restart
+	
+	SpriteFrame(0, 1, 8, 8, 127, 64)		// #30 - '-'
+	SpriteFrame(0, 0, 8, 11, 28, 86)		// #31 - F
+	SpriteFrame(0, 0, 8, 11, 19, 86)		// #32 - E
+	SpriteFrame(0, 0, 8, 11, 10, 86)		// #33 - D
+	SpriteFrame(0, 0, 8, 11, 1, 86)			// #34 - C
+	SpriteFrame(0, 0, 8, 11, 28, 74)		// #35 - B
+	SpriteFrame(0, 0, 8, 11, 19, 74)		// #36 - A
+	SpriteFrame(0, 0, 8, 11, 120, 48)		// #37 - S
+	SpriteFrame(0, 1, 8, 8, 136, 64)		// #38 - +
+end event
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 143)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

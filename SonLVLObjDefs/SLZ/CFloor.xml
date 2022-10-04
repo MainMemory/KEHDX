@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Image="frame">
+  <Images>
+    <ImageFromSheet id="frame" sheet="SLZ/Objects.gif" sourcex="67" sourcey="26" width="64" height="32">
+      <Offset X="-32" Y="-8"/>
+    </ImageFromSheet>
+  </Images>
+  <Properties>
+    <Property name="Fall Type" type="FallTypes" startbit="0" length="1" />
+  </Properties>
+  <Enums>
+    <Enum name="FallTypes">
+      <EnumMember name="Left" />
+      <EnumMember name="Bottom" />
+    </Enum>
+  </Enums>
+</ObjDef>

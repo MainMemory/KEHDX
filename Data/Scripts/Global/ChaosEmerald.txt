@@ -1,0 +1,226 @@
+// ----------------------------------
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: Chaos Emerald Object
+// Script Author: MainMemory
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.timer
+private alias object.value1 : object.originPos.Y
+private alias object.value2 : object.mode
+
+private alias 0 : EMERALD_MODE_S2
+private alias 1 : EMERALD_MODE_HPZ
+private alias 2 : EMERALD_MODE_S1
+
+private alias 0 : EMERALD_NONE
+private alias 1 : EMERALD_ITEM
+private alias 2 : EMERALD_OBTAINED
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case EMERALD_ITEM
+		if object.propertyvalue != 9
+			Sin(temp0, object.angle)
+			temp0 <<= 10
+			object.ypos = object.originPos.Y
+			object.ypos += temp0
+		end if
+		
+		object.angle += 4
+		object.angle &= 511
+		
+		object.frame++
+		object.frame %= 96
+		
+		object.animationTimer++
+		object.animationTimer &= 15
+		
+		// Check interaction with players
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+			if stage.listPos == 9
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
+			else
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
+			end if
+			
+			if checkResult == true
+				CallFunction(EmeraldManager_AwardEmerald)
+				ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+			end if
+		next
+		break
+		
+	case EMERALD_OBTAINED
+		currentPlayer = object.propertyValue
+		object.xpos = object[currentPlayer].xpos
+		object.ypos = object[currentPlayer].ypos
+		object.ypos -= 0x261A80
+		
+		object.timer++
+		if object.timer < 150
+			temp0 = object.timer
+			temp0 &= 7
+			switch temp0
+			case 0
+				object.alpha = 255
+				break
+			case 1
+			case 7
+				object.alpha = 192
+				break
+			case 2
+			case 6
+				object.alpha = 128
+				break
+			case 3
+			case 5
+				object.alpha = 64
+				break
+			case 4
+				object.alpha = 0
+				break
+			end switch
+		else
+			CallFunction(EmeraldManager_DeleteEmerald)
+			ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+		end if
+		break
+		
+	end switch
+end event
+
+
+event ObjectDraw
+	switch object.state
+	case EMERALD_ITEM
+		switch object.mode
+		case EMERALD_MODE_S2
+		default
+			if object.frame < 64
+				DrawSprite(0)
+			else
+				temp0 = object.frame
+				temp0 -= 60
+				temp0 >>= 2
+				DrawSprite(temp0)
+			end if
+			break
+			
+		case EMERALD_MODE_HPZ
+			DrawSprite(9)
+			break
+			
+		case EMERALD_MODE_S1
+			if object.animationTimer < 8
+				DrawSprite(10)
+			else
+				DrawSprite(11)
+			end if
+			break
+			
+		end switch
+		break
+		
+	case EMERALD_OBTAINED
+		switch object.mode
+		case EMERALD_MODE_S2
+		default
+			temp0 = 0
+			break
+		case EMERALD_MODE_HPZ
+			temp0 = 9
+			break
+		case EMERALD_MODE_S1
+			temp0 = 10
+			break
+		end switch
+		
+		DrawSpriteFX(temp0, FX_INK, object.xpos, object.ypos)
+		break
+		
+	end switch
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("Global/Items.gif")
+	switch specialMode
+	case 0
+		SpriteFrame(-8, -8, 16, 16, 109, 158)
+		
+		temp0 = 175
+		while temp0 < 193
+			temp1 = 109
+			while temp1 < 161
+				SpriteFrame(-8, -8, 16, 16, temp1, temp0)
+				temp1 += 17
+			loop
+			temp0 += 17
+		loop
+		
+		SpriteFrame(-8, -16, 16, 32, 178, 159) // 9 HPZ Shard
+		
+		temp1 = 126
+		temp0 = 0
+		while temp0 < 2
+			SpriteFrame(-8, -8, 16, 16, temp1, 158) // S1 Emerald
+			temp1 += 17
+			temp0++
+		loop
+		break
+		
+	case 1
+		temp0 = 0
+		while temp0 < 12
+			SpriteFrame(-8, -8, 16, 16, 177, 192)
+			temp0++
+		loop
+		break
+		
+	end switch
+	
+	if stage.listPos == 9
+		temp0 = EMERALD_MODE_HPZ
+	else
+		if stage.listPos > 9
+			temp0 = EMERALD_MODE_S1
+		else
+			temp0 = EMERALD_MODE_S2
+		end if
+	end if
+	
+	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].drawOrder = 4
+		object[arrayPos0].originPos.Y = object[arrayPos0].ypos
+		object[arrayPos0].mode = temp0
+		CallFunction(EmeraldManager_AddEntity) 
+	next
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Items.gif")
+	SpriteFrame(-8, -8, 16, 16, 109, 158)
+	
+	// KEHDX TODO: just like it says, prop vals seem to be chosen at random?
+	// i lack the knowledge to do this myself, best to leave it to someone else...
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "idkTbh")
+end event

@@ -1,0 +1,431 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Menu Control Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.timer
+private alias object.value1 : object.selection
+
+// Padded out for parity with other Menu objects, so that the value slot is the same across each
+private alias object.value10 : object.buttonLeft
+private alias object.value11 : object.buttonTop
+private alias object.value12 : object.buttonRight
+private alias object.value13 : object.buttonBottom
+private alias object.value14 : object.buttonID
+private alias object.value15 : object.buttonFunc
+
+// Similarly also padded out for the same reason
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
+// States
+private alias 0 : OPTIONS_INIT
+private alias 1 : OPTIONS_FADEIN
+private alias 2 : OPTIONS_MAIN
+private alias 3 : OPTIONS_EXIT
+
+private alias saveRAM[200] : saved.radar
+private alias saveRAM[201] : saved.radarstyle
+
+// Touch Input Aliases
+private alias -1 : TOUCHINPUT_NULL
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// Button activation functions
+reserve function Options_Button_Character
+reserve function Options_Button_Radar
+reserve function Options_Button_SoundTest
+reserve function Options_Button_MusicSwitch
+reserve function Options_Button_RadarStyle
+
+
+// ========================
+// Function Definitions
+// ========================
+
+private function Options_Button_Character
+	saved.character++
+	saved.character &= 1
+	
+	switch saved.character
+	case 0
+		EditMenuEntry(MENU_1, "KNUCKLES", 2, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "TIKAL", 2, true)
+		break
+		
+	end switch
+	
+	WriteSaveRAM()
+	
+	if options.physicalControls == false
+		object.selection = SELECTION_NULL
+	end if
+end function
+
+
+private function Options_Button_Radar
+	saved.radar++
+	saved.radar &= 1
+	
+	switch saved.radar
+	case 0
+		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "OFF", 8, true)
+		break
+	end switch
+	
+	if options.physicalControls == false
+		object.selection = SELECTION_NULL
+	end if
+end function
+
+
+private function Options_Button_SoundTest
+	// KEHDX TODO: unimplemented
+	if options.physicalControls == false
+		object.selection = SELECTION_NULL
+	end if
+end function
+
+
+private function Options_Button_MusicSwitch
+	// KEHDX TODO: unimplemented
+	if options.physicalControls == false
+		object.selection = SELECTION_NULL
+	end if
+end function
+
+
+private function Options_Button_RadarStyle
+	saved.radarstyle++
+	saved.radarstyle &= 1
+	
+	switch saved.radarstyle
+	case 0
+		EditMenuEntry(MENU_1, "NEW", 26, true)
+		break
+		
+	case 1
+		EditMenuEntry(MENU_1, "OLD", 26, true)
+		break
+		
+	end switch
+	
+	if options.physicalControls == false
+		object.selection = SELECTION_NULL
+	end if
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	
+	switch object.state
+	case OPTIONS_INIT
+		object.timer = 320
+		
+		// Set up BG scroll values, 1px per frame
+		tileLayer[1].scrollSpeed = -0x10000
+		hParallax[0].scrollSpeed = -0x10000
+		
+		// Box drawing values, for the boxes that wrap the Options
+		object.drawPos.x = screen.xcenter
+		object.drawPos.x -= 141
+		// y is set when drawing
+		object.drawWidth = 279
+		object.drawHeight = 39
+		object.drawColour.r = 0xE0
+		object.drawColour.b = 0x00
+		
+		// For the arrows, set up the flip for them
+		object.direction = FACING_LEFT
+		
+		if options.physicalControls == false
+			// If using touch, then don't have a default selection
+			// (also starting with the cursor having already selected something will cause a "tap" to be seen, which isn't too good...)
+			
+			object.selection = SELECTION_NULL
+		end if
+		
+		SetScreenFade(0, 0, 0, object.timer)
+		object.state++
+		break
+
+	case OPTIONS_FADEIN
+		if object.timer > 0
+			object.timer -= 16
+		else
+			PlayMusic(0)
+			object.state++
+		end if
+		
+		SetScreenFade(0, 0, 0, object.timer)
+		break
+
+	case OPTIONS_MAIN
+		if options.physicalControls == true
+			object.selection += keyPress[0].down
+			object.selection -= keyPress[0].up
+
+			if object.selection > 4
+				object.selection = 0
+			end if
+
+			if object.selection < 0
+				object.selection = 4
+			end if
+			
+			temp0 = keyPress[0].left
+			temp0 |= keyPress[0].right
+			
+			if temp0 == true
+				temp0 = Options_Button_Character
+				temp0 += object.selection
+				CallFunction(temp0)
+			end if
+			
+			if keyPress[0].buttonB == true
+				object.state = OPTIONS_EXIT
+			end if
+			
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > TOUCHINPUT_NULL
+				// Activate touch controls
+				options.physicalControls = false
+				object.selection = selection_NULL
+			end if
+		else
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
+			// Touch inputs, including the current unimplemented buttons
+			
+			// Left bounds
+			object.buttonLeft = screen.xcenter
+			object.buttonLeft -= 149
+			
+			// Right bounds
+			object.buttonRight = object.buttonLeft
+			object.buttonRight += 300
+			
+			// Other values
+			object.buttonTop = 3
+			object.buttonBottom = 51
+			object.buttonFunc = Options_Button_Character
+			
+			// Cycle through, and look at all five buttons
+			object.buttonID = 0
+			while object.buttonID < 5
+				CallFunction(KEH_RunButton)
+				
+				object.buttonTop += 48
+				object.buttonBottom += 48
+				object.buttonID++
+				object.buttonFunc++
+			loop
+			
+			// Check for the exit button
+			if temp3 > TOUCHINPUT_NULL
+				CheckTouchRect(10, 190, 60, 220)
+				if checkResult > TOUCHINPUT_NULL
+					object.selection = object.buttonID
+				else
+					if object.selection == object.buttonID
+						object.selection = SELECTION_NULL
+					end if
+				end if
+			else
+				if object.selection == object.buttonID
+					object.state = OPTIONS_EXIT
+					object.selection = SELECTION_NULL
+				end if
+			end if
+			
+			options.physicalControls = input.pressButton
+			options.physicalControls |= keyPress[0].down
+			options.physicalControls |= keyPress[0].up
+		end if
+		
+		menu1.selection = object.selection
+		menu1.selection *= 6
+		menu1.selection += 2
+		break
+		
+	case OPTIONS_EXIT
+		if object.timer < 256
+			music.volume -= 2
+			object.timer += 8
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			WriteSaveRAM()
+			StopMusic()
+			
+			menu.bootMode = BOOTMODE_MAINMENU
+			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+
+	end switch
+	
+end event
+
+
+event ObjectDraw
+	// Draw the text
+	temp0 = screen.xcenter
+	DrawMenu(MENU_1, screen.xcenter, 12)
+	
+	// It'll be changed in the loop, so back it up right now
+	temp1 = object.drawPos.y
+	object.drawPos.y = 3
+	
+	temp0 = 0
+	while temp0 < 5
+		CheckNotEqual(temp0, object.selection)
+		checkResult *= 0xE0
+		object.drawColour.g = checkResult
+		CallFunction(KEH_DrawSelBox)
+		object.drawPos.y += 48
+		temp0++
+	loop
+	
+	// After the loop, we can restore it now
+	object.drawPos.y = temp1
+	
+	if options.physicalControls == false
+		// The arrows don't actually do or mean anything, but they help convey that the current option is selected
+		temp0 = object.selection
+		temp0 *= 48
+		temp0 += 3
+		
+		// (The Right arrow is just a flipped version of the Left arrow)
+		DrawSpriteScreenXY(2,          screen.xcenter, temp0)
+		DrawSpriteScreenFX(2, FX_FLIP, screen.xcenter, temp0)
+		
+		// Back button
+		CheckEqual(object.selection, 5)
+		DrawSpriteScreenXY(checkResult, 38, 202)
+	end if
+	
+end event
+
+
+event ObjectStartup
+
+	// Load the sprite sheet
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	
+	// No need to setup sprite frames for the text since the menu system will handle them automatically
+	
+	// Touch control Frames
+	SpriteFrame(-20, -10, 40, 20, 85, 105) // 0 - Back, Blue
+	SpriteFrame(-20, -10, 40, 20, 85, 125) // 1 - Back, Red
+	
+	SpriteFrame(-175, 12, 20, 20, 85, 65)  // 2 - Left, Blue
+	
+	SetMusicTrack("Options.ogg", 0, true)
+	
+	// Setup the menu
+	SetupMenu(MENU_1, 0, 1, 2)
+	
+	// Add the entries
+	AddMenuEntry(MENU_1, "*@@PLAYER SELECT@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "KNUCKLES", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@RADAR@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@ON@", true)
+	AddMenuEntry(MENU_1, "@@@@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@SOUND TEST@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@MUSIC SWITCH@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NOT AVAILABLE", true)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "*@@RADAR SPRITES@@*", false)
+	AddMenuEntry(MENU_1, "@", false)
+	AddMenuEntry(MENU_1, "NEW", true)
+	
+	menu1.selection =  2
+	
+	switch saved.character
+	case 0
+		EditMenuEntry(MENU_1, "KNUCKLES", 2, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "TIKAL", 2, true)
+		break
+	end switch
+	
+	switch saved.radar
+	case 0
+		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "OFF", 8, true)
+		break
+	end switch
+	
+	switch saved.radarstyle
+	case 0
+		EditMenuEntry(MENU_1, "NEW", 26, true)
+		break
+	case 1
+		EditMenuEntry(MENU_1, "OLD", 26, true)
+		break
+	end switch
+	
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-50, -8, 100, 16, 128, 154)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

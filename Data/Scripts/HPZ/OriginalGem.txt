@@ -1,0 +1,56 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: Original Gem Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+private alias object.value0 : object.timer
+
+// States
+private alias 0 : ORIGINALGEM_IDLE
+private alias 1 : ORIGINALGEM_FADEOUT
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	// Check interaction with players, in KEHDX we've dummied this out to just be a mere box
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		BoxCollisionTest(C_SOLID, object.entityPos, -24, -16, 24, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
+	next
+end event
+
+
+event ObjectDraw
+	DrawSprite(0)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("HPZ/Objects.gif")
+	
+	SpriteFrame(-32, -16, 64, 32, 1, 223)
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("HPZ/Objects.gif")
+	SpriteFrame(-32, -16, 64, 32, 1, 223)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

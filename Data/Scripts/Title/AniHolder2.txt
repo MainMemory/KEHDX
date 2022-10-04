@@ -1,0 +1,31 @@
+// ----------------------------------
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: Ani Holder 2 Object
+// Script Author: Lave sIime
+// ----------------------------------
+
+// ========================
+// Events
+// ========================
+
+event ObjectStartup
+	// This object doesn't do much either...
+	LoadAnimation("Tikal.ani")
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-8, -8, 16, 16, 0, 120)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

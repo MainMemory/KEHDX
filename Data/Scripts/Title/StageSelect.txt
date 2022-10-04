@@ -1,0 +1,737 @@
+// ----------------------------------
+// RSDK Project: Sonic 1/Sonic 2
+// Script Description: Sega Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+private alias object.value0 : object.timer
+private alias object.value1 : object.selection
+
+private alias object.value2 : object.drawPos
+
+// Values used for scrolling with physical input
+private alias object.value3 : object.scrollPosPrev
+private alias object.value4 : object.scrollPosTarget
+private alias object.value5 : object.scrollAngle
+
+// Values used for scrolling with touch input
+private alias object.value6 : object.dragging
+private alias object.value7 : object.dragposPrev
+private alias object.value8 : object.scrollOverride
+
+// Times
+private alias object.value9  : object.milliseconds
+private alias object.value10 : object.seconds
+private alias object.value11 : object.minutes
+
+// Used to store Sheet IDs
+private alias object.value12 : object.mainSheet
+private alias object.value13 : object.iconSheet
+
+// Used for drawing the selection box
+// Padded out to match other objects' values
+private alias object.value20 : object.drawPos.x
+private alias object.value21 : object.drawPos.y
+private alias object.value22 : object.drawWidth
+private alias object.value23 : object.drawHeight
+private alias object.value24 : object.drawColour.r
+private alias object.value25 : object.drawColour.g
+private alias object.value26 : object.drawColour.b
+
+// Object holder Aliases
+// (Blank Object used to hold info)
+private alias object.value0 : object.score
+private alias object.value1 : object.rings
+private alias object.value2 : object.playcount
+private alias object.value3 : object.deaths
+private alias object.value4 : object.rank
+// values 9/10/11 are same milli/sec/mins as main obj
+
+// object.selection Aliases
+// Also used by Comp Menu Local 2
+public alias 0  : SELECTION_STGSEL_START // EHZ
+public alias 15 : SELECTION_STGSEL_END   // SBZ
+public alias 16 : SELECTION_STGSEL_COUNT // SELECTION_STGSEL_END + 1
+
+// The lowest bounds of the camrea
+// Used for touch input scrolling
+// ((SELECTION_STGSEL_END - 2) * 72)
+private alias 936 : STAGESEL_SCROLL_LOWBOUNDS
+
+// How tall each row should be
+private alias 72 : STAGESEL_STAGEROWSIZE
+
+// Sprite Frame Aliases
+private alias 12 : STAGESEL_SPR_NUMBERS
+
+// These last two are used for stages, if stage count is ever changed than make sure to update these too
+private alias 22 : STAGESEL_SPR_STGICONS
+private alias 38 : STAGESEL_SPR_STGNAMES
+
+// Touch Input Aliases
+private alias -1 : TOUCHINPUT_NULL
+
+
+// ========================
+// Function Declarations
+// ========================
+
+// Used when drawing, for scrolling
+reserve function StageSelect_GetScrollOffset
+
+// Also used when drawing, to draw a stage entry
+reserve function StageSelect_DrawStageEntry
+
+// Used to check if a Stage box is within view
+reserve function StageSelect_CheckBoxBounds
+
+
+// ========================
+// Function Defintitions
+// ========================
+
+private function StageSelect_GetScrollOffset
+	// This function is called to get the offset for vertical scrolling sprites
+	
+	// Preconditions:
+	// - temp1 is set to the base value of the sprite beforehand
+	//   - This is because relative subtraction is done here, rather than absolute assignment, so the previous value still matters
+	
+	// Different scrolling methods for Physical and Touch controls
+	if options.physicalControls == true
+		temp1 -= object.scrollPosPrev
+		
+		// Pan the camera to the target
+		if object.scrollPosPrev != object.scrollPosTarget
+			Sin(temp7, object.scrollAngle)
+			
+			temp7 >>= 2
+			if temp7 > STAGESEL_STAGEROWSIZE
+				temp7 = STAGESEL_STAGEROWSIZE
+			end if
+			
+			if object.scrollPosPrev > object.scrollPosTarget
+				temp1 += temp7
+			else
+				temp1 -= temp7
+			end if
+		end if
+	else
+		temp1 -= object.scrollOverride
+	end if
+end function
+
+
+private function StageSelect_DrawStageEntry
+	// This function is called in order to draw an Act listing
+	
+	// Preconditions:
+	// - object.drawPos is set to the (1:1) Y position to draw the entry at
+	// - temp0 is the index of the stage it should draw
+	//   - However, do see below
+	
+	// Postconditions:
+	// - temp0 must *not* be different than what it was initially, as it is used to control the drawing loop
+	
+	// Draw the box
+	object.drawPos.x = screen.xcenter
+	object.drawPos.x -= 149
+	object.drawPos.y = object.drawPos
+	object.drawWidth = 295
+	object.drawHeight = 55
+	object.drawColour.r = 0xE0
+	object.drawColour.b = 0x00
+	CheckNotEqual(temp0, object.selection)
+	checkResult *= 0xE0
+	object.drawColour.g = checkResult
+	CallFunction(KEH_DrawSelBox)
+	
+	// Draw with the Main sheet for now
+	object.spriteSheet = object.mainSheet
+		
+	// Draw all the texts
+	// (Score, Rings, Play Count, Time, Deaths, Rank, ...)
+	temp1 = 6
+	while temp1 < 12
+		DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
+		temp1++
+	loop
+	
+	// Switch to the Icons sheet and palette now that we're drawing the, well, icons
+	object.spriteSheet = object.iconSheet
+	SetActivePalette(1, 0, screen.ysize)
+	
+	temp2 = screen.xcenter
+	temp2 -= 141
+	
+	temp1 = temp0
+	temp1 += STAGESEL_SPR_STGICONS
+	
+	// Draw the zone's icon
+	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
+	
+	// Back to the main sheet and palette now!
+	object.spriteSheet = object.mainSheet
+	SetActivePalette(0, 0, screen.ysize)
+	
+	// Go from Icon Frames to Name Frames (STAGESEL_SPR_STGNAMES - STAGESEL_SPR_STGICONS, in other words)
+	temp1 += SELECTION_STGSEL_COUNT
+	
+	// Draw the zone's name
+	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
+	
+	// Now, all the numbers!
+	
+	temp1 = object.drawPos
+	
+	temp2 = screen.xcenter
+	temp2 += 3
+	
+	arrayPos0 = temp0
+	arrayPos0 += 40
+	
+	// Score
+	temp1 += 25
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].score, 6, 8, false)
+	
+	// Rings count
+	temp1 += 16
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].rings, 3, 8, false)
+	
+	// Play count
+	temp1 -= 34	
+	temp2 += 128
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].playcount, 3, 8, false)
+	
+	// Tick marks
+	temp1 += 12
+	DrawSpriteScreenXY(2, temp2, temp1)
+	
+	// Time - milliseconds
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].milliseconds, 2, 8, true)
+	
+	// Time - seconds
+	temp2 -= 27
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].seconds, 2, 8, true)
+	
+	// Time - minutes
+	temp2 -= 23
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].minutes, 2, 8, false)
+	
+	// Death counter
+	temp2 += 50
+	temp1 += 12
+	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].deaths, 3, 7, false)
+	
+	// Here would be rank... if there was one!
+	temp1 += 12
+	DrawSpriteScreenXY(object[arrayPos0].rank, temp2, temp1)
+	
+end function
+
+
+private function StageSelect_CheckBoxBounds
+	temp0 = 32
+	CallFunction(StageSelect_GetScrollOffset)
+	
+	temp1 = object.selection
+	temp1 *= STAGESEL_STAGEROWSIZE
+	temp0 += temp1
+	
+	temp1 = 0
+	CallFunction(StageSelect_GetScrollOffset)
+	
+	temp2 = temp1
+	temp2 += STAGESEL_STAGEROWSIZE // a bit messy... hopefully not too bad though
+	temp2 += STAGESEL_STAGEROWSIZE
+	temp2 += STAGESEL_STAGEROWSIZE
+	
+	CheckGreater(temp0, temp1)
+	temp1 = checkResult
+	CheckLower(temp0, temp2)
+	checkResult &= temp1
+	
+	keyPress[0].down = false
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case 0
+		LoadSpriteSheet("KEHMenu/Menu.gif")
+		object.mainSheet = object.spriteSheet
+		
+		LoadSpriteSheet("KEHMenu/Icons.gif")
+		object.iconSheet = object.spriteSheet
+		
+		object.timer = 320
+		SetScreenFade(0, 0, 0, object.timer)
+		object.selection = saveRAM[251]
+		
+		object.scrollAngle = 0
+		object.scrollPosTarget = object.selection
+		object.scrollPosTarget *= STAGESEL_STAGEROWSIZE
+		
+		// If returning from SBZ or anywhere else down the list, keep a cap
+		if object.scrollPosTarget > STAGESEL_SCROLL_LOWBOUNDS
+			object.scrollPosTarget = STAGESEL_SCROLL_LOWBOUNDS
+		end if
+		
+		object.scrollPosPrev = object.scrollPosTarget
+		
+		options.physicalControls = true
+		object.scrollOverride = object.scrollPosTarget
+		
+		// Set BG speed, 0.5 px per frame rather than the 1.0 the other Menus use
+		tileLayer[1].scrollSpeed = -0x8000
+		hParallax[0].scrollSpeed = -0x8000
+		
+		object.state++
+		break
+		
+	case 1
+		if object.timer > 0
+			object.timer -= 8
+		else
+			PlayMusic(2)
+			object.state++
+		end if
+		
+		SetScreenFade(0, 0, 0, object.timer)
+		break
+		
+	case 2
+		if keyPress[0].buttonB == true
+			object.state = 6
+			return
+		end if
+		
+		if options.physicalControls == true
+			// Using Physical Controls, with fixed scrolling
+			
+			// Move the camera to the target
+			if object.scrollAngle < 127
+				object.scrollAngle += 8
+				if object.scrollAngle > 127
+					object.scrollAngle = 127
+					object.scrollPosPrev = object.scrollPosTarget
+					object.scrollOverride = object.scrollPosTarget
+				end if
+			end if
+			
+			if object.scrollPosPrev != object.scrollPosTarget
+				// Don't allow switching selections while already scrolling
+				
+				return
+			end if
+			
+			if keyPress[0].up == true
+				if object.selection > SELECTION_STGSEL_START
+					object.selection--
+					
+					object.scrollAngle = 0
+					
+					// KEHDX TODO: this doesn't work as expected...
+					CallFunction(StageSelect_CheckBoxBounds)
+					if checkResult == false
+						object.scrollPosTarget -= STAGESEL_STAGEROWSIZE
+					end if
+					
+					PlaySfx(SfxName[Score Add], false)
+				end if
+				
+				keyPress[0].down = false
+			end if
+			
+			if keyPress[0].down == true
+				if object.selection < SELECTION_STGSEL_END
+					object.selection++
+					
+					object.scrollAngle = 0
+					
+					CallFunction(StageSelect_CheckBoxBounds)
+					if checkResult == false
+						object.scrollPosTarget += STAGESEL_STAGEROWSIZE
+					end if
+					
+					PlaySfx(SfxName[Score Add], false)
+				end if
+			end if
+			
+			if keyPress[0].start == true	
+				object.state = 5
+				saveRAM[251] = object.selection
+			end if
+			
+			// If the player's touched the screen at all...
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			
+			if checkResult > TOUCHINPUT_NULL
+				// ... then activate touch controls, and hide the Knuckles cursor too
+				options.physicalControls = false
+				object.selection = SELECTION_NULL
+			end if
+		else
+			// Using Touch Controls
+			
+			// See if the screen's tapped at all
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			arrayPos1 = checkResult
+			temp3 = checkResult
+			
+			// The priority of controls is:
+			// - Exit (highest priority)
+			// - Dragging (mid)
+			// - Selecting (least prio)
+			
+			if object.dragging == false
+				
+				// Check for the Exit button
+				// It's at the top of the "scene," next to the Select A Stage text
+				// This box is 
+				temp1 = 12
+				CallFunction(StageSelect_GetScrollOffset)
+				temp2 = temp1
+				temp2 += 40
+				CheckTouchRect(10, temp1, 58, temp2)
+				
+				// Used to block further scrolling, if needed
+				temp4 = 0
+				
+				if checkResult > TOUCHINPUT_NULL
+					object.selection = 254
+					
+					temp4 = 5
+				else
+					if temp3 < 0
+						if object.selection == 254
+							object.state = 6
+							object.selection = SELECTION_NULL
+							
+							temp4 = 5
+						end if
+					else
+						if object.selection == 254
+							object.selection = SELECTION_NULL
+						end if
+					end if
+				end if
+				
+				arrayPos0 = TOUCHINPUT_NULL
+				
+				// Allow scrolling from both the left and right blank areas
+				
+				// Left
+				CheckTouchRect(0, 0, 40, screen.ysize)
+				if checkResult > TOUCHINPUT_NULL
+					arrayPos0 = checkResult
+				end if
+				
+				temp0 = screen.xsize
+				temp0 -= 40
+				CheckTouchRect(temp0, 0, screen.xsize, screen.ysize)
+				if checkResult > TOUCHINPUT_NULL
+					arrayPos0 = checkResult
+				end if
+				
+				arrayPos0 -= temp4
+				
+				if arrayPos0 > TOUCHINPUT_NULL
+					object.dragging = true
+					object.selection = SELECTION_NULL
+					
+					object.dragposPrev = touchscreen[arrayPos0].ypos
+				else
+					temp0 = 0
+					while temp0 < SELECTION_STGSEL_COUNT
+						temp1 = 32
+						CallFunction(StageSelect_GetScrollOffset)
+						temp2 = temp0
+						temp2 *= STAGESEL_STAGEROWSIZE
+						temp1 += temp2
+						temp2 = temp1
+						temp2 += 58
+						CheckTouchRect(63, temp1, 360, temp2)
+						
+						if checkResult > TOUCHINPUT_NULL
+							object.selection = temp0
+							
+							temp0 = SELECTION_NULL
+						else
+							if temp3 < 0
+								if object.selection == temp0
+									object.state = 5
+									saveRAM[251] = object.selection
+								end if
+							else
+								if object.selection == temp0
+									object.selection = SELECTION_NULL
+								end if
+							end if
+						end if
+						
+						temp0++
+					loop
+				end if
+			else
+				// Scrolling is active
+				
+				if arrayPos1 > TOUCHINPUT_NULL
+					object.dragposPrev -= touchscreen[arrayPos1].ypos
+					object.scrollOverride += object.dragposPrev
+					
+					// Enforce scroll limits
+					if object.scrollOverride < 0
+						object.scrollOverride = 0
+					end if
+					
+					if object.scrollOverride > STAGESEL_SCROLL_LOWBOUNDS
+						object.scrollOverride = STAGESEL_SCROLL_LOWBOUNDS
+					end if
+					
+					object.dragposPrev = touchscreen[arrayPos1].ypos
+				else
+					// Screen's no longer held, disable scrolling
+					
+					object.dragging = false
+				end if
+			end if
+			
+			if input.pressButton == true
+				// Resume physical input
+				options.physicalControls = true
+				object.dragging = false
+				
+				object.scrollAngle = 0
+				
+				// Round down to the nearest selection, based on camera pos
+				object.scrollPosTarget = object.scrollOverride
+				object.scrollPosTarget /= STAGESEL_STAGEROWSIZE
+				object.scrollPosTarget++
+				object.selection = object.scrollPosTarget
+				object.scrollPosTarget *= STAGESEL_STAGEROWSIZE
+				
+				if object.scrollPosTarget > STAGESEL_SCROLL_LOWBOUNDS
+					object.scrollPosTarget = STAGESEL_SCROLL_LOWBOUNDS
+				end if
+				
+				object.scrollPosPrev = object.scrollPosTarget
+			end if
+		end if
+		break
+
+	case 5
+		// If HPZ was selected, we should go to the special cutscene instead
+		CheckEqual(object.selection, 9)
+		stage.listPos = checkResult
+		stage.listPos ^= 1
+		stage.listPos *= object.selection
+		
+		stage.activeList = checkResult
+		stage.activeList++
+		
+		stage.playerListPos = saved.character
+		if object.timer < 256
+			object.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			LoadStage()
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
+	case 6
+		if object.timer < 256
+			object.timer += 8
+			music.volume -= 2
+			SetScreenFade(0, 0, 0, object.timer)
+		else
+			menu.bootMode = BOOTMODE_MAINMENU
+			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
+			
+			StopMusic()
+			SetScreenFade(0, 0, 0, 0xFF)
+		end if
+		break
+		
+	end switch
+end event
+
+
+event ObjectDraw
+	// Select Stage Header
+	temp1 = 16
+	CallFunction(StageSelect_GetScrollOffset)
+	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	
+	if options.physicalControls == false
+		// Draw the back button
+		
+		checkEqual(object.selection, 254)
+		checkResult += 4
+		DrawSpriteScreenXY(checkResult, 38, temp1)
+	end if
+
+	// Get the base position for all the listings
+	temp1 = 32
+	CallFunction(StageSelect_GetScrollOffset)
+	
+	object.drawPos = temp1
+	
+	temp0 = 0
+	while temp0 < SELECTION_STGSEL_COUNT
+		
+		// Pass it off to the external function
+		CallFunction(StageSelect_DrawStageEntry)
+		
+		object.drawPos += STAGESEL_STAGEROWSIZE
+		temp0++
+	loop
+	
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	LoadSpriteSheet("KEHMenu/Icons.gif")
+	
+	// These frames are for the "Menu" sheet
+	SpriteFrame(0, 0, 1, 1, 0, 0)           // 0 - Placeholder (formerly selection box, don't want to shift around 53 following sprite frame IDs at the moment)
+	SpriteFrame(-71, 0, 142, 7, 288, 185)   // 1 - "Select a Stage"
+	
+	SpriteFrame(-40, 0, 30, 7, 82, 0) // 2 - Time tick marks
+	SpriteFrame(0, 0, 8, 7, 104, 17)   // 3 - Rank placeholder
+	
+	SpriteFrame(-20, -6, 40, 20, 85, 105)  // 4 - Blue back arrow
+	SpriteFrame(-20, -6, 40, 20, 85, 125)  // 5 - Red back arrow
+	
+	SpriteFrame(-101, 25, 45, 7, 0, 8) // 6 - Score:
+	SpriteFrame(-101, 41, 45, 7, 46, 8) // 7 - Rings:
+	
+	SpriteFrame(19, 7, 85, 7, 413, 59)  // 8 - Play Count:
+	SpriteFrame(19, 19, 37, 7, 10, 15) // 9 - Time:
+	SpriteFrame(19, 31, 53, 7, 10, 143) // 10 - Deaths:
+	SpriteFrame(19, 43, 37, 7, 91, 8) // 11 - Rank:
+	
+	// 12-21 - Numbers (STAGESEL_SPR_NUMBERS)
+	temp0 = 0
+	temp1 = 0
+	while temp0 < 10
+		SpriteFrame(0, 0, 8, 7, temp1, 25)
+		temp1 += 8
+		temp0++
+	loop
+	
+	// These frames are for the "Icons" sheet
+	// 22-37 - Stage Icons, both S1 and S2 (STAGESEL_SPR_STGICONS)
+	temp2 = SELECTION_STGSEL_COUNT
+	temp2 /= 2
+	
+	// Top row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 0)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// Middle row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-141, 16, 32, 24, temp1, 24)
+		temp1 += 32
+		temp0++
+	loop
+	
+	// Not doing anything with the bottom row for now...
+	
+	// Now, all the frames are back to the "Menu" sheet
+	// 38-53 - Stage Names (STAGESEL_SPR_STGNAMES)
+	temp0 = 0
+	temp1 = 192
+	while temp0 < SELECTION_STGSEL_COUNT
+		SpriteFrame(-101, 9, 112, 7, 0, temp1)
+		temp1 += 7
+		temp0++
+	loop
+	
+	SetMusicTrack("2D.ogg", 2, 108000)
+	
+	arrayPos0 = 40
+	
+	// Set up all saved values, load them into entities instead
+	temp0 = 0
+	while temp0 < SELECTION_STGSEL_COUNT
+		// KEHDX TODO: 300 values per save? if there's only 5 values per save then we could trim down a bit,
+		//       and add something cool like replays in place instead with all that freed room
+		
+		arrayPos1  = 300
+		arrayPos1 *= temp0
+		
+		object[arrayPos0].score = saveRAM[arrayPos1]
+		
+		arrayPos1++
+		object[arrayPos0].rings = saveRAM[arrayPos1]
+		
+		arrayPos1++
+		object[arrayPos0].playcount = saveRAM[arrayPos1]
+		
+		arrayPos1++
+		
+		// If uninitialised, then add in a really long time
+		if saveRAM[arrayPos1] == 0
+			saveRAM[arrayPos1] = 59999
+		end if
+		
+		object[arrayPos0].milliseconds = saveRAM[arrayPos1]
+		
+		object[arrayPos0].minutes = object[arrayPos0].milliseconds
+		object[arrayPos0].minutes /= 6000
+		
+		object[arrayPos0].milliseconds %= 6000
+		
+		object[arrayPos0].seconds = object[arrayPos0].milliseconds
+		object[arrayPos0].seconds /= 100
+		
+		object[arrayPos0].milliseconds %= 100
+		
+		arrayPos1++
+		object[arrayPos0].deaths = saveRAM[arrayPos1]
+		
+		// Placeholder
+		object[arrayPos0].rank = 3
+		
+		arrayPos0++
+		temp0++
+	loop
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("KEHMenu/Menu.gif")
+	SpriteFrame(-80, -8, 159, 16, 128, 113)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event

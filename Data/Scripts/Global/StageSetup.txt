@@ -1,0 +1,647 @@
+// ----------------------------------
+// RSDK Project: Sonic 2
+// Script Description: Stage Setup Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+// Not all these aliases are actually used in this script necessarily, a good amount of them are just here for general reference
+
+private alias object.state  : object.pause.state
+
+private alias 0 : PAUSE_INIT
+private alias 1 : PAUSE_MAIN
+private alias 2 : PAUSE_CONTINUE
+private alias 3 : PAUSE_RESTART
+private alias 4 : PAUSE_EXIT
+private alias 5 : PAUSE_FADEOUT
+
+// Timer open for general use, though it's primarily used for fading
+private alias object.value0 : object.pause.timer
+
+private alias object.value1 : object.pause.selection
+
+private alias -1 : SELECTION_NULL
+private alias  0 : SELECTION_CONTINUE
+private alias  1 : SELECTION_RESTART
+private alias  2 : SELECTION_EXIT
+private alias  3 : SELECTION_MAX
+
+private alias object.value3 : object.pause.drawnBG
+private alias object.value4 : object.pause.usingTouch
+
+// Game Modes
+private alias 0 : MODE_NOSAVE
+private alias 1 : MODE_NORMAL
+private alias 2 : MODE_TIMEATTACK
+
+// Tracks
+private alias 0 : TRACK_STAGE
+private alias 1 : TRACK_ACTFINISH
+private alias 2 : TRACK_INVINCIBLE
+private alias 3 : TRACK_CONTINUE
+private alias 4 : TRACK_BOSS
+private alias 5 : TRACK_GAMEOVER
+private alias 6 : TRACK_DROWNING
+private alias 7 : TRACK_SUPER
+
+// Reserved object slots
+private alias 0  : SLOT_PLAYER1
+private alias 1  : SLOT_PLAYER2
+private alias 8  : SLOT_STAGESETUP
+private alias 9  : SLOT_HUD
+private alias 10 : SLOT_ZONESETUP
+private alias 11 : SLOT_TITLECARD
+private alias 25 : SLOT_MUSICEVENT_CHANGE
+private alias 26 : SLOT_MUSICEVENT_BOSS
+private alias 30 : SLOT_ACTFINISH
+
+// Music Events
+private alias  0 : MUSICEVENT_FADETOBOSS
+private alias  1 : MUSICEVENT_FADETOSTAGE
+private alias  2 : MUSICEVENT_TRANSITION
+
+private alias 0 : MUSICEVENT_FLAG_NOCHANGE
+private alias 1 : MUSICEVENT_FLAG_SPEEDUP
+private alias 2 : MUSICEVENT_FLAG_SLOWDOWN
+
+// Player Aliases
+private alias object.xpos : player.xpos
+private alias object.ypos : player.ypos
+private alias object.xvel : player.xvel
+private alias object.speed : player.speed
+private alias object.collisionLeft : player.collisionLeft
+private alias object.right : player.right
+private alias object.visible : player.visible
+private alias object.drawOrder : player.drawOrder
+private alias object.value18 : player.sortedDrawOrder
+
+// Draw Order Aliases
+private alias -1 : DRAWORDER_PLAYER
+
+// Menu Boot Mode Aliases
+private alias 3 : BOOTMODE_STAGESELECT
+
+
+// ========================
+// Function Declarations
+// ========================
+
+reserve function StageSetup_HandleOscTable
+
+
+// ========================
+// Static Values
+// ========================
+
+public value StageSetup_monitorOverlayFrame = 0
+private value StageSetup_oscillateFlipFlags = 0
+
+
+// ========================
+// Tables
+// ========================
+
+private table StageSetup_initOscillationTable
+	128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0
+	128, 0, 0x3848, 238, 0x2080, 180, 0x3080, 270, 0x5080, 450, 0x7080, 630, 128, 0, 0x4000, 254
+end table
+
+
+public table StageSetup_oscillationTable
+	128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0, 128, 0
+	128, 0, 0x3848, 238, 0x2080, 180, 0x3080, 270, 0x5080, 450, 0x7080, 630, 128, 0, 0x4000, 254
+end table
+
+private table StageSetup_oscillateLimits
+	2, 0x1000, 2, 0x1800, 2, 0x2000, 2, 0x3000, 4, 0x2000, 8, 0x800,  8, 0x4000, 4, 0x4000
+	2, 0x3800, 2, 0x3800, 2, 0x2000, 3, 0x3000, 5, 0x5000, 7, 0x7000, 2, 0x4000, 2, 0x4000
+end table
+
+
+// ========================
+// Function Definitions
+// ========================
+
+private function StageSetup_HandleOscTable
+	temp0 = 0
+	temp1 = 0
+	while temp0 < 16
+		GetTableValue(temp4, temp1, StageSetup_oscillateLimits)		// temp4 = oscillateSpeed
+		GetTableValue(temp6, temp1, StageSetup_oscillationTable)	// temp6 = oscillatePos
+		temp1++
+
+		GetTableValue(temp5, temp1, StageSetup_oscillateLimits)		// temp5 = oscillateMax
+		GetTableValue(temp7, temp1, StageSetup_oscillationTable)	// temp7 = oscillateInc
+		temp1--
+
+		GetBit(temp2, StageSetup_oscillateFlipFlags, temp0)
+		if temp2 == false
+			temp7 += temp4
+			temp6 += temp7
+			if temp6 >= temp5
+				SetBit(StageSetup_oscillateFlipFlags, temp0, true)
+			end if
+		else
+			temp7 -= temp4
+			temp6 += temp7
+			if temp6 < temp5
+				SetBit(StageSetup_oscillateFlipFlags, temp0, false)
+			end if
+		end if
+
+		SetTableValue(temp6, temp1, StageSetup_oscillationTable)
+		temp1++
+
+		SetTableValue(temp7, temp1, StageSetup_oscillationTable)
+		temp1++
+
+		temp0++
+	loop
+end function
+
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch stage.state
+	case STAGE_PAUSED
+		foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+			object.pause.state = PAUSE_INIT
+		next
+		switch object.pause.state
+		case PAUSE_INIT
+			// Init
+			object.pause.state++
+			object.pause.drawnBG = false
+			break
+			
+		case PAUSE_MAIN
+			if object.pause.usingTouch == false
+				if keyPress[0].up == true
+					object.pause.selection--
+					if object.pause.selection < SELECTION_CONTINUE
+						object.pause.selection = SELECTION_EXIT
+					end if
+					
+					PlaySfx(SfxName[Menu Move], false)
+				end if
+				
+				if keyPress[0].down == true
+					object.pause.selection++
+					if object.pause.selection > SELECTION_EXIT
+						object.pause.selection = SELECTION_CONTINUE
+					end if
+					
+					PlaySfx(SfxName[Menu Move], false)
+				end if
+				
+				temp0 = keyPress[0].buttonA
+				temp0 |= keyPress[0].buttonB
+				temp0 |= keyPress[0].buttonC
+				temp0 |= keyPress[0].start
+				if temp0 == true
+					object.pause.timer = 0
+					
+					object.pause.state = PAUSE_CONTINUE
+					object.pause.state += object.pause.selection
+				end if
+				
+				object.pause.usingTouch = touchScreen[0].down
+			else
+				
+				CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+				temp3 = checkResult
+				
+				// These buttons are *really* small, not much that can be done without redesigning the entire menu though
+				
+				// Continue
+				
+				temp0 = screen.xcenter
+				temp0 -= 40
+				temp1 = temp0
+				temp1 += 80
+				
+				temp4 = screen.ycenter
+				temp4 -= 14
+				temp5 = temp4
+				temp5 += 7
+				
+				temp6 = SELECTION_CONTINUE
+				while temp6 < SELECTION_EXIT
+					CheckTouchRect(temp0, temp4, temp1, temp5)
+					
+					if checkResult > -1
+						object.pause.selection = temp6
+					else
+						if temp3 < 0
+							if object.pause.selection == temp6
+								object.pause.timer = 0
+								
+								object.pause.state = PAUSE_CONTINUE
+								object.pause.state += object.pause.selection
+							end if
+						else
+							if object.pause.selection == temp6
+								object.pause.selection = SELECTION_NULL
+							end if
+						end if
+					end if
+					
+					temp4 += 11
+					temp5 += 11
+					temp6++
+				loop
+				
+				temp0 = keyPress[0].up
+				temp0 |= keyPress[0].down
+				temp0 |= keyPress[0].left
+				temp0 |= keyPress[0].right
+				temp0 |= keyPress[0].buttonA
+				temp0 |= keyPress[0].buttonB
+				temp0 |= keyPress[0].buttonC
+				temp0 |= keyPress[0].start
+				if temp0 == true
+					object.pause.usingTouch = false
+					object.pause.selection = SELECTION_CONTINUE
+				end if
+			end if
+			break
+			
+		case PAUSE_CONTINUE
+			PlaySfx(SfxName[Menu Back], false)
+			stage.state = STAGE_RUNNING
+			ResumeMusic()
+			
+			// Send the player back to their special draw order
+			foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+				player[currentPlayer].drawOrder = DRAWORDER_PLAYER
+			next
+			break
+			
+		case PAUSE_RESTART
+			PlaySfx(SfxName[Menu Select], false)
+			object.pause.state = PAUSE_FADEOUT
+			break
+			
+		case PAUSE_EXIT
+			PlaySfx(SfxName[Menu Select], false)
+			
+			// Set the info to load into the Menu
+			stage.activeList = PRESENTATION_STAGE
+			stage.listPos = 0
+			menu.bootMode = BOOTMODE_STAGESELECT
+			
+			object.pause.state = PAUSE_FADEOUT
+			break
+			
+		case PAUSE_FADEOUT
+			object.pause.timer++
+			
+			// "Choppy" on purpose, can be changed if desired
+			if object.pause.timer == 18
+				LoadStage()
+			end if
+			break
+			
+		end switch
+		break
+		
+	default
+		object.pause.state = PAUSE_INIT
+		
+		// Handle ring animation
+		// Not done in the ring object itself because all rings should share the same frame
+		ringTimer++
+		if ringTimer == 4
+			ringTimer = 0
+			ringFrame++
+			ringFrame &= 7
+		end if
+
+		// Handle Monitor overlay frame
+		StageSetup_monitorOverlayFrame++
+		if StageSetup_monitorOverlayFrame > 17
+			StageSetup_monitorOverlayFrame = 0
+		end if
+		
+		// Handle Player Score Bonus
+		if options.gameMode != MODE_TIMEATTACK
+			if player.score >= player.scoreBonus
+				player.lives++
+				player.scoreBonus += 50000
+				PlaySfx(SfxName[Life], false)
+				PauseMusic()
+				ResetObjectEntity(SLOT_MUSICEVENT_CHANGE, TypeName[Music Event], MUSICEVENT_TRANSITION, 0, 0)
+				object[SLOT_MUSICEVENT_CHANGE].priority = PRIORITY_ACTIVE
+			end if
+		end if
+
+		// Handle Oscillations & Platform Array movements
+		oscillation++
+		oscillation &= 0x1FF
+		
+		CallFunction(StageSetup_HandleOscTable)
+		
+		// Boundaries: Left & Bottom
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+			temp0 = player[currentPlayer].collisionLeft
+			temp0 <<= 16
+			temp0 += player[currentPlayer].xpos
+			temp1 = stage.curXBoundary1
+			temp1 <<= 16
+			if temp0 < temp1
+				if player[currentPlayer].right == true
+					player[currentPlayer].xvel 	= 0x10000
+					player[currentPlayer].speed = 0x10000
+				else
+					player[currentPlayer].xvel 	= 0
+					player[currentPlayer].speed = 0
+				end if
+
+				player[currentPlayer].xpos = temp1
+				temp0 = player[currentPlayer].collisionLeft
+				temp0 <<= 16
+				player[currentPlayer].xpos -= temp0
+			end if
+
+			temp1 = stage.curYBoundary2
+			temp1 <<= 16
+			if temp1 < stage.deathBoundary
+				if player[currentPlayer].ypos > stage.deathBoundary
+					CallFunction(Player_Kill)
+				end if
+			else
+				if player[currentPlayer].ypos > temp1
+					CallFunction(Player_Kill)
+				end if
+			end if
+		next
+		// [Fallthrough]
+	case STAGE_FROZEN
+		// Sort players
+		currentPlayer = playerCount
+		currentPlayer--
+		while currentPlayer > -1
+			if player[currentPlayer].visible == true
+				currentPlayer += playerCount
+				if player[currentPlayer].sortedDrawOrder == 0
+					currentPlayer -= playerCount
+					arrayPos0 = player[currentPlayer].sortedDrawOrder
+					AddDrawListEntityRef(arrayPos0, currentPlayer)
+
+					currentPlayer += playerCount
+					AddDrawListEntityRef(arrayPos0, currentPlayer)
+					currentPlayer -= playerCount
+				else
+					currentPlayer -= playerCount
+					arrayPos0 = player[currentPlayer].sortedDrawOrder
+					currentPlayer += playerCount
+					AddDrawListEntityRef(arrayPos0, currentPlayer)
+
+					currentPlayer -= playerCount
+					arrayPos0 = player[currentPlayer].sortedDrawOrder
+					AddDrawListEntityRef(arrayPos0, currentPlayer)
+				end if
+			end if
+			currentPlayer--
+		loop
+		break
+		
+	end switch
+
+#platform: MOBILE
+	// Show/hide touch controls based on whether the player's control is locked or not
+	if options.attractMode == false
+		if player[0].controlMode > -1
+			options.touchControls = true
+		else
+			options.touchControls = false
+		end if
+	else
+		options.touchControls = false
+	end if
+#endplatform
+end event
+
+
+event ObjectDraw
+	CheckEqual(stage.state, STAGE_PAUSED)
+	temp0 = checkResult
+	CheckNotEqual(object.pause.state, PAUSE_FADEOUT)
+	temp0 &= checkResult
+	
+	if temp0 == true
+		// Draw the Pause Menu
+		// We don't want to draw this when fading out, just like SA2
+		
+		DrawSpriteScreenXY(0, screen.xcenter, screen.ycenter)
+		
+		// Because it uses alpha, we should only draw it once
+		if object.pause.drawnBG == false
+			temp0 = screen.xcenter
+			temp0 -= 40
+			
+			temp1 = screen.ycenter
+			temp1 -= 22
+			
+			DrawRect(temp0, temp1, 81, 45, 224, 80, 96, 0x80)
+			
+			object.pause.drawnBG++
+		end if
+		
+		temp0 = SELECTION_CONTINUE
+		temp1 = 1
+		while temp0 < SELECTION_MAX
+			// Make the current selection highlighted
+			checkNotEqual(object.pause.selection, temp0)
+			checkResult *= 0xE0
+			checkResult += 0xE0E000
+			SetPaletteEntry(0, 6, checkResult)
+			SetPaletteEntry(1, 6, checkResult)
+			
+			DrawSpriteScreenXY(temp1, screen.xcenter, screen.ycenter)
+			temp0++
+			temp1++
+		loop
+		
+		SetPaletteEntry(0, 6, 0xE0E0E0)
+	end if
+	
+	// The black fade-out
+	// Do note - because nothing else is being redrawn, this black rect is persisting between frames so each new frame's rect is layered atop the old one
+	// Because of that, the fade is "exponential," so to speak, so low values can still cause a large difference
+	DrawRect(0, 0, screen.xsize, screen.ysize, 0, 0, 0, object.pause.timer)
+end event
+
+
+event ObjectStartup
+	SetMusicTrack("ActComplete.ogg", TRACK_ACTFINISH, false)
+	SetMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, 38679)
+	SetMusicTrack("Continue.ogg", TRACK_CONTINUE, false)
+	SetMusicTrack("Boss.ogg", TRACK_BOSS, true)
+	SetMusicTrack("GameOver.ogg", TRACK_GAMEOVER, false)
+	SetMusicTrack("Drowning.ogg", TRACK_DROWNING, false)
+	SetMusicTrack("Super.ogg", TRACK_SUPER, true)
+	
+	stage.timeOver = false
+	
+	// KEHDX - Removed a 'stage.pauseEnabled = true' from here, since we don't want the HW menu
+	if options.attractMode == true
+		// Set Object Range to a set value so that attract mode demos always looks the same
+		SetObjectRange(424)
+	end if
+
+	SpeedUpMusic 	= 0
+	SlowDownMusic 	= 0
+	stage.musicFlag = MUSICEVENT_FLAG_NOCHANGE
+
+	stage.deathBoundary = stage.curYBoundary2
+	stage.deathBoundary <<= 16
+	
+	foreach (TypeName[Stage Setup], arrayPos0, ALL_ENTITIES)
+		ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, 0, 0)
+	next
+	
+	object[8].type = TypeName[Stage Setup]
+	object[8].priority = PRIORITY_ALWAYS
+	object[8].drawOrder = 6
+	object[8].inkEffect = INK_BLEND
+	object[8].pause.drawnBG = false
+
+	foreach (TypeName[HUD], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].type = TypeName[Blank Object]
+		
+		object[SLOT_HUD].type 			= TypeName[HUD]
+		object[SLOT_HUD].priority 		= PRIORITY_ACTIVE
+		object[SLOT_HUD].drawOrder 		= 6
+	next
+
+	ringExtraLife 						= 100
+	oscillation 						= 0
+	StageSetup_oscillateFlipFlags 		= 0xBE00
+
+	// Reset the oscillation table
+	temp0 = 0
+	while temp0 < 32
+		GetTableValue(temp1, temp0, StageSetup_initOscillationTable)
+		SetTableValue(temp1, temp0, StageSetup_oscillationTable)
+		temp0++
+	loop
+	
+	blueShieldType    = TypeName[Blue Shield]
+	invincibilityType = TypeName[Invincibility]
+	
+	LoadSpriteSheet("Global/Display.gif")
+	
+	// Pause menu
+	SpriteFrame(-40, -22, 81, 45, 137, 389)	// 0  - Frame
+	SpriteFrame(-32, -14, 64, 7, 120, 359)	// 1  - Continue
+	SpriteFrame(-28, -3, 56, 7, 125, 367)	// 2  - Restart
+	SpriteFrame(-16, 8, 32, 7, 149, 375)	// 3  - Exit
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 143)
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end event
+
+
+// ========================
+// Editor Helpers
+// ========================
+
+// All the following is only to be used from Editor subs, using these in the game itself won't give desired results
+// None of these exist in the original game, these are all custom to the decomp
+
+reserve function EditorHelpers_DrawHitbox
+reserve function EditorHelpers_DrawX
+
+
+public function EditorHelpers_DrawHitbox
+	
+#platform: USE_EDITOR
+	
+	// This function is called in order to draw an object's hitbox, as a white 
+	// editor.drawingOverlay isn't set here, that's to be determined by the object calling this function
+	
+	// Preconditions:
+	// - object.xpos and object.ypos are the position for the hitbox to be centered around
+	// - temp0 is the left hitbox size
+	// - temp1 is the top hitbox size
+	// - temp2 is the right hitbox size
+	// - temp3 is the bottom hitbox size
+	//  - Hitboxes aren't world-space, to be 1:1 values instead (ie just a basic "-15" instead of "-0xF0000")
+	
+	// Get the base 1:1 position of the object
+	temp4 = object.ixpos
+	temp5 = object.iypos
+	
+	// Move to its top left corner
+	temp4 -= temp0
+	temp5 -= temp1
+	
+	// Get the hitbox's total width and height
+	temp2 += temp0
+	temp3 += temp1
+	
+	DrawRectOutline(temp4, temp5, temp2, temp3, 255, 255, 255, 255)
+	
+#endplatform
+	
+end function
+
+
+public function EditorHelpers_DrawX
+	
+#platform: USE_EDITOR
+	
+	// This function is called to draw a red X, just for when you wanna show something's *really* wrong
+	// editor.drawingOverlay isn't set here, that's for the object calling this function to decide
+	
+	// Preconditions:
+	// - temp0 and temp1 are the position for the X to be centered around, in world-space
+	
+	// Left
+	temp2 = temp0
+	temp2 -= 0x100000
+	
+	// Right
+	temp3 = temp0
+	temp3 += 0x100000
+	
+	// Top
+	temp4 = temp1
+	temp4 -= 0x100000
+	
+	// Bottom
+	temp5 = temp1
+	temp5 += 0x100000
+	
+	// TL-BR
+	DrawLine(temp2, temp4, temp3, temp5, 255, 0, 0)
+	
+	// TR-BL
+	DrawLine(temp3, temp4, temp2, temp5, 255, 0, 0)
+	
+#endplatform
+	
+end function
