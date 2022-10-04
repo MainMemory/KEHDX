@@ -11,7 +11,8 @@
 
 private alias object.value0 : object.timer
 private alias object.value1 : object.menusel
-private alias object.value2 : object.usingTouch
+
+private alias object.value2 : object.drawPos
 
 // Values used for scrolling with physical input
 private alias object.value3 : object.scrollPosPrev
@@ -28,11 +29,9 @@ private alias object.value9  : object.milliseconds
 private alias object.value10 : object.seconds
 private alias object.value11 : object.minutes
 
-private alias object.value12 : object.drawPos
-
 // Used to store Sheet IDs
-private alias object.value13 : object.mainSheet
-private alias object.value14 : object.iconSheet
+private alias object.value12 : object.mainSheet
+private alias object.value13 : object.iconSheet
 
 // Used for drawing the selection box
 // Padded out to match other objects' values
@@ -88,6 +87,9 @@ reserve function StageSelect_GetScrollOffset
 // Also used when drawing, to draw a stage entry
 reserve function StageSelect_DrawStageEntry
 
+// Used to check if a Stage box is within view
+reserve function StageSelect_CheckBoxBounds
+
 
 // ========================
 // Function Defintitions
@@ -101,7 +103,7 @@ private function StageSelect_GetScrollOffset
 	//   - This is because relative subtraction is done here, rather than absolute assignment, so the previous value still matters
 	
 	// Different scrolling methods for Physical and Touch controls
-	if object.usingTouch == false
+	if options.physicalControls == true
 		temp1 -= object.scrollPosPrev
 		
 		// Pan the camera to the target
@@ -233,6 +235,31 @@ private function StageSelect_DrawStageEntry
 end function
 
 
+private function StageSelect_CheckBoxBounds
+	temp0 = 32
+	CallFunction(StageSelect_GetScrollOffset)
+	
+	temp1 = object.menusel
+	temp1 *= STAGESEL_STAGEROWSIZE
+	temp0 += temp1
+	
+	temp1 = 0
+	CallFunction(StageSelect_GetScrollOffset)
+	
+	temp2 = temp1
+	temp2 += STAGESEL_STAGEROWSIZE // a bit messy... hopefully not too bad though
+	temp2 += STAGESEL_STAGEROWSIZE
+	temp2 += STAGESEL_STAGEROWSIZE
+	
+	CheckGreater(temp0, temp1)
+	temp1 = checkResult
+	CheckLower(temp0, temp2)
+	checkResult &= temp1
+	
+	keyPress[0].down = false
+end function
+
+
 // ========================
 // Events
 // ========================
@@ -261,7 +288,7 @@ event ObjectUpdate
 		
 		object.scrollPosPrev = object.scrollPosTarget
 		
-		object.usingTouch = false
+		options.physicalControls = true
 		object.scrollOverride = object.scrollPosTarget
 		
 		// Set BG speed, 0.5 px per frame rather than the 1.0 the other Menus use
@@ -270,7 +297,7 @@ event ObjectUpdate
 		
 		object.state++
 		break
-
+		
 	case 1
 		if object.timer > 0
 			object.timer -= 8
@@ -278,7 +305,7 @@ event ObjectUpdate
 			PlayMusic(2)
 			object.state++
 		end if
-
+		
 		SetScreenFade(0, 0, 0, object.timer)
 		break
 		
@@ -288,8 +315,8 @@ event ObjectUpdate
 			return
 		end if
 		
-		if object.usingTouch == false
-			// Using Physical Controls
+		if options.physicalControls == true
+			// Using Physical Controls, with fixed scrolling
 			
 			// Move the camera to the target
 			if object.scrollAngle < 127
@@ -313,15 +340,16 @@ event ObjectUpdate
 					
 					object.scrollAngle = 0
 					
-					temp0 = MENUSEL_STGSEL_END
-					temp0 -= 2
-					
-					CheckLower(object.menusel, temp0)
-					checkResult *= STAGESEL_STAGEROWSIZE
-					object.scrollPosTarget -= checkResult
+					// KEHDX TODO: this doesn't work as expected...
+					CallFunction(StageSelect_CheckBoxBounds)
+					if checkResult == false
+						object.scrollPosTarget -= STAGESEL_STAGEROWSIZE
+					end if
 					
 					PlaySfx(SfxName[Score Add], false)
 				end if
+				
+				keyPress[0].down = false
 			end if
 			
 			if keyPress[0].down == true
@@ -330,12 +358,10 @@ event ObjectUpdate
 					
 					object.scrollAngle = 0
 					
-					CheckLower(object.scrollPosTarget, STAGESEL_SCROLL_LOWBOUNDS)
-					temp0 = checkResult
-					CheckLower(object.menusel, MENUSEL_STGSEL_END)
-					temp0 &= checkResult
-					temp0 *= STAGESEL_STAGEROWSIZE
-					object.scrollPosTarget += temp0
+					CallFunction(StageSelect_CheckBoxBounds)
+					if checkResult == false
+						object.scrollPosTarget += STAGESEL_STAGEROWSIZE
+					end if
 					
 					PlaySfx(SfxName[Score Add], false)
 				end if
@@ -351,7 +377,7 @@ event ObjectUpdate
 			
 			if checkResult > TOUCHINPUT_NULL
 				// ... then activate touch controls, and hide the Knuckles cursor too
-				object.usingTouch = true
+				options.physicalControls = false
 				object.menusel = MENUSEL_NULL
 			end if
 		else
@@ -482,7 +508,7 @@ event ObjectUpdate
 			
 			if input.pressButton == true
 				// Resume physical input
-				object.usingTouch = false
+				options.physicalControls = true
 				object.dragging = false
 				
 				object.scrollAngle = 0
@@ -531,13 +557,8 @@ event ObjectUpdate
 			music.volume -= 2
 			SetScreenFade(0, 0, 0, object.timer)
 		else
-			if TypeName[Main Menu] > 0
-				menu.bootMode = BOOTMODE_MAINMENU
-				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
-			else
-				stage.listPos = 0
-				LoadStage()
-			end if
+			menu.bootMode = BOOTMODE_MAINMENU
+			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
 			
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
@@ -554,7 +575,7 @@ event ObjectDraw
 	CallFunction(StageSelect_GetScrollOffset)
 	DrawSpriteScreenXY(1, screen.xcenter, temp1)
 	
-	if object.usingTouch == true
+	if options.physicalControls == false
 		// Draw the back button
 		
 		checkEqual(object.menusel, 254)
@@ -654,10 +675,10 @@ event ObjectStartup
 	// Set up all saved values, load them into entities instead
 	temp0 = 0
 	while temp0 < MENUSEL_STGSEL_COUNT
-		// TODO: 300 values per save? if there's only 5 values per save then we could trim down a bit,
+		// KEHDX TODO: 300 values per save? if there's only 5 values per save then we could trim down a bit,
 		//       and add something cool like replays in place instead with all that freed room
 		
-		arrayPos1 = 300
+		arrayPos1  = 300
 		arrayPos1 *= temp0
 		
 		object[arrayPos0].score = saveRAM[arrayPos1]

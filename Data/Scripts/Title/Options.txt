@@ -12,8 +12,6 @@
 private alias object.value0 : object.timer
 private alias object.value1 : object.menusel
 
-private alias object.value2 : object.usingTouch
-
 // Padded out for parity with other Menu objects, so that the value slot is the same across each
 private alias object.value10 : object.buttonLeft
 private alias object.value11 : object.buttonTop
@@ -77,7 +75,7 @@ private function Options_Button_Character
 	
 	WriteSaveRAM()
 	
-	if object.usingTouch == true
+	if options.physicalControls == false
 		object.menusel = MENUSEL_NULL
 	end if
 end function
@@ -97,23 +95,23 @@ private function Options_Button_Radar
 		break
 	end switch
 	
-	WriteSaveRAM()
-	
-	if object.usingTouch == true
+	if options.physicalControls == false
 		object.menusel = MENUSEL_NULL
 	end if
 end function
 
 
 private function Options_Button_SoundTest
-	if object.usingTouch == true
+	// KEHDX TODO: unimplemented
+	if options.physicalControls == false
 		object.menusel = MENUSEL_NULL
 	end if
 end function
 
 
 private function Options_Button_MusicSwitch
-	if object.usingTouch == true
+	// KEHDX TODO: unimplemented
+	if options.physicalControls == false
 		object.menusel = MENUSEL_NULL
 	end if
 end function
@@ -134,9 +132,7 @@ private function Options_Button_RadarStyle
 		
 	end switch
 	
-	WriteSaveRAM()
-	
-	if object.usingTouch == true
+	if options.physicalControls == false
 		object.menusel = MENUSEL_NULL
 	end if
 end function
@@ -151,10 +147,22 @@ event ObjectUpdate
 	switch object.state
 	case OPTIONS_INIT
 		object.timer = 320
-		object.usingTouch = false
 		
+		// Set up BG scroll values, 1px per frame
 		tileLayer[1].scrollSpeed = -0x10000
 		hParallax[0].scrollSpeed = -0x10000
+		
+		// Box drawing values, for the boxes that wrap the Options
+		object.drawPos.x = screen.xcenter
+		object.drawPos.x -= 141
+		object.drawPos.y = 3
+		object.drawWidth = 279
+		object.drawHeight = 39
+		object.drawColour.r = 0xE0
+		object.drawColour.b = 0x00
+		
+		// For the arrows, set up the flip for them
+		object.direction = FACING_LEFT
 		
 		SetScreenFade(0, 0, 0, object.timer)
 		object.state++
@@ -172,7 +180,7 @@ event ObjectUpdate
 		break
 
 	case OPTIONS_MAIN
-		if object.usingTouch == false
+		if options.physicalControls == true
 			object.menusel += keyPress[0].down
 			object.menusel -= keyPress[0].up
 
@@ -199,15 +207,15 @@ event ObjectUpdate
 			
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			if checkResult > TOUCHINPUT_NULL
-				// Activate touch controls, hide the Knuckles cursor
-				object.usingTouch = true
+				// Activate touch controls
+				options.physicalControls = false
 				object.menusel = MENUSEL_NULL
 			end if
 		else
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			temp3 = checkResult
 			
-			// Touch inputs, including the null buttons
+			// Touch inputs, including the current unimplemented buttons
 			
 			// Left bounds
 			object.buttonLeft = screen.xcenter
@@ -222,7 +230,7 @@ event ObjectUpdate
 			object.buttonBottom = 51
 			object.buttonFunc = Options_Button_Character
 			
-			// Cycle through, and look at all four buttons
+			// Cycle through, and look at all five buttons
 			object.buttonID = 0
 			while object.buttonID < 5
 				CallFunction(KEH_RunButton)
@@ -250,8 +258,8 @@ event ObjectUpdate
 				end if
 			end if
 			
-			object.usingTouch = input.pressButton
-			object.usingTouch ^= true
+			options.physicalControls = input.pressButton
+			options.physicalControls ^= true
 		end if
 		
 		menu1.selection = object.menusel
@@ -265,7 +273,9 @@ event ObjectUpdate
 			object.timer += 8
 			SetScreenFade(0, 0, 0, object.timer)
 		else
+			WriteSaveRAM()
 			StopMusic()
+			
 			menu.bootMode = BOOTMODE_MAINMENU
 			ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
 			SetScreenFade(0, 0, 0, 0xFF)
@@ -282,13 +292,9 @@ event ObjectDraw
 	temp0 = screen.xcenter
 	DrawMenu(MENU_1, screen.xcenter, 12)
 	
-	object.drawPos.x = screen.xcenter
-	object.drawPos.x -= 141
-	object.drawPos.y = 3
-	object.drawWidth = 279
-	object.drawHeight = 39
-	object.drawColour.r = 0xE0
-	object.drawColour.b = 0x00
+	// It'll be changed in the loop, so back it up right now
+	temp1 = object.drawPos.y
+	
 	temp0 = 0
 	while temp0 < 5
 		CheckNotEqual(temp0, object.menusel)
@@ -299,14 +305,18 @@ event ObjectDraw
 		temp0++
 	loop
 	
-	if object.usingTouch == true
+	// After the loop, we can restore it now
+	object.drawPos.y = temp1
+	
+	if options.physicalControls == false
 		// The arrows don't actually do or mean anything, but they help convey that the current option is selected
 		temp0 = object.menusel
 		temp0 *= 48
 		temp0 += 3
 		
-		DrawSpriteScreenXY(2, screen.xcenter, temp0)
-		DrawSpriteScreenXY(3, screen.xcenter, temp0)
+		// (The Right arrow is just a flipped version of the Left arrow)
+		DrawSpriteScreenXY(2,          screen.xcenter, temp0)
+		DrawSpriteScreenFX(2, FX_FLIP, screen.xcenter, temp0)
 		
 		// Back button
 		CheckEqual(object.menusel, 5)
@@ -328,7 +338,6 @@ event ObjectStartup
 	SpriteFrame(-20, -10, 40, 20, 85, 125) // 1 - Back, Red
 	
 	SpriteFrame(-175, 12, 20, 20, 85, 65)  // 2 - Left, Blue
-	SpriteFrame(155, 12, 20, 20, 85, 85)   // 3 - Right, Blue
 	
 	SetMusicTrack("Options.ogg", 0, true)
 	
@@ -364,8 +373,7 @@ event ObjectStartup
 	AddMenuEntry(MENU_1, "@", false)
 	AddMenuEntry(MENU_1, "NEW", true)
 	
-	menu1.selection = 2
-	menu2.selection = -1
+	menu1.selection =  2
 	
 	switch saved.character
 	case 0

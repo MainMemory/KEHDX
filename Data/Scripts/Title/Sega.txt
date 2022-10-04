@@ -30,11 +30,14 @@ public alias saveRAM[202] : saved.character
 
 // Menu Boot Mode Aliases
 // Public since the following Menu-related objects use them too
-public alias 0 : BOOTMODE_NONE
-public alias 1 : BOOTMODE_MAINMENU
-public alias 2 : BOOTMODE_OPTIONS
-public alias 3 : BOOTMODE_STAGESELECT
-public alias 4 : BOOTMODE_COMPETITION
+public alias -1 : BOOTMODE_NONE
+public alias  1 : BOOTMODE_MAINMENU
+public alias  2 : BOOTMODE_OPTIONS
+public alias  3 : BOOTMODE_STAGESELECT
+public alias  4 : BOOTMODE_COMPETITION
+
+// KEHDX Cheat, to enable/disable the splashes (SEGA, SHC)
+private alias 0 : KEHDX_DISABLESPLASHES
 
 
 // ========================
@@ -245,8 +248,9 @@ event ObjectStartup
 	SpriteFrame(-93, -29, 187, 58, 112, 192)
 	SpriteFrame(-93, -29, 187, 58, 299, 192)
 	
-	// Hide Touch overlay
+	// Hide Touch overlay, start with Physical controls active instead
 	options.touchControls = false
+	options.physicalControls = true
 	
 #platform: USE_ORIGINS
 	if game.titleMode != false
@@ -261,6 +265,13 @@ event ObjectStartup
 	default
 		// Nothing special needed here, player just booted up the game so give them all the splashes
 		temp0 = TypeName[Sega]
+		
+		if KEHDX_DISABLESPLASHES == true
+			// Unless y'know, you don't want 'em
+			
+			temp0 = TypeName[Main Menu]
+			menu.bootMode = BOOTMODE_MAINMENU
+		end if
 		break
 		
 	case BOOTMODE_MAINMENU
@@ -288,7 +299,7 @@ event ObjectStartup
 	
 	foreach (TypeName[Sega], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].type = temp0
-		object[arrayPos0].priority = 1 // "PRIORITY_ACTIVE", actual name varies across decomp versions so numeric ID is used here instead
+		object[arrayPos0].priority = 1
 	next
 end event
 

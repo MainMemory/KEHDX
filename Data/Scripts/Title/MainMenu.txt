@@ -12,9 +12,6 @@
 private alias object.value0 : object.timer
 private alias object.value1 : object.menusel
 
-// Used for touch controls, as one could've guessed
-private alias object.value2 : object.usingTouch
-
 // When fading out, this is the type the object will become afterwards
 private alias object.value3 : object.fadeType
 
@@ -219,7 +216,6 @@ event ObjectUpdate
 //		object.menusel = saveRAM[250]
 		object.timer = 320
 		object.inkEffect = 3
-		object.usingTouch = false
 		
 		// Set BG speed, 1.0 pixel per frame
 		tileLayer[1].scrollSpeed = -0x10000
@@ -242,7 +238,7 @@ event ObjectUpdate
 		break
 		
 	case MAINMENU_MAIN
-		if object.usingTouch == false
+		if options.physicalControls == true
 			// Assuming physical controls, this is the default
 			
 			if keyPress[0].up == true
@@ -267,7 +263,7 @@ event ObjectUpdate
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			if checkResult > TOUCHINPUT_NULL
 				// ... then activate touch controls, and hide the Knuckles cursor too
-				object.usingTouch = true
+				options.physicalControls = false
 				object.menusel = MENUSEL_NULL
 			end if
 		else
@@ -301,10 +297,10 @@ event ObjectUpdate
 				object.buttonFunc++
 			loop
 			
-			object.usingTouch = input.pressButton
-			object.usingTouch |= keyPress[0].down
-			object.usingTouch |= keyPress[0].up
-			object.usingTouch ^= true
+			options.physicalControls = input.pressButton
+			options.physicalControls |= keyPress[0].down
+			options.physicalControls |= keyPress[0].up
+			options.physicalControls ^= true
 		end if
 		break
 		

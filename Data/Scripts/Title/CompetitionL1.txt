@@ -166,16 +166,10 @@ event ObjectUpdate
 				object.timer += 16
 				SetScreenFade(0, 0, 0, object.timer)
 			else
-				arrayPos0 = object.entityPos
-				arrayPos0++
-				
-				// Clear all the Competition boxes
-				temp0 = 4
-				while temp0 > 0
-					ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, object.xpos, object.ypos)
-					arrayPos0++
-					temp0--
-				loop
+				// Clear all competition boxes
+				foreach (TypeName[Competition L1], arrayPos0, ACTIVE_ENTITIES)
+					object[arrayPos0].type = TypeName[Blank Object]
+				next
 				
 				ResetObjectEntity(object.entityPos, TypeName[Competition L2], 0, object.xpos, object.ypos)
 				
@@ -191,16 +185,10 @@ event ObjectUpdate
 			else
 				StopMusic()
 				
-				arrayPos0 = object.entityPos
-				arrayPos0++
-				
-				// Clear all the Competition boxes
-				temp0 = 4
-				while temp0 > 0
-					ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, object.xpos, object.ypos)
-					arrayPos0++
-					temp0--
-				loop
+				// Clear all competition boxes
+				foreach (TypeName[Competition L1], arrayPos0, ACTIVE_ENTITIES)
+					object[arrayPos0].type = TypeName[Blank Object]
+				next
 				
 				menu.bootMode = BOOTMODE_MAINMENU
 				ResetObjectEntity(object.entityPos, TypeName[Main Menu], 0, object.xpos, object.ypos)
@@ -286,13 +274,11 @@ event ObjectUpdate
 					
 					foreach (TypeName[Competition L1], arrayPos1, ACTIVE_ENTITIES)
 						// Make sure it's not currently choosing a character;
-						// It can either be blank (no player), or be locked in (ready player)
-						
+						// It can either be blank (no player, COMP_SUB_OPEN), or be locked in (ready player, COMP_SUB_SELECTED)
 						CheckEqual(object[arrayPos1].state, COMP_SUB_SELECT)
 						temp0 |= checkResult
 						
 						// Gather a player count too
-						
 						CheckEqual(object[arrayPos1].state, COMP_SUB_SELECTED)
 						temp1 += checkResult
 					next
@@ -311,17 +297,21 @@ event ObjectUpdate
 									object[arrayPos1].state = COMP_SUB_HOLD
 								end if
 								
-								// Get amount to bit shift by
+								// Get amount to bit shift by (note that char IDs are each a byte in the variable)
 								temp1 = object[arrayPos1].propertyValue
 								temp1--
 								temp1 <<= 3
 								
+								// Get the character selection, and shift it by the desired amount
 								temp0 = object[arrayPos1].selection
 								temp0 <<= temp1
+								
+								// Preserve other selections (& wipe this slot's previous selection)
 								temp1 = temp0
 								Not(temp1)
-								
 								vs.playerIDs &= temp1
+								
+								// And now, add it into the mix
 								vs.playerIDs |= temp0
 							next
 							
@@ -346,16 +336,18 @@ event ObjectUpdate
 			temp0 = object[32].readyPlayers
 			temp0 <<= 1
 			GetBit(object.active, temp0, object.propertyValue)
-			GetBit(object.ready, temp0, object.propertyValue)
+			GetBit(object.ready,  temp0, object.propertyValue)
 			
 			temp1 = object.propertyValue
 			temp1--
-			GetBit(temp0, temp1, 0)
-			if temp0 == false
+			GetBit(object.direction, temp1, 0)
+			if object.direction == false
 				// left row
 				
 				if object.drawPos.x < object.targetPos.x
 					object.drawPos.x += object.speed
+					
+					// "+= 1" looks weird i know, just set this way so speed can be changed easily if needed later
 					object.speed += 1
 					
 					if object.drawPos.x > object.targetPos.x
@@ -368,6 +360,8 @@ event ObjectUpdate
 				
 				if object.drawPos.x > object.targetPos.x
 					object.drawPos.x += object.speed
+					
+					// "-= 1" also looks weird too yeah, same reason as up above
 					object.speed -= 1
 					
 					if object.drawPos.x < object.targetPos.x
@@ -380,17 +374,17 @@ event ObjectUpdate
 			
 		case COMP_SUB_READY_OUT
 			object.active = false
-			object.ready = false
+			object.ready  = false
 			
 			temp1 = object.propertyValue
 			temp1--
-			GetBit(temp0, temp1, 0)
-			if temp0 == true
+			GetBit(object.direction, temp1, 0)
+			if object.direction == true
 				// right row
 				
 				if object.drawPos.x < screen.xsize
 					object.drawPos.x += object.speed
-					object.speed += 1
+					object.speed++
 					
 					if object.drawPos.x > screen.xsize
 						object.type = TypeName[Blank Object]
@@ -405,7 +399,7 @@ event ObjectUpdate
 				
 				if object.drawPos.x > temp0
 					object.drawPos.x += object.speed
-					object.speed -= 1
+					object.speed--
 					
 					if object.drawPos.x < temp0
 						object.type = TypeName[Blank Object]
@@ -423,6 +417,7 @@ end event
 event ObjectDraw
 	if object.propertyValue == 0
 		// Master shouldn't draw anything, return
+		
 		return
 	end if
 	
@@ -486,6 +481,8 @@ event ObjectDraw
 	case COMP_SUB_READY_IN
 	case COMP_SUB_READY_OUT
 		if object.targetPos.x != 0
+			// Draw the "Ready" text, and make it yellow if we truly are ready
+			// -> This yellow will carry on over to the [X]P player tag too
 			temp0 = 0xE0E000
 			temp0 += object.drawColour.g
 			SetPaletteEntry(0, 128, temp0)
@@ -498,6 +495,8 @@ event ObjectDraw
 		temp0 = 0
 		
 		// Structered this way for future additions...
+		// Type is switched because only one ani file can be loaded per object class
+		// (We could switch animation file here, but that's not too good of a move i feel...)
 		switch object.selection
 		case 0
 		default
@@ -507,7 +506,7 @@ event ObjectDraw
 			
 		case 1
 			object.type = TypeName[Ani Holder 2]
-			temp0 = 2 // "ANI_SELECTED" (custom animation, takes the slot of the previously blank "Waiting")
+			temp0 = 2 // "ANI_SELECTED" (custom animation)
 			break
 			
 		end switch
@@ -524,7 +523,6 @@ event ObjectDraw
 			ProcessAnimation()
 		else
 			object.animation = 0
-			object.frame = 0
 		end if
 		
 		if object.animation != object.prevAnimation
@@ -536,6 +534,7 @@ event ObjectDraw
 		
 		DrawObjectAnimation()
 		
+		// Restore the object's type
 		object.type = TypeName[Competition L1]
 		
 		// Move a few pixels up
