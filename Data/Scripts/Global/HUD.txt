@@ -12,10 +12,27 @@
 private alias object.value0 : object.flashingTimer
 
 // Player Aliases
+private alias object.state : player.state
+private alias object.controlMode : player.controlMode
 private alias object.xpos : player.xpos
 private alias object.ypos : player.ypos
+private alias object.xvel : player.xvel
+private alias object.yvel : player.yvel
+private alias object.speed : player.speed
+private alias object.visible : player.visible
+private alias object.direction : player.direction
+private alias object.jumpPress : player.jumpPress
+private alias object.jumpHold : player.jumpHold
+private alias object.up : player.up
+private alias object.down : player.down
+private alias object.left : player.left
+private alias object.right : player.right
 
 private alias object.value0 : player.rings
+private alias object.value1 : player.timer
+private alias object.value7 : player.invincibleTimer
+private alias object.value8 : player.blinkTimer
+private alias object.value37 : player.shield
 
 // Game Mode Aliases
 private alias 2 : MODE_TIMEATTACK
@@ -162,7 +179,7 @@ public function EmeraldManager_AwardEmerald
 				EmeraldManager_BonusTimer = 120
 				EmeraldManager_EmeraldTimer = 0
 			end if
-			PlaySfx(SfxName[Star Post], 0)
+			PlaySfx(SfxName[Star Post], false)
 			SetTableValue(-1, temp1, EmeraldManager_EmeraldObjects)
 			SetTableValue(-1, temp1, EmeraldManager_RadarSprites)
 			EmeraldManager_GotEmeralds++
@@ -587,7 +604,7 @@ event ObjectUpdate
 				SetTableValue(temp1, temp4, EmeraldManager_RadarScale)
 				EmeraldManager.pingTimer = 0
 				if saved.radar == 0
-					PlaySfx(SfxName[Radar Ping], 0)
+					PlaySfx(SfxName[Radar Ping], false)
 				end if
 			end if
 		end if
@@ -605,20 +622,20 @@ event ObjectUpdate
 		if temp0 == true
 			object.state++
 			object.priority = PRIORITY_ALWAYS
-			stage.state = 3
-			object[0].controlMode = -1
-			object[0].direction = 0
-			object[0].up = 0
-			object[0].down = 0
-			object[0].left = 0
-			object[0].right = 0
-			object[0].jumpPress = 0
-			object[0].jumpHold = 0
-			object[0].xvel = 0
-			object[0].yvel = 0
-			object[0].visible = true
-			object[0].value1 = 0
-			object[0].value8 = 0
+			stage.state = STAGE_FROZEN
+			player[0].state = Player_State_Static
+			player[0].controlMode = CONTROLMODE_NONE
+			player[0].up = false
+			player[0].down = false
+			player[0].left = false
+			player[0].right = false
+			player[0].jumpPress = false
+			player[0].jumpHold = false
+			player[0].xvel = 0
+			player[0].yvel = 0
+			player[0].visible = true
+			player[0].timer = 0
+			player[0].blinkTimer = 0
 			EmeraldManager.fadeAmount = 0
 		end if
 		break
@@ -626,10 +643,10 @@ event ObjectUpdate
 	case 2
 		music.volume -= 2
 
-		object[0].state = Player_State_Air
-		object[0].value7 = 0
-		if object[0].value37 > 0
-			object[0].value37 = 0
+		player[0].state = Player_State_Air
+		player[0].invincibleTimer = 0
+		if player[0].shield > 0
+			player[0].shield = 0
 			arrayPos0 = playerCount
 			CallFunction(Player_ApplyShield)
 		end if
@@ -643,22 +660,25 @@ event ObjectUpdate
 				CallFunction(EmeraldManager_AwardBonus)
 			end if
 			object.state++
+			
+			// Restore normal bounds
 			stage.newXBoundary2 = tileLayer[0].xsize
 			stage.newXBoundary2 <<= 7
-			object[0].xpos = EmeraldManager_EndX
-			object[0].ypos = EmeraldManager_EndY
-			object[0].speed = 0
-			object[0].xvel = 0
-			object[0].up = 0
-			object[0].down = 0
-			object[0].left = 0
-			object[0].right = 0
-			object[0].jumpPress = 0
-			object[0].jumpHold = 0
-			object[0].speed = 0
-			screen.cameraX = object[0].ixpos
-			screen.cameraY = object[0].iypos
-			stage.state = 1
+			
+			// Move the player to the ending position
+			player[0].xpos = EmeraldManager_EndX
+			player[0].ypos = EmeraldManager_EndY
+			player[0].direction = 0
+			player[0].xvel = 0
+			player[0].yvel = 0
+			player[0].speed = 0
+			
+			screen[0].cameraX = player[0].xpos
+			screen[0].cameraX >>= 16
+			screen[0].cameraY = player[0].ypos
+			screen[0].cameraY >>= 16
+			
+			stage.state = STAGE_RUNNING
 		end if
 		break
 		
