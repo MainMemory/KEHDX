@@ -250,6 +250,7 @@ private function StageSelect_CheckBoxBounds
 	temp2 += STAGESEL_STAGEROWSIZE // a bit messy... hopefully not too bad though
 	temp2 += STAGESEL_STAGEROWSIZE
 	temp2 += STAGESEL_STAGEROWSIZE
+	temp2 += 12
 	
 	CheckGreater(temp0, temp1)
 	temp1 = checkResult
@@ -465,7 +466,7 @@ event ObjectUpdate
 						if checkResult > TOUCHINPUT_NULL
 							object.selection = temp0
 							
-							temp0 = SELECTION_NULL
+							temp0 = SELECTION_NULL // break
 						else
 							if temp3 < 0
 								if object.selection == temp0
