@@ -9,16 +9,16 @@
 // ========================
 
 private alias object.value0 : object.timer
-private alias object.value1 : object.originPos.Y
-private alias object.value2 : object.mode
-
-private alias 0 : EMERALD_MODE_S2
-private alias 1 : EMERALD_MODE_HPZ
-private alias 2 : EMERALD_MODE_S1
+private alias object.value1 : object.originPos.y
 
 private alias 0 : EMERALD_NONE
 private alias 1 : EMERALD_ITEM
 private alias 2 : EMERALD_OBTAINED
+
+// Emerald Manager (HUD) Aliases
+private alias 0 : EMERALD_MODE_S2
+private alias 1 : EMERALD_MODE_HPZ
+private alias 2 : EMERALD_MODE_S1
 
 
 // ========================
@@ -27,11 +27,17 @@ private alias 2 : EMERALD_OBTAINED
 
 event ObjectUpdate
 	switch object.state
+	case EMERALD_NONE
+		// (The object should never be in this state btw)
+		Print("Invalid Emerald: ", false, false)
+		Print(object.entityPos, true, true)
+		break
+		
 	case EMERALD_ITEM
 		if object.propertyvalue != 9
 			Sin(temp0, object.angle)
 			temp0 <<= 10
-			object.ypos = object.originPos.Y
+			object.ypos = object.originPos.y
 			object.ypos += temp0
 		end if
 		
@@ -46,7 +52,8 @@ event ObjectUpdate
 		
 		// Check interaction with players
 		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-			if stage.listPos == 9
+			if EmeraldManager_Mode == EMERALD_MODE_HPZ
+				// HPZ's got vertical emerald shards, which are just a tad bit larger
 				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
 			else
 				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
@@ -102,7 +109,7 @@ end event
 event ObjectDraw
 	switch object.state
 	case EMERALD_ITEM
-		switch object.mode
+		switch EmeraldManager_Mode
 		case EMERALD_MODE_S2
 		default
 			if object.frame < 64
@@ -131,7 +138,7 @@ event ObjectDraw
 		break
 		
 	case EMERALD_OBTAINED
-		switch object.mode
+		switch EmeraldManager_Mode
 		case EMERALD_MODE_S2
 		default
 			temp0 = 0
@@ -153,8 +160,7 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("Global/Items.gif")
-	switch specialMode
-	case 0
+	if specialMode == false
 		SpriteFrame(-8, -8, 16, 16, 109, 158)
 		
 		temp0 = 175
@@ -176,32 +182,17 @@ event ObjectStartup
 			temp1 += 17
 			temp0++
 		loop
-		break
-		
-	case 1
+	else
 		temp0 = 0
 		while temp0 < 12
 			SpriteFrame(-8, -8, 16, 16, 177, 192)
 			temp0++
 		loop
-		break
-		
-	end switch
-	
-	if stage.listPos == 9
-		temp0 = EMERALD_MODE_HPZ
-	else
-		if stage.listPos > 9
-			temp0 = EMERALD_MODE_S1
-		else
-			temp0 = EMERALD_MODE_S2
-		end if
 	end if
 	
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].drawOrder = 4
-		object[arrayPos0].originPos.Y = object[arrayPos0].ypos
-		object[arrayPos0].mode = temp0
+		object[arrayPos0].originPos.y = object[arrayPos0].ypos
 		CallFunction(EmeraldManager_AddEntity) 
 	next
 end event
@@ -220,7 +211,7 @@ event RSDKLoad
 	LoadSpriteSheet("Global/Items.gif")
 	SpriteFrame(-8, -8, 16, 16, 109, 158)
 	
-	// KEHDX TODO: just like it says, prop vals seem to be chosen at random?
+	// KEHDX TODO: just like it says, prop vals seem to be rather arbitrary?
 	// i lack the knowledge to do this myself, best to leave it to someone else...
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "idkTbh")
 end event
