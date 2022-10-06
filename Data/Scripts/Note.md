@@ -14,6 +14,19 @@ This file is just a list of every folder, and how its copied scripts differ from
 ## HPZ
 - HPZCutSceneSetup: Standard HPZ Setup, but with most unrelated parts removed and cutscene control added in instead
 
+## Players
+- Player Object: 
+  - Change PLAYER_\* aliases, for Knuckles and Tikal
+  - Add in ANI_VICTORY (39),
+  - Add in PlayerObject_Initial[X/Y] statics
+  - Remove Sonic reloading animation his animation file upon detransforming (since he's not Sonic anymore, he's Knuckles)
+  - Pause code changes for custom pause menu, including blocking pausing while there's a Title Card
+  - Remove transformation code
+  - Add in `player.yvel += 0x20000 // missing from original` line in glide code startup
+  - Allow Knuckles to jump/look up/look down during the slide glide
+  - Victory code at the end of ObjectUpdate
+  - Reset player.score when starting a level
+- Holding off on editing the other 2 player scripts at all until cleanup is finalised...
 
 # Sonic 1 Scripts
 
