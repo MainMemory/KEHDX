@@ -1,6 +1,6 @@
 // ----------------------------------
 // RSDK Project: Sonic 2
-// Script Description: Original Gem Object
+// Script Description: Decoration Gem Object
 // Script Author: Christian Whitehead/Simon Thomley
 // Unpacked by Rubberduckycooly's script unpacker
 // ----------------------------------
@@ -8,11 +8,8 @@
 // ========================
 // Aliases
 // ========================
-private alias object.value0 : object.timer
 
-// States
-private alias 0 : ORIGINALGEM_IDLE
-private alias 1 : ORIGINALGEM_FADEOUT
+private alias object.value0 : object.timer
 
 
 // ========================
@@ -20,22 +17,35 @@ private alias 1 : ORIGINALGEM_FADEOUT
 // ========================
 
 event ObjectUpdate
-	// Check interaction with players, in KEHDX we've dummied this out to just be a mere box
+	// Just act as a solid box
+	// KEHDX - This is just an [Original Gem] script with all the fun parts removed, now it's just a solid rock
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 		BoxCollisionTest(C_SOLID, object.entityPos, -24, -16, 24, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
 	next
+	
+	// Update flashing
+	object.inkEffect = INK_ALPHA
+	temp0 = oscillation
+	temp0 <<= 4
+	Sin(temp1, temp0)
+	temp1 >>= 5
+	temp1 += 224
+	object.alpha = temp1
 end event
 
 
 event ObjectDraw
-	DrawSprite(0)
+	DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
 end event
 
 
 event ObjectStartup
 	LoadSpriteSheet("HPZ/Objects.gif")
-	
 	SpriteFrame(-32, -16, 64, 32, 1, 223)
+	
+	// KEHDX - Not the proper place to do it, but it beats having to replace all of [HPZ Setup] for this otherwise minor change
+	// -> This is just to counteract what [HPZ Setup] does when it sets the next stage to OOZ
+	stage.listPos = 9
 end event
 
 

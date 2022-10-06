@@ -56,8 +56,8 @@ private alias 2 : MUSICEVENT_FLAG_SLOWDOWN
 private alias 635050 : MUSIC_LOOP_GHZ   // Interestingly, this loop point was instead 635970 in older S1 versions...
 private alias 502294 : MUSIC_LOOP_GHZ_F // ...but this sped-up version had its loop point stay the same...
 
-private alias 38679  : MUSIC_LOOP_INV
-private alias 30897  : MUSIC_LOOP_INV_F
+private alias 39528  : MUSIC_LOOP_INV
+private alias 30436  : MUSIC_LOOP_INV_F
 
 
 // ========================

@@ -8,6 +8,7 @@
 // ========================
 // Aliases
 // ========================
+
 private alias object.value1 : object.lavaTileFrame
 private alias object.value2 : object.lavaAniTileID
 private alias object.value3 : object.lavaAnimTimer
@@ -45,8 +46,8 @@ private alias 2 : MUSICEVENT_FLAG_SLOWDOWN
 private alias 99380 : MUSIC_LOOP_MZ
 private alias 79537 : MUSIC_LOOP_MZ_F
 
-private alias 39528 : MUSIC_LOOP_INV
-private alias 30436 : MUSIC_LOOP_INV_F
+private alias 38679  : MUSIC_LOOP_INV
+private alias 30897  : MUSIC_LOOP_INV_F
 
 
 // ========================

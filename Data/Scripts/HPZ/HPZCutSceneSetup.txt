@@ -1,6 +1,6 @@
 // ----------------------------------
 // RSDK Project: Sonic 1/Sonic 2
-// Script Description: HPZ Setup Object
+// Script Description: HPZ Cutscene Setup Object
 // Script Author: Christian Whitehead/Simon Thomley
 // Unpacked by Rubberduckycooly's script unpacker
 // ----------------------------------

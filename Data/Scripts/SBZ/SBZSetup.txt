@@ -66,8 +66,8 @@ private alias 1     : MUSIC_LOOP_SBZ_F
 
 private alias 84680 : MUSIC_LOOP_FINAL
 
-private alias 39528 : MUSIC_LOOP_INV
-private alias 30436 : MUSIC_LOOP_INV_F
+private alias 38679  : MUSIC_LOOP_INV
+private alias 30897  : MUSIC_LOOP_INV_F
 
 
 // ========================

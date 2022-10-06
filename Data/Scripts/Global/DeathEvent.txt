@@ -129,12 +129,10 @@ event ObjectUpdate
 				object.timer = 0
 			end if
 
-#platform: USE_STANDALONE
 			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
 			if checkResult > -1
 				object.timer = 0
 			end if
-#endplatform
 		end if
 		break
 
