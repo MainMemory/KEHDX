@@ -1,8 +1,7 @@
 // ----------------------------------
-// RSDK Project: Sonic 2
-// Script Description: Sign Post Object
-// Script Author: Christian Whitehead/Simon Thomley
-// Unpacked by Rubberduckycooly's script unpacker
+// RSDK Project: Knuckles' Emerald Hunt
+// Script Description: End Point Object
+// Script Author: Lave sIime
 // ----------------------------------
 
 // ========================
@@ -10,7 +9,7 @@
 // ========================
 
 event ObjectStartup
-	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
+	foreach (TypeName[End Point], arrayPos0, ALL_ENTITIES)
 		EmeraldManager_EndX = object[arrayPos0].xpos
 		EmeraldManager_EndY = object[arrayPos0].ypos
 	next
@@ -27,8 +26,8 @@ end event
 
 
 event RSDKLoad
-	LoadSpriteSheet("Global/Display.gif")
-	SpriteFrame(-8, -8, 16, 16, 87, 409)
+	LoadSpriteSheet("Players/Victory!!!.gif")
+	SpriteFrame(-15, -15, 40, 40, 107, 0)
 	
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event

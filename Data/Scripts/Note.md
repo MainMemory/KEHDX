@@ -28,6 +28,13 @@ This file is just a list of every folder, and how its copied scripts differ from
   - Reset player.score when starting a level
 - Holding off on editing the other 2 player scripts at all until cleanup is finalised...
 
+## Global
+- Chaos Emerald, End Point, Fall Start, and Water Mover are custom objects, they don't need to be "updated" with cleanup or anything
+- Act Finish: Final Menu
+- Death Event: Remove unnecessary Origins code, increment `death.count`
+- Debug Mode: A single notable change, just don't have the `Tails Object` spawn when Tikal should instead
+- Title Card: Remove some unnecessary stuff, and make it draw Green rather than Blue
+
 # Sonic 1 Scripts
 
 Most of these are just changing loop points in the stage's setup script, same note for all of them. The "workaround" described is declaring a public loop point alias in Stage Setup, before the individual stage's loop alias is declared, so that the new one has higher priority and will take effect
