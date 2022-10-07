@@ -615,12 +615,12 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 11, 1, 74) 				// #22 - Number 8
 	SpriteFrame(0, 0, 8, 11, 10, 74)				// #23 - Number 9
 	
-	SpriteFrame(0, -15, 16, 16, 137, 316)			// #24 Triangle
-	SpriteFrame(-17, -13, 34, 11, 154, 316)			// #25 Next
-	SpriteFrame(-47, -13, 95, 11, 154, 328)			// #26 Stage Select
-	SpriteFrame(-72, 0, 44, 48, 185, 340) 			// #27 "SCORE, TIME, RINGS" Text with results Triangle
-	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 Timer ticks
-	SpriteFrame(-28, -13, 56, 11, 189, 316)			// #29 Restart
+	SpriteFrame(0, -15, 16, 16, 137, 316)			// #24 - Cursor Triangle
+	SpriteFrame(-17, -13, 34, 11, 154, 316)			// #25 - Next
+	SpriteFrame(-47, -13, 95, 11, 154, 328)			// #26 - Stage Select
+	SpriteFrame(-72, 0, 44, 48, 185, 340) 			// #27 - "SCORE, TIME, RINGS" Text with results Triangle
+	SpriteFrame(9, 0, 29, 4, 1, 45) 				// #28 - Timer ticks
+	SpriteFrame(-28, -13, 56, 11, 189, 316)			// #29 - Restart
 	
 	SpriteFrame(0, 1, 8, 8, 127, 64)		// #30 - '-'
 	SpriteFrame(0, 0, 8, 11, 28, 86)		// #31 - F
@@ -633,6 +633,10 @@ event ObjectStartup
 	SpriteFrame(0, 1, 8, 8, 136, 64)		// #38 - +
 end event
 
+
+// ========================
+// Editor Events
+// ========================
 
 event RSDKDraw
 	DrawSprite(0)
