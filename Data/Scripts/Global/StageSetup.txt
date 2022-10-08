@@ -457,6 +457,9 @@ event ObjectDraw
 			temp1 = screen.ycenter
 			temp1 -= 28
 			
+			// Background
+			DrawRect(temp0, temp1, 78, 56, 224, 80, 96, 0x80)
+			
 			// Now, draw the left border
 			// A 1px black column, followed by a 3px red
 			DrawRect(temp0, temp1, 1, 56, 8, 0, 0, 255)
