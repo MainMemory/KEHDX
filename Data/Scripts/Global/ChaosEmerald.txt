@@ -160,9 +160,12 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("Global/Items.gif")
+	
 	if specialMode == false
+		// 0: S2 Chaos Emerald, full
 		SpriteFrame(-8, -8, 16, 16, 109, 158)
 		
+		// 1 - 8: S2 Chaos Emerald, shine frames
 		temp0 = 175
 		while temp0 < 193
 			temp1 = 109
@@ -173,16 +176,14 @@ event ObjectStartup
 			temp0 += 17
 		loop
 		
-		SpriteFrame(-8, -16, 16, 32, 178, 159) // 9 HPZ Shard
+		// 9: HPZ Shard
+		SpriteFrame(-8, -16, 16, 32, 178, 159)
 		
-		temp1 = 126
-		temp0 = 0
-		while temp0 < 2
-			SpriteFrame(-8, -8, 16, 16, temp1, 158) // S1 Emerald
-			temp1 += 17
-			temp0++
-		loop
+		// 10 - 11: S1 Emerald
+		SpriteFrame(-8, -8, 16, 16, 126, 158)
+		SpriteFrame(-8, -8, 16, 16, 143, 158)
 	else
+		// 0 - 11, make them all the same sprite
 		temp0 = 0
 		while temp0 < 12
 			SpriteFrame(-8, -8, 16, 16, 177, 192)

@@ -477,7 +477,7 @@ event ObjectDraw
 		end if
 		
 		// Before the draw loop, back up the underwater yellow colour
-		GetPaletteEntry(0, 15, temp2)
+		GetPaletteEntry(1, 15, temp2)
 		
 		temp0 = SELECTION_CONTINUE
 		temp1 = 1
@@ -496,7 +496,7 @@ event ObjectDraw
 		
 		// Restore the colours
 		SetPaletteEntry(0, 15, 0xE0E000)
-		SetPaletteEntry(0, 15, temp2)
+		SetPaletteEntry(1, 15, temp2)
 	end if
 	
 	// The black fade-out
