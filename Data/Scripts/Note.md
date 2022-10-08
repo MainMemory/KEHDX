@@ -12,6 +12,7 @@ This file is just a list of every folder, and how its copied scripts differ from
 - Water: Enforce Knuckles jump height when starting underwater (I don't think we really need to do this though, since there aren't any checkpoints in the stage)
 
 ## HPZ
+- BreakWall: Changed to allow Knuckles (stage.playerListPos == 0) to break walls
 - HPZCutSceneSetup: Standard HPZ Setup, but with most unrelated parts removed and cutscene control added in instead
 
 ## Players
@@ -24,7 +25,6 @@ This file is just a list of every folder, and how its copied scripts differ from
   - Remove transformation code
   - Add in `player.yvel += 0x20000 // missing from original` line in glide code startup
   - Allow Knuckles to jump/look up/look down during the slide glide
-  - Victory code at the end of ObjectUpdate
   - Reset player.score when starting a level
 - Holding off on editing the other 2 player scripts at all until cleanup is finalised...
 

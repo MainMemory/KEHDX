@@ -4878,22 +4878,6 @@ event ObjectUpdate
 		end if
 	end if
 #endplatform
-	
-	// Victory Code, just hastily stuck into the ObjectUpdate for now at the moment (just like the Origins code!! :)))
-	if object[9].state >= 2
-		player.up = false
-		player.down = false
-		player.left = false
-		player.right = false
-		player.jumpPress = false
-		player.jumpHold = false
-		player.speed = 0
-		player.xvel = 0
-		player.timer = 0
-		player.animation = ANI_VICTORY
-		screen.cameraX = player[0].ixpos
-		screen.cameraY = player[0].iypos
-	end if 
 end event
 
 

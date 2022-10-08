@@ -119,9 +119,7 @@ private alias 2 : EMERALD_MODE_S1
 
 private table EmeraldManager_ObjectPool[255]
 
-public table EmeraldManager_EmeraldObjects
-	-1, -1, -1, -1, -1
-end table
+public table EmeraldManager_EmeraldObjects[5]
 
 private table EmeraldManager_RadarSprites[5]
 
@@ -750,6 +748,8 @@ event ObjectUpdate
 			PlayMusic(TRACK_ACTFINISH)
 			player[0].animation = 39
 			player[0].state = Player_State_Static
+			screen[0].cameraX = object[0].ixpos
+			screen[0].cameraY = object[0].iypos
 			
 			object[30].type = TypeName[Act Finish]
 			object[30].drawOrder = 6
