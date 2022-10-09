@@ -242,8 +242,16 @@ private alias object.value0 : vsGame.timer
 // VSGame States
 private alias 2 : VSGAME_FADEOUT
 
+// KEHDX Aliases
+
 // Animation Aliases
 private alias 39 : ANI_VICTORY
+
+// Save RAM Aliases
+private alias saveRAM[202] : saved.character
+
+private alias 0 : KEHDX_CHARACTER_KNUX
+private alias 1 : KEHDX_CHARACTER_TIKAL
 
 
 // ========================
@@ -4903,9 +4911,15 @@ end event
 
 
 event ObjectStartup
+	player.score = 0 // KEHDX - Score is per-level, so reset it upon entering a new scene
 	
-	// KEHDX - Score is per-level, so reset it upon entering a new scene
-	player.score = 0
+	if stage.playerListPos > PLAYER_KNUX_ALONE
+		// Also KEHDX - All characters should be functionally identical, transfer player list pos to display character ID
+		// stage.playerListPos should only be > 0 when entering from Dev Menu
+		
+		saved.character = stage.playerListPos
+		stage.playerListPos = PLAYER_KNUX_ALONE
+	end if
 	
 	playerCount = 0
 
@@ -4941,16 +4955,16 @@ event ObjectStartup
 		Player_superBlendClr 		= 0
 		Player_superBlendTimer 	= 0
 
-		switch stage.playerListPos
-		case 0
+		switch saved.character
+		case KEHDX_CHARACTER_KNUX
 		default
 			LoadAnimation("Knuckles.ani")
 			break
-		
-		case 1
+			
+		case KEHDX_CHARACTER_TIKAL
 			LoadAnimation("Tikal.ani")
 			break
-		
+			
 		end switch
 		
 		player[0].character 	= 2
@@ -4981,8 +4995,8 @@ end event
 
 
 event RSDKLoad
-	LoadSpriteSheet("Players/Sonic1.gif")
-	SpriteFrame(-16, -19, 27, 39, 1, 1)
+	LoadSpriteSheet("Players/KTE1.gif")
+	SpriteFrame(-12, -20, 26, 40, 1, 1)
 	
 	// used in-game, but shouldn't be set from the editor
 	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")

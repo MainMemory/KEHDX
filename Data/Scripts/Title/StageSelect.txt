@@ -531,21 +531,23 @@ event ObjectUpdate
 		break
 
 	case 5
-		// If HPZ was selected, we should go to the special cutscene instead
-		CheckEqual(object.selection, 9)
-		stage.listPos = checkResult
-		stage.listPos ^= 1
-		stage.listPos *= object.selection
-		
-		stage.activeList = checkResult
-		stage.activeList++
-		
-		stage.playerListPos = saved.character
 		if object.timer < 256
 			object.timer += 8
 			music.volume -= 2
 			SetScreenFade(0, 0, 0, object.timer)
 		else
+			// If HPZ was selected, we should go to the special cutscene instead
+			CheckEqual(object.selection, 9)
+			stage.listPos = checkResult
+			stage.listPos ^= 1
+			stage.listPos *= object.selection
+			
+			stage.activeList = checkResult
+			stage.activeList++
+			
+			stage.playerListPos = 0
+			player.lives = 3
+			
 			LoadStage()
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)

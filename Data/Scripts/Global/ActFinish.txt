@@ -49,6 +49,12 @@ private alias object.value0 : player.rings
 // Menu Boot Mode Aliases	
 private alias 3 : BOOTMODE_STAGESELECT
 
+// Save RAM Aliases
+private alias saveRAM[202] : saved.character
+
+private alias 0 : KEHDX_CHARACTER_KNUX
+private alias 1 : KEHDX_CHARACTER_TIKAL
+
 
 // ========================
 // Function Declarations
@@ -170,29 +176,13 @@ event ObjectUpdate
 		
 		// The tallying system seems to be a bit off, though...
 		// KEHDX TODO: it would be p cool to repurpose this for something, right?
-
-		switch stage.playerListPos
-		case 0
-		case 3
-			temp0 = 0
-			foreach (TypeName[Ring], arrayPos0, ALL_ENTITIES)
-				if object[arrayPos0].propertyValue <= 1
-					temp0++
-				end if
-			next
-			break
-
-		case 1
-		case 2
-			temp0 = 0
-			foreach (TypeName[Ring], arrayPos0, ALL_ENTITIES)
-				if object[arrayPos0].propertyValue != 2
-					temp0++
-				end if
-			next
-			break
-
-		end switch
+		
+		temp0 = 0
+		foreach (TypeName[Ring], arrayPos0, ALL_ENTITIES)
+			if object[arrayPos0].propertyValue != 2
+				temp0++
+			end if
+		next
 
 		// Perfect Bonus!
 		if temp0 == 0
@@ -401,9 +391,6 @@ event ObjectUpdate
 				object.selection = SELECTION_NULL
 			end if
 		else
-			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-			temp3 = checkResult
-			
 			temp0 = screen.xcenter
 			temp0 -= 200
 			temp1 = temp0
@@ -417,7 +404,7 @@ event ObjectUpdate
 				if checkResult > -1
 					object.selection = temp2
 				else
-					if temp3 < 0
+					if touchscreen[0].down == false
 						if object.selection == temp2
 							temp0 = ActFinish_Button_Next
 							temp0 += object.selection
@@ -576,17 +563,15 @@ event ObjectStartup
 	LoadSpriteSheet("Global/Display.gif")
 
 	// Assign sprite frames based on current character in play
-	switch stage.playerListPos
-	case 0
-		// Knuckles
+	switch saved.character
+	case KEHDX_CHARACTER_KNUX
 		SpriteFrame(-94, 0, 128, 16, 34, 188)		// #0 - "KNUCKLES" large text
-		SpriteFrame(40, 0, 48, 16, 1, 205)			// #1 - "GOT" large text
+		SpriteFrame(40, 0, 48, 16, 1, 205)			// #1 - "GOT" large text, unique offset
 		break
 	
-	case 1
-		// Tikal
+	case KEHDX_CHARACTER_TIKAL
 		SpriteFrame(-63, 0, 71, 16, 144, 222)		// #0 - "TIKAL" large text
-		SpriteFrame(16, 0, 48, 16, 1, 205)			// #1 - "GOT" large text
+		SpriteFrame(16, 0, 48, 16, 1, 205)			// #1 - "GOT" large text, unique offset
 		break
 	
 	end switch

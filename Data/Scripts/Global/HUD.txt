@@ -35,6 +35,8 @@ private alias object.value7 : player.invincibleTimer
 private alias object.value8 : player.blinkTimer
 private alias object.value37 : player.shield
 
+private alias 39 : ANI_VICTORY
+
 // Game Mode Aliases
 private alias 2 : MODE_TIMEATTACK
 
@@ -52,7 +54,7 @@ private alias 3 : EMERALDMANAGER_FADEIN
 private alias 4 : EMERALDMANAGER_RESULTS
 
 private alias object.value1 : EmeraldManager.pingTimer
-private alias object.value2 : EmeraldManager.fadeAmount
+private alias object.value2 : EmeraldManager.fade
 
 // Used for shifting the HUD off of the screen
 private alias object.value3 : object.xoffset
@@ -70,6 +72,7 @@ private alias 1 : TRACK_ACTFINISH
 // SaveRAM Aliases
 private alias saveRAM[200] : saved.radar
 private alias saveRAM[201] : saved.radarstyle
+private alias saveRAM[202] : saved.character
 
 // Now, a mess
 // So, in order to get an array of a series of values, we just stuff player-dependant values in some reserved object slots in the transition object bank
@@ -86,7 +89,7 @@ private alias object.value0 : object.collectedEmeralds
 reserve function EmeraldManager_AddEntity
 reserve function EmeraldManager_AwardEmerald
 reserve function EmeraldManager_AwardBonus
-reserve function EmeraldManager_HUD
+reserve function EmeraldManager_DrawHUD
 reserve function sqrt
 
 reserve function HUD_Draw_Standard
@@ -117,28 +120,40 @@ private alias 2 : EMERALD_MODE_S1
 // Tables
 // ========================
 
+// Used on scene startup, to add all objects needed into the selection pool
 private table EmeraldManager_ObjectPool[255]
 
+// Used in-game, to store the entityPos of the objects holding emeralds
 public table EmeraldManager_EmeraldObjects[5]
 
-private table EmeraldManager_RadarSprites[5]
+// Used to hold which frame the Emerald icon should use, in the HUD
+private table EmeraldManager_RadarFrames[5]
 
+// Similar to above, this one is just for the Emerald icons' scale
 private table EmeraldManager_RadarScale[5]
 
+// Score bonuses, based on how fast the player gets an Emerald
 private table EmeraldManager_ScoreBonuses
 	20000, 15000, 10000, 8000, 6000, 5000, 4000, 3000, 2000, 1000
 end table
 
+// The distance thresholds, between Emerald icon changes
 private table EmeraldManager_DistanceLimits
-	0x190000, 0xE1000, 0x19000, 0x6400, 0x2400, -1
+	0x190000 // Blue
+	0xE1000  // Green
+	0x19000  // Yellow
+	0x6400   // Orange (not really orange, but i have no idea what this colour's name is tbh)
+	0x2400   // Red
+	-1       // Fallback to grey
 end table
 
+// The colours each Emerald icon frame should be, in RGB as normal
 private table EmeraldManager_RadarColours
 	0xA0A0A0 // Grey
 	0x2040C0 // Blue
 	0x008000 // Green
 	0xE0A000 // Yellow
-	0xE05060 // Orange (not really orange, but i have no idea what this colour's name is tbh)
+	0xE05060 // Orange (?)
 	0xE00000 // Red
 end table
 
@@ -211,7 +226,7 @@ public function EmeraldManager_AwardEmerald
 			
 			PlaySfx(SfxName[Star Post], false)
 			SetTableValue(-1, temp1, EmeraldManager_EmeraldObjects)
-			SetTableValue(-1, temp1, EmeraldManager_RadarSprites)
+			SetTableValue(-1, temp1, EmeraldManager_RadarFrames)
 			EmeraldManager_GotEmeralds++
 		end if
 		
@@ -225,7 +240,7 @@ public function EmeraldManager_DeleteEmerald
 end function
 
 
-private function EmeraldManager_HUD
+private function EmeraldManager_DrawHUD
 	// duh emealds
 	temp1 = EmeraldManager_EmeraldCount
 	temp1 *= 20
@@ -240,7 +255,7 @@ private function EmeraldManager_HUD
 	
 	temp2 = 0
 	while temp2 < EmeraldManager_EmeraldCount
-		GetTableValue(temp3, temp2, EmeraldManager_RadarSprites)
+		GetTableValue(temp3, temp2, EmeraldManager_RadarFrames)
 		switch temp3
 		case -1
 			// The Emerald's been grabbed, we don't need to display it anymore
@@ -360,7 +375,7 @@ private function HUD_Draw_Standard
 	end if
 
 	// Lives icon
-	temp0 = stage.playerListPos
+	temp0 = saved.character
 	temp0 += 15
 	temp1 = 16
 	temp1 -= object.xoffset
@@ -380,7 +395,7 @@ private function HUD_Draw_Standard
 	DrawNumbers(24, temp1, 220, player.lives, 2, 8, false)
 
 	if saved.radar == 0
-		CallFunction(EmeraldManager_HUD)
+		CallFunction(EmeraldManager_DrawHUD)
 	end if
 
 	temp0 = screen.xsize
@@ -401,9 +416,11 @@ private function HUD_Draw_Standard
 			DrawSpriteScreenXY(temp0, 17, 61)
 		else
 			GetTableValue(temp0, EmeraldManager_BonusFrame, EmeraldManager_ScoreBonuses)
-			if EmeraldManager_BonusFrame < 3
+			if temp0 > 9999
+				// Draw 5 digits
 				DrawNumbers(0, 49, 61, temp0, 5, 8, false)
 			else
+				// Draw 4 digits
 				DrawNumbers(0, 41, 61, temp0, 4, 8, false)
 			end if
 		end if
@@ -610,6 +627,7 @@ event ObjectUpdate
 					temp2++
 					GetTableValue(temp3, temp2, EmeraldManager_DistanceLimits)
 				loop
+				
 				if temp5 > temp1
 					temp4 = temp0
 					temp5 = temp1
@@ -619,7 +637,7 @@ event ObjectUpdate
 				temp2 = -1
 			end if
 			
-			SetTableValue(temp2, temp0, EmeraldManager_RadarSprites)
+			SetTableValue(temp2, temp0, EmeraldManager_RadarFrames)
 			temp0++
 		loop
 		
@@ -691,18 +709,18 @@ event ObjectUpdate
 			player[0].timer = 0
 			player[0].blinkTimer = 0
 			
-			EmeraldManager.fadeAmount = 0
+			EmeraldManager.fade = 0
 		end if
 		break
 		
 	case EMERALDMANAGER_FADEOUT
 		music.volume -= 2
-		
-		EmeraldManager.fadeAmount += 8
 		StopSfx(SfxName[Jump])
-		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
 		
-		if EmeraldManager.fadeAmount == 0x200
+		EmeraldManager.fade += 8
+		SetScreenFade(255, 255, 255, EmeraldManager.fade)
+		
+		if EmeraldManager.fade == 0x200
 			if EmeraldManager_BonusFrame != -1
 				CallFunction(EmeraldManager_AwardBonus)
 			end if
@@ -722,17 +740,16 @@ event ObjectUpdate
 			player[0].speed = 0
 			player[0].invincibleTimer = 0
 			
-			// Clear the player's shield
-			if player[0].shield > 0
-				player[0].shield = 0
-				arrayPos0 = playerCount
-				CallFunction(Player_ApplyShield)
-			end if
-			
 			screen[0].cameraX = player[0].xpos
 			screen[0].cameraX >>= 16
 			screen[0].cameraY = player[0].ypos
 			screen[0].cameraY >>= 16
+			
+			// Clear the player's shield
+			currentPlayer = 0
+			player[currentPlayer].shield = 0
+			arrayPos0 = playerCount
+			CallFunction(Player_ApplyShield)
 			
 			// Resume the stage
 			stage.state = STAGE_RUNNING
@@ -740,16 +757,14 @@ event ObjectUpdate
 		break
 		
 	case EMERALDMANAGER_FADEIN
-		EmeraldManager.fadeAmount -= 8
-		SetScreenFade(255, 255, 255, EmeraldManager.fadeAmount)
-		if EmeraldManager.fadeAmount == 0
+		EmeraldManager.fade -= 8
+		SetScreenFade(255, 255, 255, EmeraldManager.fade)
+		if EmeraldManager.fade == 0
 			object.state++
 			
 			PlayMusic(TRACK_ACTFINISH)
-			player[0].animation = 39
+			player[0].animation = ANI_VICTORY
 			player[0].state = Player_State_Static
-			screen[0].cameraX = object[0].ixpos
-			screen[0].cameraY = object[0].iypos
 			
 			object[30].type = TypeName[Act Finish]
 			object[30].drawOrder = 6
@@ -790,11 +805,7 @@ end event
 
 
 event ObjectDraw
-	currentPlayer = 0
-	
-#platform: USE_ORIGINS
 	currentPlayer = screen.currentID
-#endplatform
 	
 	if player[currentPlayer].rings == 0
 		object.flashingTimer = oscillation
@@ -824,8 +835,6 @@ event ObjectStartup
 	SpriteFrame(0, 0, 8, 11, 28, 62) 	// #7  - Number 7
 	SpriteFrame(0, 0, 8, 11, 1, 74) 	// #8  - Number 8
 	SpriteFrame(0, 0, 8, 11, 10, 74) 	// #9  - Number 9
-	
-	// A-F digits are unused
 	
 	SpriteFrame(0, 0, 40, 43, 1, 1) 	// #10 - Score, Time, Rings HUD text
 	SpriteFrame(0, 0, 31, 11, 1, 119) 	// #11 - Red Time text
@@ -875,43 +884,43 @@ event ObjectStartup
 	case EMERALD_MODE_S2
 	default
 		// 38 - Emerald Radar
-		SpriteFrame(-8, -8, 16, 16, 1, 358)
+		SpriteFrame(-8, -8, 16, 16, 1, 290)
 		
 		if saved.radarstyle == 0
 			// 39 - New Got Emerald
-			SpriteFrame(0, 0, 16, 16, 35, 358)
+			SpriteFrame(0, 0, 16, 16, 35, 290)
 		else
 			// 39 - Old Got Emerald
-			SpriteFrame(0, 0, 16, 16, 18, 358)
+			SpriteFrame(0, 0, 16, 16, 18, 290)
 		end if
 		break
 		
 	case EMERALD_MODE_HPZ
 		// 38 - HPZ Shard Radar
-		SpriteFrame(-8, -8, 16, 16, 1, 392)
+		SpriteFrame(-8, -8, 16, 16, 1, 307)
 		
 		if saved.radarstyle == 0
 			// 39 - New HPZ Got Shard
-			SpriteFrame(0, 0, 16, 16, 35, 392)
+			SpriteFrame(0, 0, 16, 16, 35, 307)
 		else
 			// 39 - Old HPZ Got Shard
-			SpriteFrame(0, 0, 16, 16, 18, 392)
+			SpriteFrame(0, 0, 16, 16, 18, 307)
 		end if
 		break
 		
 	case EMERALD_MODE_S1
 		if saved.radarstyle == 0
 			// 38 - New Emerald Radar
-			SpriteFrame(-8, -8, 16, 16, 52, 358)
+			SpriteFrame(-8, -8, 16, 16, 52, 290)
 			
 			// 39 - New Got Emerald
-			SpriteFrame(0, 0, 16, 16, 86, 358)
+			SpriteFrame(0, 0, 16, 16, 86, 290)
 		else
 			// 38 - Old Emerald Radar
-			SpriteFrame(-8, -8, 16, 16, 1, 358)
+			SpriteFrame(-8, -8, 16, 16, 1, 290)
 			
 			// 39 - Old Got Emerald
-			SpriteFrame(0, 0, 16, 16, 69, 358)
+			SpriteFrame(0, 0, 16, 16, 69, 290)
 		end if
 		break
 		
@@ -949,7 +958,7 @@ event ObjectStartup
 	temp0 = 0
 	temp1 = 1
 	while temp0 < 7
-		SpriteFrame(0, -3, 16, 16, temp1, 409) 	// 91 - 98 - S, A, B, C, D, E, F ranks
+		SpriteFrame(0, -3, 16, 16, temp1, 256) 	// 91 - 98 - S, A, B, C, D, E, F ranks
 		temp1 += 17
 		temp0++
 	loop
@@ -995,12 +1004,16 @@ event ObjectStartup
 	temp0 = 0
 	while temp0 < 5
 		SetTableValue(-1, temp0, EmeraldManager_EmeraldObjects)
-		SetTableValue(-1, temp0, EmeraldManager_RadarSprites)
+		SetTableValue(-1, temp0, EmeraldManager_RadarFrames)
 		SetTableValue( 0, temp0, EmeraldManager_RadarScale)
 		temp0++
 	loop
 end event
 
+
+// ========================
+// Editor Events
+// ========================
 
 event RSDKDraw
 	DrawSprite(0)
