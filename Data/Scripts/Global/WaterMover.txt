@@ -7,15 +7,15 @@
 // What this object does is move water position, nothing too complicated
 // - This is as opposed to handling it with hardcoded values in code, which is the boring and unfun option
 
-// This object is normally used in CPZ and LZ, though it can be used in other zones with water too
-// (Do note the use of 'Water_processActTable' in this script though)
-
 // ========================
 // Aliases
 // ========================
 
 // Player Aliases
 private alias object.xpos : player.xpos
+
+// Water Aliases
+private alias object.value3 : object.proccessActEffects
 
 
 // ========================
@@ -49,9 +49,11 @@ event ObjectStartup
 		end if
 	next
 	
-	// Now that we're here, we don't need the water to manage any of its own stuff
-	// (Player_State_Static is a dummy function)
-	SetTableValue(Player_State_Static, stage.actNum, Water_processActTable)
+	foreach (TypeName[Water], arrayPos0, ALL_ENTITIES)
+		// Dummy out the Water's own moving system
+		// (We don't *really* need to do this - the system will work just fine without it - but may as well)
+		object[arrayPos0].proccessActEffects = Player_State_Static
+	next
 end event
 
 
