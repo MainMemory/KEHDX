@@ -78,8 +78,13 @@ public alias 4 : COL_BOTTOM
 // Draw Order
 private alias -1 : DRAWORDER_PLAYER
 
-// Players
-private alias 0 : PLAYER_KNUX_ALONE
+// Player List Pos Aliases
+public alias 0 : PLAYER_KNUX_ALONE
+
+// Dummy them out
+public alias 255 : PLAYER_SONIC_ALONE
+public alias 254 : PLAYER_TAILS_ALONE
+public alias 253 : PLAYER_SONIC_AND_TAILS
 
 // Shields
 private alias 0 : SHIELD_NONE
@@ -1096,6 +1101,8 @@ public function Player_ProcessUpdate
 
 			if checkResult > -1
 				arrayPos0 = checkResult
+
+				// KEHDX TODO: this is reading from the middle of the EHZ stage data lol
 
 				temp0 = touchscreen[arrayPos0].xpos
 				temp0 -= saveRAM[39] // Virtual DPad X Pos
