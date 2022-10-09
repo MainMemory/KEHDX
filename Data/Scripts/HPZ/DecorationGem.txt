@@ -26,7 +26,7 @@ event ObjectUpdate
 	// Update flashing
 	object.inkEffect = INK_ALPHA
 	temp0 = oscillation
-	temp0 <<= 4
+	temp0 <<= 3
 	Sin(temp1, temp0)
 	temp1 >>= 5
 	temp1 += 224

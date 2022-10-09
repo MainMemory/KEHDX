@@ -67,7 +67,7 @@ Most of these are just changing loop points in the stage's setup script, same no
 ## Enemies
 - Added in a Shortcut to the Scripts folder, for ease of use
 - Bomb: Make it leave behind an Emerald when it blows up
-- (a few other special cases too, i think grabber and a couple others i believe?)
+- (a few other special cases too, i think grabber \[oh yeah we need to fix it warping you during act results too] and a couple others i believe?)
 - For just about the rest of them, the only change is allowing them to bear Emeralds
 
 
