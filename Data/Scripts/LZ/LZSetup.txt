@@ -1050,21 +1050,15 @@ event ObjectStartup
 
 	SetLayerDeformation(3, 128, 4, 0, 0, 0)
 
-	if stage.actNum < 4
-		// If in acts 1-3, then only load the underwater palette
-		LoadPalette("LZ_WaterPal.act", 1, 0, 0, 256)
-	else
-		// SBZ3: Load not only the water palette, but also the main stage palette
-		LoadPalette("SBZ3_Pal.act", 0, 128, 128, 192)
-		LoadPalette("SBZ3_WaterPal.act", 1, 0, 0, 256)
-	end if
+	// Load the underwater palette (KEHDX - ignoring SBZ3)
+	LoadPalette("LZ_WaterPal.act", 1, 0, 0, 256)
 	
 	// Set up Super colours
 	CallFunction(LZSetup_InitSuperSonicPal)
 	CallFunction(LZSetup_InitSuperTailsPal)
 	CallFunction(LZSetup_InitSuperKnuxPal)
 
-	// Load the eletric flash palette in case the player gets wet with a lightning shield
+	// Load the eletric flash palette (KEHDX - may as well keep it anyways)
 	LoadPalette("ElectricFlash.act", 2, 0, 0, 256)
 
 	// Reset the flash timer
