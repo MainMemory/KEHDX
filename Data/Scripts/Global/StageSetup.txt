@@ -563,7 +563,7 @@ event ObjectStartup
 	// Stuff for the Pause Menu
 	LoadSpriteSheet("Global/Display.gif")
 	
-	SpriteFrame(-40, -32, 44, 4, 120, 370)	// 0  - Frame Edge
+	SpriteFrame(-40, -32, 44, 4, 31, 46)	// 0  - Frame Edge
 	SpriteFrame(-30, -25, 61, 11, 120, 358)	// 1  - Continue
 	SpriteFrame(-28, -5, 56, 11, 189, 316)	// 2  - Restart
 	SpriteFrame(-15, 15, 29, 11, 137, 377)	// 3  - Exit

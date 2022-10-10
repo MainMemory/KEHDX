@@ -112,13 +112,13 @@ event ObjectDraw
 		switch EmeraldManager_Mode
 		case EMERALD_MODE_S2
 		default
-			if object.frame < 64
-				DrawSprite(0)
-			else
+			DrawSprite(0)
+			
+			if object.frame >= 64
 				temp0 = object.frame
 				temp0 -= 60
 				temp0 >>= 2
-				DrawSprite(temp0)
+				DrawSpriteFX(temp0, FX_INK, object.xpos, object.ypos)
 			end if
 			break
 			
@@ -194,6 +194,7 @@ event ObjectStartup
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].drawOrder = 4
 		object[arrayPos0].originPos.y = object[arrayPos0].ypos
+		object[arrayPos0].inkEffect = INK_BLEND
 		CallFunction(EmeraldManager_AddEntity) 
 	next
 end event
