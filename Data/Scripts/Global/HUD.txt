@@ -31,6 +31,8 @@ private alias object.right : player.right
 
 private alias object.value0 : player.rings
 private alias object.value1 : player.timer
+private alias object.value3 : player.drownTimer
+private alias object.value4 : player.drownLevel
 private alias object.value7 : player.invincibleTimer
 private alias object.value8 : player.blinkTimer
 private alias object.value37 : player.shield
@@ -65,6 +67,9 @@ private alias object.value6 : object.minutes
 
 // A constant value, for the minimum allowed distance between Emerald placements, don't want all the Emeralds right next to each other!
 private alias 0x19000 : EMERALDMANAGER_MINDIST
+
+// KEHDX TODO: implement this as a proper option
+private alias 1 : EMERALDMANAGER_USEARROWS
 
 // Track Aliases
 private alias 1 : TRACK_ACTFINISH
@@ -207,6 +212,10 @@ public function EmeraldManager_AwardEmerald
 			arrayPos3 += currentPlayer
 			object[arrayPos3].collectedEmeralds++ // can be changed to `+= 3` when testing, if you really wanna
 			
+			// Just to be kind, let's refresh the player's air too
+			player[currentPlayer].drownTimer = 0
+			player[currentPlayer].drownLevel = 0
+			
 			if object[arrayPos3].collectedEmeralds >= EmeraldManager_EmeraldCount
 				stage.timeEnabled = false
 			end if
@@ -256,17 +265,25 @@ private function EmeraldManager_DrawHUD
 	temp2 = 0
 	while temp2 < EmeraldManager_EmeraldCount
 		GetTableValue(temp3, temp2, EmeraldManager_RadarFrames)
+		temp4 = temp3
+		temp4 >>= 8
+		temp4 &= 255
+		temp3 &= 255
 		switch temp3
-		case -1
+		case 255
 			// The Emerald's been grabbed, we don't need to display it anymore
 			break
 			
 		case 38
 			// Draw the faint, alpha Emerald sprite, as it's nowhere near range yet
+			temp3 += temp4
 			DrawSpriteScreenFX(temp3, FX_INK, temp0, temp1)
 			break
 			
 		default
+			temp7 = 38
+			temp7 += temp4
+			
 			// Draw the throbbing Emerald frame
 			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
 			object.scale *= 5
@@ -284,7 +301,7 @@ private function EmeraldManager_DrawHUD
 			SetPaletteEntry(1, 7, temp6)
 			
 			// Now, draw the sprite with that chosen colour
-			DrawSpriteScreenFX(38, FX_SCALE, temp0, temp1)
+			DrawSpriteScreenFX(temp7, FX_SCALE, temp0, temp1)
 			
 			// And after all that, we can restore the colour now
 			SetPaletteEntry(0, 7, temp4)
@@ -412,7 +429,7 @@ private function HUD_Draw_Standard
 	if EmeraldManager_BonusFrame != -1
 		if EmeraldManager_BonusTimer > 60
 			temp0 = EmeraldManager_BonusFrame
-			temp0 += 80
+			temp0 += 48
 			DrawSpriteScreenXY(temp0, 17, 61)
 		else
 			GetTableValue(temp0, EmeraldManager_BonusFrame, EmeraldManager_ScoreBonuses)
@@ -434,7 +451,7 @@ private function HUD_Draw_Standard
 
 	temp0 = temp2
 	temp0 += object.xoffset
-	DrawSpriteScreenXY(90, temp0, temp3)
+	DrawSpriteScreenXY(58, temp0, temp3)
 
 	temp2 += 40
 
@@ -596,12 +613,12 @@ event ObjectUpdate
 		while temp0 < EmeraldManager_EmeraldCount
 			GetTableValue(arrayPos0, temp0, EmeraldManager_EmeraldObjects)
 			if arrayPos0 != -1
-				temp1 = object[0].xpos
+				temp1 = player[0].xpos
 				temp1 -= object[arrayPos0].xpos
 				temp1 >>= 16
 				temp2 = temp1
 				temp1 *= temp2
-				temp2 = object[0].ypos
+				temp2 = player[0].ypos
 				temp2 -= object[arrayPos0].ypos
 				temp2 >>= 16
 				
@@ -635,6 +652,26 @@ event ObjectUpdate
 				temp2 += 38
 			else
 				temp2 = -1
+			end if
+			
+			if EMERALDMANAGER_USEARROWS == true
+				// Get the direction of the arrow, based on an xdiff/ydiff "vector" of sorts...
+				
+				temp1 = player[0].xpos
+				temp1 -= object[arrayPos0].xpos
+				
+				temp3 = player[0].ypos
+				temp3 -= object[arrayPos0].ypos
+				
+				ATan2(temp4, temp1, temp3)
+				temp4 += 32
+				
+				// Round it down to an eighth, bump it up by one, and then push it back up to be the second byte in the value
+				temp4 >>= 5
+				temp4++
+				temp4 <<= 8
+				
+				temp2 |= temp4
 			end if
 			
 			SetTableValue(temp2, temp0, EmeraldManager_RadarFrames)
@@ -926,39 +963,32 @@ event ObjectStartup
 		
 	end switch
 	
-	// 40-79 - Arrows
+	// 40-47 - Arrows
 	temp0 = 0
-	temp1 = 273
-	while temp0 < 5
-		temp2 = 0
-		temp3 = 1
-		while temp2 < 8
-			SpriteFrame(-8, -8, 16, 16, temp3, temp1)
-			temp3 += 17
-			temp2++
-		loop
-		
+	temp1 = 1
+	while temp0 < 8
+		SpriteFrame(0, -3, 16, 16, temp1, 273)
 		temp1 += 17
 		temp0++
 	loop
 	
-	SpriteFrame(0, 0, 60, 11, 137, 256) 	// 80 - Perfect!
-	SpriteFrame(0, 0, 62, 11, 137, 268) 	// 81 - Extreme!
-	SpriteFrame(0, 0, 62, 11, 137, 280) 	// 82 - Awesome!
-	SpriteFrame(0, 0, 40, 11, 137, 292) 	// 83 - Tight!
-	SpriteFrame(0, 0, 55, 11, 178, 292) 	// 84 - Radical!
-	SpriteFrame(0, 0, 35, 11, 137, 304) 	// 85 - Cool!
-	SpriteFrame(0, 0, 55, 11, 173, 304) 	// 86 - Jammin'!
-	SpriteFrame(0, 0, 33, 11, 200, 268) 	// 87 - Nice!
-	SpriteFrame(0, 0, 44, 11, 200, 280) 	// 88 - Great!
-	SpriteFrame(0, 0, 36, 11, 196, 256) 	// 89 - Good!
+	SpriteFrame(0, 0, 60, 11, 137, 256) 	// 48 - Perfect!
+	SpriteFrame(0, 0, 62, 11, 137, 268) 	// 49 - Extreme!
+	SpriteFrame(0, 0, 62, 11, 137, 280) 	// 50 - Awesome!
+	SpriteFrame(0, 0, 40, 11, 137, 292) 	// 51 - Tight!
+	SpriteFrame(0, 0, 55, 11, 178, 292) 	// 52 - Radical!
+	SpriteFrame(0, 0, 35, 11, 137, 304) 	// 53 - Cool!
+	SpriteFrame(0, 0, 55, 11, 173, 304) 	// 54 - Jammin'!
+	SpriteFrame(0, 0, 33, 11, 200, 268) 	// 55 - Nice!
+	SpriteFrame(0, 0, 44, 11, 200, 280) 	// 56 - Great!
+	SpriteFrame(0, 0, 36, 11, 196, 256) 	// 57 - Good!
 	
-	SpriteFrame(0, 0, 34, 27, 157, 35)		// 90 - Best and Rank Text
+	SpriteFrame(0, 0, 34, 27, 157, 35)		// 58 - Best and Rank Text
 	
 	temp0 = 0
 	temp1 = 1
 	while temp0 < 7
-		SpriteFrame(0, -3, 16, 16, temp1, 256) 	// 91 - 98 - S, A, B, C, D, E, F ranks
+		SpriteFrame(0, -3, 16, 16, temp1, 256) 	// 59 - 66 - S, A, B, C, D, E, F ranks
 		temp1 += 17
 		temp0++
 	loop
