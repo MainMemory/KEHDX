@@ -74,6 +74,13 @@ private function ActFinish_Button_Next
 	// Corresponds to SELECTION_NEXT
 	
 	stage.listPos++
+	
+	if stage.listPos >= stage.listSize
+		// KEHDX TODO: it'd be cool to have a results screen, or something of the sort like that at the end
+		
+		stage.activeList = PRESENTATION_STAGE
+		stage.listPos = 0
+	end if
 end function
 
 
@@ -512,7 +519,7 @@ event ObjectDraw
 		DrawSpriteScreenXY(11, temp7, temp6)
 		temp7 += 88
 		temp6++
-		DrawNumbers(14, temp7, temp6, object.perfectBonus, 5, 8, 0)
+		DrawNumbers(14, temp7, temp6, object.perfectBonus, 6, 8, 0)
 	end if
 	
 	if object.state == ACTFINISH_MENU
