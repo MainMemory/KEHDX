@@ -8,11 +8,7 @@ This file is just a list of every folder, and how its copied scripts differ from
 ## CNZ
 - Bumper: Changed to add SYZ sprites
 
-## CPZ
-- Water: Enforce Knuckles jump height when starting underwater (I don't think we really need to do this though, since there aren't any checkpoints in the stage)
-
 ## HPZ
-- BreakWall: Changed to allow Knuckles (stage.playerListPos == 0) to break walls
 - HPZCutSceneSetup: Standard HPZ Setup, but with most unrelated parts removed and cutscene control added in instead
 
 ## Players
@@ -32,7 +28,6 @@ This file is just a list of every folder, and how its copied scripts differ from
 - Chaos Emerald, End Point, Fall Start, and Water Mover are custom objects, they don't need to be "updated" with cleanup or anything
 - Act Finish: Final Menu
 - Death Event: Remove unnecessary Origins code, increment `death.count`
-- Debug Mode: A single notable change, just don't have the `Tails Object` spawn when Tikal should instead
 - Title Card: Remove some unnecessary stuff, and make it draw Green rather than Blue
 
 # Sonic 1 Scripts
@@ -41,7 +36,6 @@ Most of these are just changing loop points in the stage's setup script, same no
 
 ## GHZ
 - GHZ Setup: Changed for inv music loop points (not necessarily needed, with workaround in Stage Setup)
-- Break Wall: Changed to allow Knuckles (stage.playerListPos == 0) to break walls
 
 ## MZ
 - MZ Setup: Changed for inv music loop points (not necessarily needed, with workaround in Stage Setup)
@@ -57,7 +51,6 @@ Most of these are just changing loop points in the stage's setup script, same no
 
 ## SLZ
 - SLZ Setup: Changed for inv music loop points (not necessarily needed, with workaround in Stage Setup)
-- Break Wall: Changed to allow Knuckles (stage.playerListPos == 0) to break walls
 
 ## SYZ
 - SYZ Setup: Changed for inv music loop points (not necessarily needed, with workaround in Stage Setup)
