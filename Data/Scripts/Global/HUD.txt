@@ -281,29 +281,31 @@ private function EmeraldManager_DrawHUD
 			break
 			
 		default
+			// Draw the throbbing Emerald frame
+			
 			temp7 = 38
 			temp7 += temp4
 			
-			// Draw the throbbing Emerald frame
+			// First, fetch its scale
 			GetTableValue(object.scale, temp2, EmeraldManager_RadarScale)
 			object.scale *= 5
 			object.scale += 512
 			
-			// First, back up the used colour slot
+			// Then, back up the used colour slot
 			GetPaletteEntry(0, 7, temp4)
 			GetPaletteEntry(1, 7, temp5)
 			
-			// Then, turn the ID into a colour and set it
+			// With that, now we can turn the ID into a colour and set it
 			temp3 -= 38
 			GetTableValue(temp6, temp3, EmeraldManager_RadarColours)
 			
 			SetPaletteEntry(0, 7, temp6)
 			SetPaletteEntry(1, 7, temp6)
 			
-			// Now, draw the sprite with that chosen colour
+			// From there, draw the sprite with that chosen colour
 			DrawSpriteScreenFX(temp7, FX_SCALE, temp0, temp1)
 			
-			// And after all that, we can restore the colour now
+			// And after all that, we can restore the old colour now
 			SetPaletteEntry(0, 7, temp4)
 			SetPaletteEntry(1, 7, temp5)
 			break
@@ -664,11 +666,10 @@ event ObjectUpdate
 				temp3 -= object[arrayPos0].ypos
 				
 				ATan2(temp4, temp1, temp3)
-				temp4 += 32
 				
-				// Round it down to an eighth, bump it up by one, and then push it back up to be the second byte in the value
+				// Round it down to an eighth, bump it up to match Sprite Frame IDs, and then push it back up to be the second byte in the value
 				temp4 >>= 5
-				temp4++
+				temp4 += 2
 				temp4 <<= 8
 				
 				temp2 |= temp4
