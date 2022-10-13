@@ -15,6 +15,12 @@ private alias object.value3 : object.levelSelectCheatPos
 private alias object.value4 : object.anyCheatDone
 private alias object.value5 : object.regionSwitchCheatPos
 
+// KEHDX values
+
+// A pair of screen X values, configured at startup
+private alias object.value6 : object.e.l
+private alias object.value7 : object.e.r
+
 // States
 private alias 0 : SEGA_SETUP
 private alias 1 : SEGA_FADEIN
@@ -51,6 +57,13 @@ event ObjectUpdate
 		object.inkEffect 	= 2
 		object.timer 		= 320
 		SetScreenFade(0x00, 0x00, 0x00, object.timer)
+		
+		// Set up the bounds
+		object.e.l = screen.xcenter
+		object.e.l -= 50
+		object.e.r = object.e.l
+		object.e.r += 42
+		
 		object.state++
 		break
 
@@ -124,14 +137,13 @@ event ObjectUpdate
 			end switch
 		end if
 		
-		// Check the box surround the second letter
-		temp0 = screen.xcenter
-		temp0 -= 50
-		temp1 = temp0
-		temp1 += 42
-		CheckTouchRect(temp0, 90, temp1, 150)
+		// Checking for the box around the second letter
+		CheckTouchRect(object.e.l, 90, object.e.r, 150)
 		if checkResult > -1
 			specialMode = true
+			
+			// Crop it up
+			EditFrame(11, -51, -29, 44, 58, 341, 192)
 		end if
 		break
 
@@ -195,23 +207,10 @@ event ObjectDraw
 		DrawSpriteScreenFX(7, FX_INK, 0, 120)
 		DrawSpriteScreenFX(8, FX_INK, 0, 120)
 		DrawSpriteScreenFX(9, FX_INK, 0, 120)
-
-		DrawSpriteScreenXY(11, screen.xcenter, screen.ycenter)
-		break
-
+		// [Fallthrough]
 	case SEGA_SHOWSEGALOGO
 	case SEGA_FADETOTITLE
 		DrawSpriteScreenXY(11, screen.xcenter, screen.ycenter)
-		
-		if specialMode == true
-			temp0 = screen.xcenter
-			temp0 -= 93
-			DrawRect(temp0, 90, 42, 60, 224, 224, 224, 255)
-			
-			temp0 = screen.xcenter
-			temp0 -= 6
-			DrawRect(temp0, 90, 100, 60, 224, 224, 224, 255)
-		end if
 		break
 		
 	end switch
@@ -246,9 +245,9 @@ event ObjectStartup
 	
 	// SEGA Frames
 	SpriteFrame(-93, -29, 187, 58, 112, 192)
-	SpriteFrame(-93, -29, 187, 58, 299, 192)
+	SpriteFrame(-93, -29, 187, 58, 299, 192) // Do note - if you change this, make sure to update the use of EditFrame in SEGA_SHOWSEGALOGO too!
 	
-	// Hide Touch overlay, start with Physical controls active instead
+	// Hide Touch overlay, and default to Physical controls active initially instead
 	options.touchControls = false
 	options.physicalControls = true
 	
