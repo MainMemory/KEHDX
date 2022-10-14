@@ -334,8 +334,13 @@ event ObjectStartup
 	SetMusicTrack("Extra.ogg", 0, 59852)
 	PlayMusic(0)
 	
-	// In this scene, we're going to be the one controlling Knuckles
-	player[0].controlMode = CONTROLMODE_NONE
+	// This is a cutscene, so take away control from everyone
+	currentPlayer = 0
+	while currentPlayer < playerCount
+		player[currentPlayer].controlMode = CONTROLMODE_NONE
+		
+		currentPlayer++
+	loop
 	
 	// Not used quite yet, though it hopefully will be soon
 	if options.vsMode == true

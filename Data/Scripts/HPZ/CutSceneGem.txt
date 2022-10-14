@@ -80,6 +80,7 @@ event ObjectUpdate
 					object[tempObjectPos].speed = 0x2800
 					
 					// Erase this object
+					// -> Intentionally only blanking object type, no other object properties such as xpos
 					object.type = TypeName[Blank Object]
 					
 					PlaySfx(SfxName[Block Break], false)
@@ -121,7 +122,7 @@ event ObjectStartup
 	SpriteFrame(-32, -16, 64, 32, 1, 223)
 	SpriteFrame(-32, 1, 64, 15, 115, 207)
 	
-	// Shard frames
+	// Shard frame
 	SpriteFrame(-8, -16, 16, 32, 99, 123)
 end event
 
