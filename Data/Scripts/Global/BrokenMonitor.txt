@@ -75,23 +75,28 @@ private alias  2 : MUSICEVENT_TRANSITION
 // Tracks
 private alias 2 : TRACK_INVINCIBLE
 
+private alias object.value0 : object.collectedEmeralds
+
+
 // ========================
 // Function Declarations
 // ========================
-reserve function BrokenMonitor_DummyFunction
+
 reserve function BrokenMonitor_AddRing
+
 
 // ========================
 // Static Values
 // ========================
+
 public value BrokenMonitor_ResetDrownMusic = 0
 
 
-public function BrokenMonitor_DummyFunction
-	// Do nothing!
-end function
+// ========================
+// Function Definitions
+// ========================
 
-function BrokenMonitor_AddRing
+private function BrokenMonitor_AddRing
 	if ringPan == false
 		PlaySfx(SfxName[Ring L], false)
 		SetSfxAttributes(SfxName[Ring L], -1, -100)
@@ -121,6 +126,7 @@ function BrokenMonitor_AddRing
 		end if
 	end if
 end function
+
 
 // ========================
 // Events
@@ -250,7 +256,16 @@ event ObjectUpdate
 					temp1 = 3
 				end if
 				
-				if EmeraldManager_P1Collected < temp1
+				arrayPos0 = 0x500
+				temp0 = 0
+				while arrayPos0 < 0x504
+					CheckEqual(object[arrayPos0].collectedEmeralds, EmeraldManager_EmeraldCount)
+					temp0 |= checkResult
+					
+					arrayPos0++
+				loop
+				
+				if temp0 == false
 					CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
 					object[tempObjectPos].state = VSGAME_TELEPORT
 					PlaySfx(SfxName[Teleport], false)
@@ -339,7 +354,7 @@ event ObjectStartup
 	SpriteFrame(-8, -9, 16, 14, 18, 171)
 	SpriteFrame(-8, -9, 16, 14, 35, 171)
 
-	BrokenMonitor_ResetDrownMusic = BrokenMonitor_DummyFunction
+	BrokenMonitor_ResetDrownMusic = Player_State_Static
 	
 	foreach (TypeName[Broken Monitor], arrayPos0, ALL_ENTITIES)
 		if object[arrayPos0].propertyValue == MONITOR_TELEPORT

@@ -314,6 +314,10 @@ event ObjectUpdate
 					stage.activeList = REGULAR_STAGE
 				end if
 				
+				// KEHDX TODO: temp, set up actual values here later
+				vs.gameLength = 4
+				options.vsMode = true
+				
 				LoadStage()
 				
 				SetScreenFade(0, 0, 0, 0xFF)

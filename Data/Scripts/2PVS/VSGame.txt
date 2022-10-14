@@ -55,8 +55,8 @@ private alias 1 : SUPERSTATE_SUPER
 private alias 1 : SHIELD_NORMAL
 
 // Stage List Pos Aliases
-private alias 13 : STAGE_R_LABYRINTHZONE    // StageName[R - LABYRINTH ZONE]
 private alias 9  : STAGE_R_HIDDENPALACEZONE // StageName[R - HIDDEN PALACE ZONE]
+private alias 13 : STAGE_R_LABYRINTHZONE    // StageName[R - LABYRINTH ZONE]
 
 // KEHDX note - lots of dummy platform checks are here, that's for when we reimplement 2PVS later
 
@@ -217,27 +217,17 @@ event ObjectUpdate
 				end if
 			next
 			
-			object.state = 2
+			object.state = VSGAME_FADEOUT
 			player[0].collisionPlane = 0
 			player[0].state = Player_State_Air
 			player[0].xpos = PlayerObject_InitialX
 			player[0].ypos = PlayerObject_InitialY
-			screen[0].cameraX = player[0].ixpos
-			screen[0].cameraY = player[0].iypos
 			player[0].xvel = 0
-			
 			player[0].yvel = 0
 			player[0].speed = 0
-			stage.state = 1
-		end if
-		SetScreenFade(208, 255, 224, object.timer)
-		break
-
-	case VSGAME_FADEOUT
-		if object.timer > 0
-			object.timer -= 16
-		else
-			object.type = TypeName[Blank Object]
+			
+			screen[0].cameraX = player[0].ixpos
+			screen[0].cameraY = player[0].iypos
 			
 			// Not a good solution, but it works
 			// This manages starting exceptions - LZ and HPZ are started falling (see below) and LZ in particular should be started facing left
@@ -252,6 +242,17 @@ event ObjectUpdate
 			else
 				player[0].animation = ANI_STOPPED
 			end if
+			
+			stage.state = 1
+		end if
+		SetScreenFade(208, 255, 224, object.timer)
+		break
+
+	case VSGAME_FADEOUT
+		if object.timer > 0
+			object.timer -= 16
+		else
+			object.type = TypeName[Blank Object]
 		end if
 		SetScreenFade(208, 255, 224, object.timer)
 		break

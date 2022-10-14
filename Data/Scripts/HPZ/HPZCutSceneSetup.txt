@@ -1,6 +1,6 @@
 // ----------------------------------
 // RSDK Project: Sonic 1/Sonic 2
-// Script Description: HPZ Setup Object
+// Script Description: HPZ Cutscene Setup Object
 // Script Author: Christian Whitehead/Simon Thomley
 // Unpacked by Rubberduckycooly's script unpacker
 // ----------------------------------
@@ -21,6 +21,7 @@ private alias object.value5 : object.orb2AniTileFrame
 private alias object.value6 : object.orb3AniTileDelay
 private alias object.value7 : object.orb3AniTileFrame
 
+// Cutscene states
 private alias 0 : CUTSCENE_FADEIN
 private alias 1 : CUTSCENE_WALKRIGHT
 private alias 2 : CUTSCENE_PAUSE
@@ -42,6 +43,7 @@ private alias object.tileCollisions : player.tileCollisions
 private alias object.gravity : player.gravity
 private alias object.right : player.right
 private alias object.jumpHold : player.jumpHold
+
 
 // ========================
 // Tables
@@ -206,9 +208,10 @@ event ObjectUpdate
 	
 	case CUTSCENE_STARTPAN
 		// Start panning the camera over to the Gem
-		// object[34] should be the CutSceneGem object, with a hardcoded address here for ease
-		camera[0].target = 34
-		camera[0].style = 4
+		// object[+1] should be a Gem, though you could make it something else if you really wanna
+		camera[0].target = object[+1].entityPos
+		camera[0].style = CAMERASTYLE_HLOCKED
+		
 		object.timer = 0
 		object.state++
 		// [Fallthrough]
@@ -264,8 +267,9 @@ event ObjectUpdate
 		// Only Tikal should turn around
 		player[0].direction *= stage.playerListPos
 		break
+		
 	case CUTSCENE_BREAKROCK
-		CheckGreater(player[0].xpos, object[34].xpos)
+		CheckGreater(player[0].xpos, object[+1].xpos)
 		object.state += checkResult
 		break
 		
@@ -277,6 +281,9 @@ event ObjectUpdate
 			// Stop moving
 			player[0].right = false
 			player[0].speed = 0
+			
+			// Match the Gem's center
+			player[0].xpos = object[+1].xpos
 			break
 			
 		case 50
@@ -327,22 +334,19 @@ event ObjectStartup
 	SetMusicTrack("Extra.ogg", 0, 59852)
 	PlayMusic(0)
 	
-	// In this scene, we're going to be the one controlling Knuckles
-	player[0].controlMode = CONTROLMODE_NONE
+	// This is a cutscene, so take away control from everyone
+	currentPlayer = 0
+	while currentPlayer < playerCount
+		player[currentPlayer].controlMode = CONTROLMODE_NONE
+		
+		currentPlayer++
+	loop
 	
 	// Not used quite yet, though it hopefully will be soon
 	if options.vsMode == true
 		player[1].xpos = player[0].xpos
 		player[1].xpos -= 0x100000
 	end if
-	
-	object[10].type = TypeName[HPZ Cutscene Setup]
-	object[10].priority = PRIORITY_ACTIVE
-	object[10].state = 0
-	object[10].drawOrder = 6
-	object[10].orb2AniTileFrame = 2
-	object[10].orb3AniTileFrame = 4
-	object[10].alpha = 255
 end event
 
 
@@ -352,6 +356,16 @@ end event
 
 event RSDKDraw
 	DrawSprite(0)
+	
+	if editor.showGimzos == true
+		editor.drawingOverlay = true
+		
+		// Connect this object to its target Gem, to indicate that they're tied together
+		// (In other words, watch the Entity Pos!)
+		DrawArrow(object.xpos, object.ypos, object[+1].xpos, object[+1].ypos, 0xFF, 0x00, 0xFF)
+		
+		editor.drawingOverlay = false
+	end if
 end event
 
 

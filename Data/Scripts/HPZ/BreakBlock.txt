@@ -5,9 +5,12 @@
 // Unpacked by Rubberduckycooly's script unpacker
 // ----------------------------------
 
+// This object isn't used in the 2013 HPZ, but it's used in the original KEH HPZ (once)
+
 // ========================
 // Aliases
 // ========================
+
 private alias 0 : BREAKBLOCK_BLOCK
 private alias 1 : BREAKBLOCK_FRAGMENT
 
@@ -58,6 +61,10 @@ private table BreakBlock_fragmentVels
 end table
 
 
+// ========================
+// Function Definitions
+// ========================
+
 private function BreakBlock_DebugDraw
 	temp0 = debugMode.currentSelection
 	temp0 -= BreakBlock_debugStartID
@@ -68,7 +75,6 @@ end function
 private function BreakBlock_DebugSpawn
 	temp0 = debugMode.currentSelection
 	temp0 -= BreakBlock_debugStartID
-	temp0 |= 0x80 // Set it to be on 1
 	CreateTempObject(TypeName[Break Block], temp0, object.xpos, object.ypos)
 end function
 
@@ -82,7 +88,6 @@ event ObjectUpdate
 	case BREAKBLOCK_BLOCK
 		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 			temp1 = object.propertyValue
-			temp1 &= 0x7F
 			if temp1 == 0
 				temp0 = 4
 			else
@@ -103,7 +108,6 @@ event ObjectUpdate
 					temp0 += object.ypos
 
 					temp3 = object.propertyValue
-					temp3 &= 0x7F
 					temp4 = 5
 					temp4 += temp3
 					temp5 = temp3
@@ -134,8 +138,10 @@ event ObjectUpdate
 
 					CreateTempObject(TypeName[Object Score], player[currentPlayer].scoreBonus, object.xpos, object.ypos)
 					object[tempObjectPos].drawOrder = 5
+					
 					object.propertyValue++
 					object.ypos += 0x80000
+					
 					temp0 = object.propertyValue
 					temp0 &= 0x7F
 					if temp0 >= 5
@@ -182,13 +188,15 @@ event ObjectUpdate
 					case 15
 						global[arrayPos0] += 10000
 						break
+						
 					end switch
 
-					if player[currentPlayer].gravity == 1
+					if player[currentPlayer].gravity == GRAVITY_AIR
 						if player[currentPlayer].scoreBonus < 15
 							player[currentPlayer].scoreBonus++
 						end if
 					end if
+					
 					PlaySfx(SfxName[Block Break], false)
 				end if
 			end if
@@ -210,24 +218,22 @@ end event
 
 
 event ObjectDraw
-	temp0 = object.propertyValue
-	temp0 &= 0x7F
 	DrawSprite(temp0)
 end event
 
 
 event ObjectStartup
-	LoadSpriteSheet("HPZ/Rock.gif")
-	SpriteFrame(-16, -32, 32, 80, 0, 0)
-	SpriteFrame(-16, -32, 32, 64, 0, 0)
-	SpriteFrame(-16, -24, 32, 48, 0, 0)
-	SpriteFrame(-16, -16, 32, 32, 0, 0)
-	SpriteFrame(-16, -8, 32, 16, 0, 0)
-	SpriteFrame(-8, -8, 16, 16, 0, 0)
-	SpriteFrame(-8, -8, 16, 16, 0, 0)
-	SpriteFrame(-8, -8, 16, 16, 0, 0)
-	SpriteFrame(-8, -8, 16, 16, 0, 0)
-	SpriteFrame(-8, -8, 16, 16, 0, 0)
+	LoadSpriteSheet("HPZ/Objects.gif")
+	SpriteFrame(-16, -32, 32, 80, 265, 139)
+	SpriteFrame(-16, -32, 32, 64, 265, 139)
+	SpriteFrame(-16, -24, 32, 48, 265, 139)
+	SpriteFrame(-16, -16, 32, 32, 265, 139)
+	SpriteFrame(-16, -8, 32, 16, 265, 139)
+	SpriteFrame(-8, -8, 16, 16, 265, 139)
+	SpriteFrame(-8, -8, 16, 16, 265, 139)
+	SpriteFrame(-8, -8, 16, 16, 265, 139)
+	SpriteFrame(-8, -8, 16, 16, 265, 139)
+	SpriteFrame(-8, -8, 16, 16, 265, 139)
 
 	temp0 = 0
 	BreakBlock_debugStartID = DebugMode_ObjCount
@@ -241,47 +247,49 @@ event ObjectStartup
 end event
 
 
+// ========================
+// Editor Events
+// ========================
+
 event RSDKEdit
 	if editor.returnVariable == true
 		switch editor.variableID
 		case EDIT_VAR_PROPVAL // property value
 			checkResult = object.propertyValue
 			break
+			
 		case 0 // size
 			checkResult = object.propertyValue
-			checkResult &= 0x7F
 			break
+			
 		end switch
 	else
 		switch editor.variableID
 		case EDIT_VAR_PROPVAL // property value
 			object.propertyValue = editor.variableValue
 			break
+			
 		case 0 // size
-			temp0 = editor.variableValue
-			temp0 &= 0x7F
-			object.propertyValue &= 0x80
-			object.propertyValue |= temp0
+			object.propertyValue = editor.variableValue
 			break
+			
 		end switch
 	end if
 end event
 
 
 event RSDKDraw
-	temp0 = object.propertyValue
-	temp0 &= 0x7F
-	DrawSprite(temp0)
+	DrawSprite(object.propertyValue)
 end event
 
 
 event RSDKLoad
 	LoadSpriteSheet("HPZ/Rock.gif")
-	SpriteFrame(-16, -32, 32, 80, 0, 0)
-	SpriteFrame(-16, -32, 32, 64, 0, 0)
-	SpriteFrame(-16, -24, 32, 48, 0, 0)
-	SpriteFrame(-16, -16, 32, 32, 0, 0)
-	SpriteFrame(-16, -8, 32, 16, 0, 0)
+	SpriteFrame(-16, -32, 32, 80, 265, 139)
+	SpriteFrame(-16, -32, 32, 64, 265, 139)
+	SpriteFrame(-16, -24, 32, 48, 265, 139)
+	SpriteFrame(-16, -16, 32, 32, 265, 139)
+	SpriteFrame(-16, -8, 32, 16, 265, 139)
 	
 	AddEditorVariable("size")
 	SetActiveVariable("size")

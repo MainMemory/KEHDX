@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Image="3blocks">
+  <Images>
+    <ImageFromSheet id="5blocks" sheet="HPZ/Objects.gif" sourcex="265" sourcey="139" width="32" height="80">
+      <Offset X="-16" Y="-32" />
+    </ImageFromSheet>
+    <ImageFromSheet id="4blocks" sheet="HPZ/Objects.gif" sourcex="265" sourcey="139" width="32" height="64">
+      <Offset X="-16" Y="-32" />
+    </ImageFromSheet>
+    <ImageFromSheet id="3blocks" sheet="HPZ/Objects.gif" sourcex="265" sourcey="139" width="32" height="48">
+      <Offset X="-16" Y="-24" />
+    </ImageFromSheet>
+    <ImageFromSheet id="2blocks" sheet="HPZ/Objects.gif" sourcex="265" sourcey="139" width="32" height="32">
+      <Offset X="-16" Y="-16" />
+    </ImageFromSheet>
+    <ImageFromSheet id="1block" sheet="HPZ/Objects.gif" sourcex="265" sourcey="139" width="32" height="16">
+      <Offset X="-16" Y="-8" />
+    </ImageFromSheet>
+  </Images>
+  <Properties>
+    <Property name="Size" description="How many blocks comprise this Break Block." type="sizes" startbit="0" length="4" />
+  </Properties>
+  <Enums>
+    <Enum name="sizes">
+      <EnumMember name="5 Blocks" />
+	  <EnumMember name="4 Blocks" />
+	  <EnumMember name="3 Blocks" />
+	  <EnumMember name="2 Blocks" />
+	  <EnumMember name="1 Blocks" />
+    </Enum>
+  </Enums>
+  <Subtypes>
+    <Subtype id="00" name="5 Blocks" image="5blocks" />
+	<Subtype id="01" name="4 Blocks" image="4blocks" />
+	<Subtype id="02" name="3 Blocks" image="3blocks" />
+	<Subtype id="03" name="2 Blocks" image="2blocks" />
+	<Subtype id="04" name="1 Block" image="1block" />
+  </Subtypes>
+</ObjDef>

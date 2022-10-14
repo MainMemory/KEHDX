@@ -12,7 +12,7 @@
 private alias object.value0 : object.timer
 private alias object.value1 : object.actNamePos
 private alias object.value2 : object.zonePos
-private alias object.value3 : object.blueRectPos
+private alias object.value3 : object.blueRectPos // KEHDX - we're using the KiS2 green of course, but renaming this would just be kinda tacky
 private alias object.value4 : object.yellowRectPos
 private alias object.value5 : object.redRectPos
 private alias object.value7 : object.vsReady
@@ -24,7 +24,7 @@ private alias 1 : TITLECARD_DELAY
 private alias 2 : TITLECARD_ENTERTITLECARD
 private alias 3 : TITLECARD_SHOWTITLECARD
 private alias 4 : TITLECARD_EXITREDYELLOWRECT
-private alias 5 : TITLECARD_EXITBLUERECT
+private alias 5 : TITLECARD_EXITBLUERECT // KEHDX - ditto to above
 private alias 6 : TITLECARD_STARTSTAGE
 private alias 7 : TITLECARD_CREDITSFADEIN
 private alias 8 : TITLECARD_FADETOTITLE
@@ -159,7 +159,7 @@ event ObjectUpdate
 		if object.redRectPos > -48
 			object.redRectPos -= 32
 		else
-			if object.yellowRectPos < 424 // 500 is the sega forever value, 424 is the original one (the forever one works better on wider screens, the value is basically just screen.xsize)
+			if object.yellowRectPos < screen.xsize // KEHDX - little tweak to the value used here, make it a more direct reference
 				object.yellowRectPos += 32
 				if options.vsMode == true
 					CallNativeFunction2(ReceiveEntity, 0x400, true)
@@ -237,6 +237,9 @@ event ObjectUpdate
 		break
 
 	case TITLECARD_FADETOTITLE
+		// This state is set from the Player Object, when a replay is finished
+		// All the credits.screen checks here are just leftovers that don't do much, since S2 doesn't use in-game credits like S1 did
+		
 		if object.timer < 300
 			object.timer += 5
 			if credits.screen == 0
@@ -252,6 +255,7 @@ event ObjectUpdate
 			end if
 			LoadStage()
 		end if
+		
 		SetScreenFade(0, 0, 0, object.timer)
 		break
 
@@ -422,19 +426,14 @@ event ObjectStartup
 		SetScreenCount(2)
 #endplatform
 	end if
-
-	// Cycle through all Title Card objects
-	arrayPos0 = 32
-	while arrayPos0 < 0x420
-		if object[arrayPos0].type == TypeName[Title Card]
-			object[arrayPos0].priority 	= PRIORITY_ALWAYS
-			object[arrayPos0].alpha 	= 0xFF
-			object[arrayPos0].drawOrder = 6
-			stage.state = STAGE_PAUSED
-		end if
-
-		arrayPos0++
-	loop
+	
+	foreach (TypeName[Title Card], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].priority 	= PRIORITY_ALWAYS
+		object[arrayPos0].alpha 	= 0xFF
+		object[arrayPos0].drawOrder = 6
+		
+		stage.state = STAGE_PAUSED
+	next
 end event
 
 
