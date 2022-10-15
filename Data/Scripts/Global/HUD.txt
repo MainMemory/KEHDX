@@ -69,15 +69,15 @@ private alias object.value6 : object.minutes
 private alias 0x19000 : EMERALDMANAGER_MINDIST
 
 // KEHDX TODO: implement this as a proper option
-private alias 1 : EMERALDMANAGER_USEARROWS
+private alias 0 : EMERALDMANAGER_USEARROWS
 
 // Track Aliases
 private alias 1 : TRACK_ACTFINISH
 
 // SaveRAM Aliases
-private alias saveRAM[200] : saved.radar
-private alias saveRAM[201] : saved.radarstyle
-private alias saveRAM[202] : saved.character
+private alias saveRAM[200] : saved.radar // 0 = radar, 1 = no radar, 2 = arrows
+private alias saveRAM[201] : saved.radarstyle // 0 = New, KEHDX sprites, 1 = Old, Genesis Sprites
+private alias saveRAM[202] : saved.character // 0 =  Knuckles, 1 = Tikal (We'll add more)
 
 // Now, a mess
 // So, in order to get an array of a series of values, we just stuff player-dependant values in some reserved object slots in the transition object bank
@@ -413,10 +413,11 @@ private function HUD_Draw_Standard
 	temp1 += 18
 	DrawNumbers(24, temp1, 220, player.lives, 2, 8, false)
 
-	if saved.radar == 0
+	if saved.radar != 1
 		CallFunction(EmeraldManager_DrawHUD)
 	end if
 
+	//Collected Emeralds (They will always display no matter what)
 	temp0 = screen.xsize
 	temp0 -= 24
 	temp1 = 0
@@ -656,7 +657,8 @@ event ObjectUpdate
 				temp2 = -1
 			end if
 			
-			if EMERALDMANAGER_USEARROWS == true
+			//Arrow Code
+			if saved.radar == 2
 				// Get the direction of the arrow, based on an xdiff/ydiff "vector" of sorts...
 				
 				temp1 = player[0].xpos
@@ -710,7 +712,7 @@ event ObjectUpdate
 				temp1 -= temp0
 				SetTableValue(temp1, temp4, EmeraldManager_RadarScale)
 				EmeraldManager.pingTimer = 0
-				if saved.radar == 0
+				if saved.radar != 1
 					PlaySfx(SfxName[Radar Ping], false)
 				end if
 			end if
@@ -922,13 +924,16 @@ event ObjectStartup
 	switch EmeraldManager_Mode
 	case EMERALD_MODE_S2
 	default
-		// 38 - Emerald Radar
-		SpriteFrame(-8, -8, 16, 16, 1, 290)
-		
 		if saved.radarstyle == 0
+			// 38 - Old Emerald Radar
+			SpriteFrame(-8, -8, 16, 16, 52, 290)
+
 			// 39 - New Got Emerald
 			SpriteFrame(0, 0, 16, 16, 35, 290)
 		else
+			// 38 - Old Emerald Radar
+			SpriteFrame(-8, -8, 16, 16, 1, 290)
+
 			// 39 - Old Got Emerald
 			SpriteFrame(0, 0, 16, 16, 18, 290)
 		end if
