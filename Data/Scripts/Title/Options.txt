@@ -59,8 +59,13 @@ reserve function Options_Button_RadarStyle
 // ========================
 
 private function Options_Button_Character
-	saved.character++
-	saved.character &= 1
+	temp0 = keyPress[0].left
+	temp0 |= keyPress[0].right
+			
+	if temp0 == true
+		saved.character++
+		saved.character &= 1
+	end if
 	
 	switch saved.character
 	case 0
@@ -81,20 +86,35 @@ private function Options_Button_Character
 end function
 
 
-private function Options_Button_Radar
-	saved.radar++
-	saved.radar &= 1
-	
+private function Options_Button_Radar 
+	if keyPress[0].right == true
+		saved.radar++
+		saved.radar %= 3
+	end if
+
+	if keyPress[0].left == true
+		saved.radar--
+		if saved.radar < 0
+			saved.radar = 2
+		end if
+	end if
+
 	switch saved.radar
 	case 0
-		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		EditMenuEntry(MENU_1, "@@ON@@", 8, true)
 		break
 		
 	case 1
 		EditMenuEntry(MENU_1, "OFF", 8, true)
 		break
+
+	case 2
+		EditMenuEntry(MENU_1, "ARROWS", 8, true)
+		break
 	end switch
 	
+	WriteSaveRAM()
+
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -118,8 +138,13 @@ end function
 
 
 private function Options_Button_RadarStyle
-	saved.radarstyle++
-	saved.radarstyle &= 1
+	temp0 = keyPress[0].left
+	temp0 |= keyPress[0].right
+			
+	if temp0 == true
+		saved.radarstyle++
+		saved.radarstyle &= 1
+	end if
 	
 	switch saved.radarstyle
 	case 0
@@ -132,6 +157,8 @@ private function Options_Button_RadarStyle
 		
 	end switch
 	
+	WriteSaveRAM()
+
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -199,14 +226,9 @@ event ObjectUpdate
 				object.selection = 4
 			end if
 			
-			temp0 = keyPress[0].left
-			temp0 |= keyPress[0].right
-			
-			if temp0 == true
-				temp0 = Options_Button_Character
-				temp0 += object.selection
-				CallFunction(temp0)
-			end if
+			temp0 = Options_Button_Character
+			temp0 += object.selection
+			CallFunction(temp0)
 			
 			if keyPress[0].buttonB == true
 				object.state = OPTIONS_EXIT
@@ -362,7 +384,7 @@ event ObjectStartup
 	AddMenuEntry(MENU_1, "@", false)
 	AddMenuEntry(MENU_1, "*@@RADAR@@*", false)
 	AddMenuEntry(MENU_1, "@", false)
-	AddMenuEntry(MENU_1, "@ON@", true)
+	AddMenuEntry(MENU_1, "@@ON@@", true)
 	AddMenuEntry(MENU_1, "@@@@", false)
 	AddMenuEntry(MENU_1, "@", false)
 	AddMenuEntry(MENU_1, "@", false)
@@ -395,10 +417,13 @@ event ObjectStartup
 	
 	switch saved.radar
 	case 0
-		EditMenuEntry(MENU_1, "@ON@", 8, true)
+		EditMenuEntry(MENU_1, "@@ON@@", 8, true)
 		break
 	case 1
 		EditMenuEntry(MENU_1, "OFF", 8, true)
+		break
+	case 2
+		EditMenuEntry(MENU_1, "ARROWS", 8, true)
 		break
 	end switch
 	
