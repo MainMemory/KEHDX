@@ -374,9 +374,7 @@ event ObjectUpdate
 			end if
 			
 			// If the player's touched the screen at all...
-			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-			
-			if checkResult > TOUCHINPUT_NULL
+			if touchscreen[0].down == true
 				// ... then activate touch controls, and hide the Knuckles cursor too
 				options.physicalControls = false
 				object.selection = SELECTION_NULL
