@@ -1,0 +1,233 @@
+//---------------Sonic CD Crumble Ledge 3 Script--------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.HitboxLeft
+private alias object.value1 : Object.HitboxRight
+private alias object.value2 : Object.Timer
+private alias object.value3 : Object.Length
+private alias object.value4 : Object.YVelocity
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+// States
+private alias 0 : CLEDGE3_IDLE
+private alias 1 : CLEDGE3_DELAY_FROM_RIGHT
+private alias 2 : CLEDGE3_DELAY_FROM_LEFT
+private alias 3 : CLEDGE3_COLLAPSE_RIGHT
+private alias 4 : CLEDGE3_COLLAPSE_LEFT
+private alias 5 : CLEDGE3_RESTORE // Unused
+
+private alias 6 : CLEDGE3_DEBRIS
+
+// Stage SFX
+private alias 0 : SFX_S_CRUMBLE
+
+// Priority
+private alias 0 : PRIORITY_BOUNDS
+private alias 1 : PRIORITY_ACTIVE
+
+
+event ObjectUpdate
+	switch object.state
+	case CLEDGE3_DELAY_FROM_RIGHT
+		if Object.Timer > 0
+			Object.Timer--
+		else
+			PlaySfx(SfxName[Crumble], false)
+
+			object.state = CLEDGE3_COLLAPSE_RIGHT
+		end if
+		break
+
+	case CLEDGE3_DELAY_FROM_LEFT
+		if Object.Timer > 0
+			Object.Timer--
+		else
+			PlaySfx(SfxName[Crumble], false)
+
+			object.state = CLEDGE3_COLLAPSE_LEFT
+		end if
+		break
+
+	case CLEDGE3_COLLAPSE_RIGHT
+		Object.Timer++
+		if Object.Timer == 12
+			Object.Timer = 0
+			if Object.HitboxRight > Object.HitboxLeft
+				Object.Length--
+				Object.HitboxRight -= 16
+				temp0 = Object.HitboxRight
+				temp0 += 8
+				temp0 <<= 16
+				temp0 += object.xpos
+				CreateTempObject(TypeName[CrumbleLedge3], 0, temp0, object.ypos)
+				object[TempObjectPos].state = CLEDGE3_DEBRIS
+			else
+				ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+			end if
+		end if
+		break
+
+	case CLEDGE3_COLLAPSE_LEFT
+		Object.Timer++
+		if Object.Timer == 12
+
+			Object.Timer = 0
+			if Object.HitboxLeft < Object.HitboxRight
+				Object.Length--
+
+				Object.HitboxLeft += 16
+				temp0 = Object.HitboxLeft
+				temp0 -= 8
+				temp0 <<= 16
+				temp0 += object.xpos
+
+				CreateTempObject(TypeName[CrumbleLedge3], 0, temp0, object.ypos)
+				object[TempObjectPos].state = CLEDGE3_DEBRIS
+			else
+				ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+			end if
+
+		end if
+		break
+
+	case CLEDGE3_RESTORE
+		if object.outOfBounds == true
+			object.state = CLEDGE3_IDLE
+			Object.Length = object.propertyValue
+
+			Object.HitboxLeft = object.propertyValue
+			Object.HitboxLeft <<= 3
+
+			Object.HitboxRight = Object.HitboxLeft
+			FlipSign(Object.HitboxLeft)
+
+			object.priority = PRIORITY_BOUNDS
+			Object.Timer = 0
+		end if
+		break
+
+	case CLEDGE3_DEBRIS
+		Object.YVelocity += 0x4000
+		if Object.YVelocity > 0
+			object.ypos += Object.YVelocity
+		end if
+
+		if object.outOfBounds == true
+			object.type = TypeName[Blank Object]
+		end if
+		break
+
+	end switch
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		if object.state == CLEDGE3_IDLE
+			BoxCollisionTest(C_PLATFORM, object.entityPos, Object.HitboxLeft, -17, Object.HitboxRight, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+	
+			if checkResult == true
+				Object.Timer = 1
+				object.priority = PRIORITY_ACTIVE
+				if object[0].xpos > object.xpos
+					object.state = CLEDGE3_DELAY_FROM_RIGHT
+				else
+					object.state = CLEDGE3_DELAY_FROM_LEFT
+				end if
+			end if
+		else
+			BoxCollisionTest(C_PLATFORM, object.entityPos, Object.HitboxLeft, -17, Object.HitboxRight, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+		end if
+	next
+end event
+
+
+event ObjectDraw
+
+
+	switch object.state
+	case CLEDGE3_IDLE
+	case CLEDGE3_DELAY_FROM_RIGHT
+	case CLEDGE3_DELAY_FROM_LEFT
+	case CLEDGE3_COLLAPSE_RIGHT
+		temp0 = 0
+		temp1 = Object.HitboxLeft
+		temp1 <<= 16
+		temp1 += 0x80000
+		temp1 += object.xpos
+		while temp0 < Object.Length
+			DrawSpriteXY(0, temp1, object.ypos)
+			temp1 += 0x100000
+			temp0++
+		loop
+		break
+
+	case CLEDGE3_COLLAPSE_LEFT
+		temp0 = 0
+		temp1 = Object.HitboxRight
+		temp1 <<= 16
+		temp1 -= 0x80000
+		temp1 += object.xpos
+		while temp0 < Object.Length
+			DrawSpriteXY(0, temp1, object.ypos)
+			temp0++
+			temp1 -= 0x100000
+		loop
+		break
+
+	case CLEDGE3_DEBRIS
+		DrawSprite(object.frame)
+		break
+	end switch
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects2.gif")
+
+	SpriteFrame(-8, -32, 16, 48, 163, 1) // #0 - Ledge
+
+	foreach (TypeName[Crumble Ledge 3], arrayPos0, ALL_ENTITIES)
+		Object.Length[arrayPos0] = object[arrayPos0].propertyValue
+		Object.HitboxLeft[arrayPos0] = object[arrayPos0].propertyValue
+		Object.HitboxLeft[arrayPos0] <<= 3
+		Object.HitboxRight[arrayPos0] = Object.HitboxLeft[arrayPos0]
+		FlipSign(Object.HitboxLeft[arrayPos0])
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	Object.Length = object.propertyValue
+	Object.HitboxLeft = object.propertyValue
+	Object.HitboxLeft <<= 3
+	Object.HitboxRight = Object.HitboxLeft
+	FlipSign(Object.HitboxLeft)
+
+	temp0 = 0
+	temp1 = Object.HitboxLeft
+	temp1 <<= 16
+	temp1 += 0x80000
+	temp1 += object.xpos
+	if temp0 < Object.Length
+		DrawSpriteXY(0, temp1, object.ypos)
+		temp0++
+		temp1 += 0x100000
+	loop
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects2.gif")
+
+	SpriteFrame(-8, -32, 16, 48, 163, 1) // #0 - Ledge
+
+
+end event

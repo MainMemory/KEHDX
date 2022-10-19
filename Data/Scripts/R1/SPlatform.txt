@@ -1,0 +1,89 @@
+//--------------Sonic CD Small Platform Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.OnObject
+private alias object.value1 : Object.Timer
+private alias object.value2 : Object.YCollisionOffset
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	if Object.OnObject == true
+		if Object.Timer < 16
+			Object.Timer++
+
+			temp0 = Object.Timer
+			temp0 &= 3
+
+			if temp0 == 3
+				Object.YCollisionOffset = 0x10000
+			else
+				Object.YCollisionOffset = 0
+			end if
+		else
+			Object.YCollisionOffset = 0
+		end if
+	else
+		if Object.Timer > 0
+			Object.Timer--
+
+			temp0 = Object.Timer
+			temp0 &= 3
+
+			if temp0 == 3
+				Object.YCollisionOffset = -0x10000
+			else
+				Object.YCollisionOffset = 0
+			end if
+
+		else
+			Object.YCollisionOffset = 0
+		end if
+	end if
+
+	Object.OnObject = false
+
+	BoxCollisionTest(C_PLATFORM, object.entityPos, -16, -9, 16, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+	if checkResult == true
+		Object.OnObject = true
+		object[0].ypos += Object.YCollisionOffset
+	end if
+end event
+
+
+event ObjectDraw
+	object.ypos += Object.YCollisionOffset
+
+	DrawSprite(0)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-16, -16, 32, 32, 190, 101) // #0 - Small Platform
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-16, -16, 32, 32, 190, 101) // #0 - Small Platform
+
+
+end event

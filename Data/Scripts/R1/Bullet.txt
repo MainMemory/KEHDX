@@ -1,0 +1,77 @@
+//---------------Sonic CD Kamemusi Bullet Script--------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.FrameTimer
+private alias object.value1 : Object.XVelocity
+private alias object.value2 : Object.YVelocity
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	Object.YVelocity += 0x2000
+	object.xpos += Object.XVelocity
+	object.ypos += Object.YVelocity
+
+	if object.outOfBounds == true
+		object.type = TypeName[Blank Object]
+	else // if the go above the visible screen, delete them
+		temp0 = screen.yoffset
+		temp0 -= 8
+		temp0 <<= 16
+		if object.ypos < temp0
+			object.type = TypeName[Blank Object]
+		end if
+
+	end if
+
+	BoxCollisionTest(C_TOUCH, object.entityPos, -4, -4, 4, 4, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+	if checkResult == true
+		CallFunction(Player_Hit)
+	end if
+end event
+
+
+event ObjectDraw
+	DrawSprite(object.frame)
+
+	Object.FrameTimer++
+	if Object.FrameTimer > 2
+		Object.FrameTimer = 0
+
+		object.frame++
+		object.frame &= 3
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-4, -4, 8, 8, 166, 34) // #0 - Small Bullet Frame 0
+	SpriteFrame(-4, -4, 8, 8, 175, 34) // #1 - Small Bullet Frame 1
+	SpriteFrame(-6, -6, 12, 12, 101, 93) // #2 - Big Bullet Frame 0
+	SpriteFrame(-6, -6, 12, 12, 114, 93) // #3 - Big Bullet Frame 1
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+	SpriteFrame(-4, -4, 8, 8, 166, 34) // #0 - Small Bullet Frame 0
+
+
+end event

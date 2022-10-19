@@ -1,0 +1,137 @@
+//-----------------Sonic CD Flip Door Script------------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Timer
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+// Stage SFX
+private alias 4 : SFX_S_DOOR
+
+// Property Values
+private alias 0 : HORIZONTAL_DOOR
+private alias 1 : VERTICAL_DOOR
+
+event ObjectUpdate
+	if object.propertyValue == HORIZONTAL_DOOR
+		BoxCollisionTest(C_PLATFORM, object.entityPos, -24, -4, 24, 32, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+
+		BoxCollisionTest(C_TOUCH, object.entityPos, -24, -8, 24, 8, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+		if checkResult == true
+			if object[0].ypos > object.ypos
+				if Object.Timer == 0
+					PlaySfx(SfxName[Door], false)
+				end if
+
+				Object.Timer = 10
+			end if
+		end if
+	else
+		if object[0].xpos < object.xpos
+			BoxCollisionTest(C_TOUCH, object.entityPos, -16, -24, 0, 24, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+			if checkResult == true
+				if Object.Timer == 0
+					PlaySfx(SfxName[Door], false)
+				end if
+
+				Object.Timer = 10
+			end if
+		else
+			if Object.Timer == 0
+				BoxCollisionTest(C_BOX, object.entityPos, -24, -24, 4, 24, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+			end if
+		end if
+	end if
+end event
+
+
+event ObjectDraw
+	if object.propertyValue == HORIZONTAL_DOOR
+		if Object.Timer > 0
+			DrawSprite(1)
+			Object.Timer--
+		else
+			DrawSprite(0)
+		end if
+	else
+		if Object.Timer > 0
+			DrawSprite(3)
+			Object.Timer--
+		else
+			DrawSprite(2)
+		end if
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-24, -4, 48, 8, 117, 34) // #0 - Flip Door Horizontal
+	SpriteFrame(-24, -44, 8, 48, 167, 43) // #1 - Flip Door Horizontal Open
+	SpriteFrame(-4, -24, 8, 48, 176, 43) // #2 - Flip Door Vertical
+	SpriteFrame(-4, -24, 48, 8, 117, 34) // #3 - Flip Door Vertical Open
+ 
+	foreach (TypeName[Flip Door], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].draworder = 4
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+
+// orientation
+
+
+
+
+
+
+// Property Value
+
+
+
+// orientation
+
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(object.propertyValue)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-24, -4, 48, 8, 117, 34) // #0 - Flip Door Horizontal
+	SpriteFrame(-4, -24, 8, 48, 176, 43) // #1 - Flip Door Vertical
+
+
+
+
+
+
+end event

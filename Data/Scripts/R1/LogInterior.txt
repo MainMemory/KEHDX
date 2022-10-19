@@ -1,0 +1,68 @@
+//----------------Sonic CD Log Interior Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Not directly mentioned
+private alias 0 : WHOLE_FACE_INTERIOR
+private alias 1 : CONCAVE_FACE_INTERIOR
+
+
+event ObjectDraw
+	DrawSprite(object.propertyValue)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects2.gif")
+
+	SpriteFrame(-16, -16, 32, 32, 190, 197) // #0 - Log Interior 0
+	SpriteFrame(-16, -16, 32, 32, 223, 197) // #1 - Log Interior 1
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(object.propertyValue)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects2.gif")
+	SpriteFrame(-16, -16, 32, 32, 190, 197) // #0 - Log Interior 0
+	SpriteFrame(-16, -16, 32, 32, 223, 197) // #1 - Log Interior 1
+
+
+
+
+
+end event

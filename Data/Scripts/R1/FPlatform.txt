@@ -1,0 +1,185 @@
+//---------------Sonic CD Fall Platform Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Falling
+private alias object.value1 : Object.Timer
+private alias object.value2 : Object.YPlayerFloor
+private alias object.value3 : Object.FallTimer
+private alias object.value4 : Object.YVelocity
+private alias object.value5 : Object.YOriginPos
+
+// States
+private alias 0 : FALLPLATFORM_IDLE
+private alias 1 : FALLPLATFORM_CRUMBLE
+private alias 2 : FALLPLATFORM_FALL
+private alias 3 : FALLPLATFORM_RESTORE
+
+// Property Values
+private alias 0 : FALLING_PLATFORM
+private alias 1 : STATIC_PLATFORM
+
+// Priority
+private alias 0 : PRIORITY_BOUNDS
+private alias 1 : PRIORITY_ACTIVE
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	if Object.Falling == true
+
+		if object.state == FALLPLATFORM_IDLE
+			object.state = FALLPLATFORM_CRUMBLE
+		end if
+
+		if Object.Timer < 16
+			Object.Timer++
+
+			temp0 = Object.Timer
+			temp0 &= 3
+
+			if temp0 == 3
+				Object.YPlayerFloor = 0x10000
+			else
+				Object.YPlayerFloor = 0
+			end if
+
+		else
+			Object.YPlayerFloor = 0
+		end if
+
+	else
+		if Object.Timer > 0
+			Object.Timer--
+
+			temp0 = Object.Timer
+			temp0 &= 3
+
+			if temp0 == 3
+				Object.YPlayerFloor = -0x10000
+			else
+				Object.YPlayerFloor = 0
+			end if
+
+		else
+			Object.YPlayerFloor = 0
+		end if
+
+	end if
+	Object.Falling = false
+
+	if object.propertyValue == FALLING_PLATFORM
+		switch object.state
+		case FALLPLATFORM_CRUMBLE
+			if Object.FallTimer < 30
+				Object.FallTimer++
+			else
+				Object.YVelocity = 0
+				Object.FallTimer = 0
+				object.state = FALLPLATFORM_FALL
+				object.priority = PRIORITY_ACTIVE
+			end if
+			break
+
+		case FALLPLATFORM_FALL
+			if Object.YVelocity < 0x40000
+				Object.YVelocity += 0x2000
+			end if
+			Object.YPlayerFloor += Object.YVelocity
+			if object.outOfBounds == true
+				object.ypos = Object.YOriginPos
+				object.state = FALLPLATFORM_RESTORE
+				Object.YVelocity = 0
+			end if
+			break
+
+		case FALLPLATFORM_RESTORE
+			if object.outOfBounds == true
+				object.state = FALLPLATFORM_IDLE
+				object.priority = PRIORITY_BOUNDS
+			end if
+			break
+		end switch
+	end if
+
+	if object.state < FALLPLATFORM_RESTORE
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+			BoxCollisionTest(C_PLATFORM, object.entityPos, -32, -9, 32, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+			if checkResult == true
+				Object.Falling = true
+				object[0].ypos += Object.YPlayerFloor
+			end if
+		next
+	end if
+end event
+
+
+event ObjectDraw
+	object.ypos += Object.YPlayerFloor
+	if object.state < FALLPLATFORM_RESTORE
+		DrawSprite(0)
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-32, -16, 64, 32, 101, 109) // #0 - Fall Platform
+
+	foreach (TypeName[FallPlatform], arrayPos0, ALL_ENTITIES)
+		Object.YOriginPos[arrayPos0] = object[arrayPos0].ypos
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+	SpriteFrame(-32, -16, 64, 32, 101, 109) // #0 - Fall Platform
+
+
+
+
+
+end event

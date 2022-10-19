@@ -1,0 +1,202 @@
+//------------------Sonic CD PataBata Script------------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Oscillation
+private alias object.value1 : Object.YOriginPos
+
+private alias object.propertyValue : Object.Quality
+
+// States
+private alias 0 : PATABATA_FLY_DOWN
+private alias 1 : PATABATA_FLY_UP
+
+// Badnik Quality / Property Values
+private alias 0 : GOOD_QUALITY
+private alias 1 : BAD_QUALITY
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	if Object.Quality == GOOD_QUALITY
+		object.frame++
+		if object.frame > 39
+			object.frame = 0
+		end if
+
+		switch object.state
+		case PATABATA_FLY_DOWN
+			Sin(object.ypos, Object.Oscillation)
+			object.ypos <<= 12
+			object.ypos += Object.YOriginPos
+
+			object.xpos -= 0x8000
+
+			Object.Oscillation -= 4
+			if Object.Oscillation == 0
+				object.state = PATABATA_FLY_UP
+				object.direction = FACING_LEFT
+			end if
+			break
+
+		case PATABATA_FLY_UP
+			Sin(object.ypos, Object.Oscillation)
+			FlipSign(object.ypos)
+			object.ypos <<= 12
+			object.ypos += Object.YOriginPos
+
+			object.xpos += 0x8000
+
+			Object.Oscillation += 4
+			if Object.Oscillation == 2048
+				object.state = PATABATA_FLY_DOWN
+				object.direction = FACING_RIGHT
+			end if
+			break
+
+		end switch
+	else
+		object.frame++
+		if object.frame > 39
+			object.frame = 20
+		end if
+
+		switch object.state
+		case PATABATA_FLY_DOWN
+			Sin(object.ypos, Object.Oscillation)
+			object.ypos <<= 11
+			object.ypos += Object.YOriginPos
+
+			object.xpos -= 0x4000
+
+			Object.Oscillation -= 2
+			if Object.Oscillation == 0
+				object.state = PATABATA_FLY_UP
+				object.direction = FACING_LEFT
+			end if
+			break
+
+		case PATABATA_FLY_UP
+			Sin(object.ypos, Object.Oscillation)
+			FlipSign(object.ypos)
+			object.ypos <<= 11
+			object.ypos += Object.YOriginPos
+
+			object.xpos += 0x4000
+
+			Object.Oscillation += 2
+			if Object.Oscillation == 2048
+				object.state = PATABATA_FLY_DOWN
+				object.direction = FACING_RIGHT
+			end if
+			break
+
+		end switch
+	end if
+
+	BoxCollisionTest(C_TOUCH, object.entityPos, -14, -14, 14, 14, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+	if checkResult == true
+		CallFunction(Player_BadnikBreak)
+		if object.type == TypeName[Blank Object]	
+			CallFunction(EmeraldManager_AwardEmerald)	
+		end if
+	end if
+end event
+
+
+event ObjectDraw
+	if Object.Quality == GOOD_QUALITY
+		temp0 = object.frame
+		temp0 >>= 3
+		DrawSpriteFX(temp0, FX_FLIP, object.xpos, object.ypos)
+	else
+		temp0 = object.frame
+		temp0 >>= 2
+		DrawSpriteFX(temp0, FX_FLIP, object.xpos, object.ypos)
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	// Good PataBata
+	SpriteFrame(-16, -16, 32, 32, 1, 51) // #0 - PataBata Fly Frame 0
+	SpriteFrame(-16, -8, 32, 16, 1, 84) // #1 - PataBata Fly Frame 1
+	SpriteFrame(-16, -16, 32, 32, 117, 1) // #2 - PataBata Fly Frame 2
+	SpriteFrame(-16, -8, 32, 16, 1, 84) // #3 - PataBata Fly Frame 3
+	SpriteFrame(-16, -16, 32, 32, 1, 51) // #4 - PataBata Fly Frame 4
+
+	// Bad PataBata
+	SpriteFrame(-16, -16, 32, 32, 150, 1) // #5 - PataBata Fly Frame 0
+	SpriteFrame(-16, -8, 32, 16, 1, 84) // #6 - PataBata Fly Frame 1
+	SpriteFrame(-16, -16, 32, 32, 183, 1) // #7 - PataBata Fly Frame 2
+	SpriteFrame(-16, -8, 32, 16, 1, 84) // #8 - PataBata Fly Frame 3
+	SpriteFrame(-16, -16, 32, 32, 150, 1) // #9 - PataBata Fly Frame 4
+
+	// Used to be below LoadSpriteSheet, moved here for consistency
+	foreach (TypeName[PataBata], arrayPos0, ALL_ENTITIES)
+		Object.YOriginPos[arrayPos0] = object[arrayPos0].ypos
+		Object.Oscillation[arrayPos0] = 1024
+		object[arrayPos0].frame = Object.Quality[arrayPos0]
+		object[arrayPos0].frame *= 20
+		CallFunction(EmeraldManager_AddEntity)
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(Object.Quality)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+
+	// Good PataBata
+	SpriteFrame(-16, -16, 32, 32, 1, 51) // #0 - PataBata Fly Frame 0
+
+	// Bad PataBata
+	SpriteFrame(-16, -16, 32, 32, 150, 1) // #5 - PataBata Fly Frame 0
+
+
+
+
+
+
+end event

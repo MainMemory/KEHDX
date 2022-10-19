@@ -1,0 +1,88 @@
+//----------------Sonic CD Star Bush Script-------------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.XOriginPos // Set by Ramp3D
+
+// Property Values
+private alias 0 : FOREGROUND_BUSH // technically a lie since the draworder is bugged
+private alias 1 : SMALL_BUSH
+private alias 2 : BACKGROUND_BUSH
+
+
+event ObjectDraw
+	if object.propertyValue == FOREGROUND_BUSH
+		DrawSpriteXY(0, Object.XOriginPos, object.ypos)
+	else
+		DrawSprite(object.propertyValue)
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects2.gif")
+
+	SpriteFrame(-24, -20, 48, 40, 115, 131) // #0 - Big StarBush
+	SpriteFrame(-12, -12, 24, 24, 1, 229) // #1 - Small StarBush
+	SpriteFrame(-24, -20, 48, 40, 115, 131) // #2 - Big StarBush (Background)
+
+	// Used to be below LoadSpriteSheet, moved down for consistency
+	foreach (TypeName[StarBush], arrayPos0, ALL_ENTITIES)
+		if object[arrayPos0].propertyValue == FOREGROUND_BUSH
+			object[arrayPos0].drawOrder = 4 // this should be 5
+		end if
+
+		if object[arrayPos0].propertyValue == BACKGROUND_BUSH
+			object[arrayPos0].drawOrder = 4
+		end if
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+// type
+
+
+
+
+
+// Property Value
+
+
+// type
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects2.gif")
+
+	SpriteFrame(-24, -20, 48, 40, 115, 131) // #0 - Big StarBush
+	SpriteFrame(-12, -12, 24, 24, 1, 229) // #1 - Small StarBush
+	SpriteFrame(-24, -20, 48, 40, 115, 131) // #2 - Big StarBush (Background)
+
+
+
+
+
+
+
+end event

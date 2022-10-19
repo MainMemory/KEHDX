@@ -1,0 +1,88 @@
+//---------------Sonic CD Vert Platform Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value1 : Object.YCollisionOffset
+private alias object.value2 : Object.YVelocity
+private alias object.value3 : Object.Angle
+
+// Property Values
+private alias 0 : START_MOVING_DOWN
+private alias 1 : START_MOVING_UP
+
+// Collision
+private alias 1 : PLAYER_COL_FLOOR
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	Object.Angle = Oscillation
+	Object.Angle <<= 1
+
+	if object.propertyValue == START_MOVING_UP
+		Object.Angle += 256
+	end if
+
+	Sin(Object.YVelocity, Object.Angle)
+	Object.YVelocity *= 0x1800
+	Object.YVelocity += object.ypos
+	Object.YVelocity &= 0xFFFF0000 // Truncate the value
+	Object.YVelocity -= Object.YCollisionOffset
+
+	temp0 = object.ypos
+	object.ypos = Object.YCollisionOffset
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+		BoxCollisionTest(C_PLATFORM, object.entityPos, -32, -9, 32, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+		if checkResult == PLAYER_COL_FLOOR
+			object[0].ypos += Object.YVelocity
+		end if
+	next
+	object.ypos = temp0
+end event
+
+
+event ObjectDraw
+	Sin(Object.YCollisionOffset, Object.Angle)
+	Object.YCollisionOffset *= 0x1800
+	Object.YCollisionOffset += object.ypos
+	Object.YCollisionOffset &= 0xFFFF0000 // Truncate the value
+
+	DrawSpriteXY(0, object.xpos, Object.YCollisionOffset)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-32, -16, 64, 32, 101, 109) // #0 - Vertical Platform
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+
+	SpriteFrame(-32, -16, 64, 32, 101, 109) // #0 - Vertical Platform
+
+
+
+
+
+end event

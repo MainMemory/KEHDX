@@ -1,0 +1,98 @@
+//------------------Sonic CD Blue Bird Script-----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Timer
+private alias object.value1 : Object.Angle
+
+// HUD alias
+private alias object[24].propertyValue : HUD.TimePeriod
+
+// States
+private alias 0 : BLUEBIRD_FLYRIGHT
+private alias 1 : BLUEBIRD_FLYLEFT
+
+// Time Period Aliases
+private alias 2 : TIME_GOOD_FUTURE
+
+
+event ObjectUpdate
+	// This Object is always running & updating, regardless of the Stage's current state
+	// However, it will only draw itself under the specific conditions, though it is being
+	// updated all the same
+
+	switch object.state
+	case BLUEBIRD_FLYRIGHT
+		if Object.Angle > 0
+			Object.Angle -= 2
+		else
+			// Apex hit, turn around
+
+			object.state = BLUEBIRD_FLYLEFT
+			object.direction = FACING_LEFT
+		end if
+		break
+
+	case BLUEBIRD_FLYLEFT
+		if Object.Angle < 256
+			Object.Angle += 2
+		else
+			// Other apex hit now, return to the other direction
+
+			object.state = BLUEBIRD_FLYRIGHT
+			object.direction = FACING_RIGHT
+		end if
+		break
+
+	end switch
+
+	// Animate the Blue Bird
+	Object.Timer++
+	if Object.Timer > 19
+		Object.Timer = 0
+
+		object.frame++
+
+		// The Bird bounces between 2 frames total
+		object.frame &= 1
+	end if
+
+end event
+
+
+event ObjectDraw
+	Cos(temp0, Object.Angle)
+	temp0 <<= 14
+	temp0 += object.xpos
+
+	Sin(temp1, Object.Angle)
+	temp1 <<= 14
+	temp1 += object.ypos
+
+	DrawSpriteFX(object.frame, FX_FLIP, temp0, temp1)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("Global/Items2.gif")
+	SpriteFrame(-8, -7, 16, 15, 66, 239)
+	SpriteFrame(-8, -8, 16, 15, 83, 239)
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Items3.gif")
+	SpriteFrame(-8, -8, 16, 16, 240, 199)
+
+
+end event

@@ -1,0 +1,278 @@
+//----------------Sonic CD Tube Switch Script-----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.OnObject
+private alias object.value1 : Object.LaunchSpeed
+
+// Player Aliases
+// WARNING: Variable VAR_PLAYERVALUE6 does not exist in RSDKv4!
+private alias object[0].value6 : Player.MinRollSpeed
+
+// Gravity
+private alias 0 : GRAVITY_GROUND
+private alias 1 : GRAVITY_AIR
+
+// Collision Modes
+private alias 0 : CMODE_FLOOR
+private alias 1 : CMODE_LWALL
+private alias 2 : CMODE_ROOF
+private alias 3 : CMODE_RWALL
+
+// Global SFX
+private alias 7 : SFX_G_RELEASE
+
+// Property Values
+private alias 0 : HORIZONTAL_TUBE
+private alias 1 : VERTICAL_TUBE
+private alias 2 : BOOST_ANGLE_TUBE
+private alias 3 : BOOST_VERTICAL_TUBE
+private alias 4 : HORIZONTAL_EXIT_TUBE
+private alias 5 : VERTICAL_EXIT_TUBE
+private alias 6 : SPEED_LIMITED_TUBE
+private alias 7 : EXIT_ANGLE_TUBE
+private alias 8 : EXIT_BOOST_TUBE
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+// WARNING: ObjectPlayerInteraction is not supported in RSDKv4!
+event ObjectUpdate
+foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+	BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+	if checkResult == true
+		switch object.propertyValue
+		case HORIZONTAL_TUBE
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+			if object[0].speed > 0
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				if object[0].state != Player_State_TubeRoll
+					PlaySfx(SFX_G_RELEASE, false)
+				end if
+
+// WARNING: Variable VAR_PLAYERDIRECTION does not exist in RSDKv4!
+				object[0].direction = FACING_RIGHT
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_TubeRoll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+
+				Player.MinRollSpeed = 0xA0000
+
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+				if object[0].speed < 0xA0000
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+					object[0].speed = 0xA0000
+				end if
+			else
+// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
+				if object[0].gravity == GRAVITY_GROUND
+
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+					if object[0].speed > -0x20000
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+						object[0].speed = -0x20000
+					end if
+
+				end if
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_Roll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+			end if
+			break
+
+		case VERTICAL_TUBE
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+			if object[0].state != Player_State_TubeRoll
+				PlaySfx(SFX_G_RELEASE, false)
+			end if
+// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
+			object[0].gravity = GRAVITY_GROUND
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+			object[0].state = Player_State_TubeRoll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+			object[0].animation = ANI_JUMPING
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+			object[0].collisionMode = CMODE_RWALL
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+			object[0].angle = 64
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+			object[0].speed = 0x100000
+			Player.MinRollSpeed = 0x100000
+			break
+
+		case BOOST_ANGLE_TUBE
+			if Object.OnObject == false
+
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+				if object[0].collisionMode == CMODE_FLOOR
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+					object[0].collisionMode = CMODE_ROOF
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+					FlipSign(object[0].speed)
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+					object[0].angle = 128
+				else
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+					object[0].collisionMode = CMODE_FLOOR
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+					FlipSign(object[0].speed)
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+					object[0].angle = 0
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+					object[0].ypos += 0x40000
+				end if
+
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_TubeRoll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+
+			end if
+			break
+
+		case BOOST_VERTICAL_TUBE
+// WARNING: Variable VAR_PLAYERYVELOCITY does not exist in RSDKv4!
+			if object[0].yvel < 0
+
+// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
+				object[0].gravity = GRAVITY_GROUND
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_TubeRoll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+				object[0].collisionMode = CMODE_LWALL
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+				object[0].angle = 192
+				Player.MinRollSpeed = 0xA0000
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+// WARNING: Variable VAR_PLAYERYVELOCITY does not exist in RSDKv4!
+				object[0].speed = object[0].yvel
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+				FlipSign(object[0].speed)
+
+			end if
+			break
+
+		case HORIZONTAL_EXIT_TUBE
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+			if object[0].speed < 0
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				if object[0].state != Player_State_TubeRoll
+					PlaySfx(SFX_G_RELEASE, false)
+				end if
+
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_TubeRoll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+				Player.MinRollSpeed = 0xA0000
+			else
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+				object[0].state = Player_State_Roll
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+			end if
+			break
+
+		case VERTICAL_EXIT_TUBE
+// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
+			if object[0].gravity == GRAVITY_AIR
+// WARNING: Variable VAR_PLAYERXVELOCITY does not exist in RSDKv4!
+				object[0].xvel = Object.LaunchSpeed
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+				object[0].speed = Object.LaunchSpeed
+				object[0].state = Player_State_Air
+			else
+// WARNING: Variable VAR_PLAYERCOLLISIONMODE does not exist in RSDKv4!
+				if object[0].collisionMode == CMODE_LWALL
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+					object[0].angle = 196
+// WARNING: Variable VAR_PLAYERANGLE does not exist in RSDKv4!
+					Cos256(temp0, object[0].angle)
+// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
+					temp0 *= object[0].speed
+					temp0 >>= 8
+					if temp0 != 0
+						Object.LaunchSpeed = temp0
+					end if
+				end if
+			end if
+			break
+
+		case SPEED_LIMITED_TUBE
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+			if object[0].state == Player_State_TubeRoll
+
+// WARNING: Variable VAR_PLAYERYVELOCITY does not exist in RSDKv4!
+				if object[0].yvel < -0x60000
+// WARNING: Variable VAR_PLAYERYVELOCITY does not exist in RSDKv4!
+					object[0].yvel = -0x60000
+				end if
+
+			else
+// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
+				object[0].animation = ANI_JUMPING
+			end if
+			break
+
+		case EXIT_ANGLE_TUBE
+// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
+			if object[0].state == Player_State_TubeRoll
+				object.propertyValue = EXIT_BOOST_TUBE
+			end if
+			break
+
+		case EXIT_BOOST_TUBE
+// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
+			if object[0].gravity == GRAVITY_AIR
+// WARNING: Variable VAR_PLAYERYVELOCITY does not exist in RSDKv4!
+				object[0].yvel = -0xA8000
+				object.propertyValue = EXIT_ANGLE_TUBE
+			end if
+			break
+
+		end switch
+
+		Object.OnObject = true
+	else
+		Object.OnObject = false
+	end if
+next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	temp0 = object.xpos
+	temp0 -= 0x80000
+	temp1 = object.ypos
+	temp1 -= 0x80000
+
+	DrawSpriteXY(0, temp0, temp1)
+
+	temp0 += 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+
+	temp1 += 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+
+	temp0 -= 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-8, -8, 16, 16, 173, 67) // #0 - "T" Icon
+
+
+end event

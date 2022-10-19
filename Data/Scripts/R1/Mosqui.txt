@@ -1,0 +1,395 @@
+//-----------------Sonic CD Mosqui Script---------------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Timer
+private alias object.value1 : Object.XOriginPos
+private alias object.value2 : Object.YOriginPos
+
+private alias object.propertyValue : Object.Quality
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+// States
+private alias 0 : MOSQUI_MOVE_LEFT
+private alias 1 : MOSQUI_MOVE_RIGHT
+private alias 2 : MOSQUI_TURN_DOWN
+private alias 3 : MOSQUI_DART
+private alias 4 : MOSQUI_BLANK
+private alias 5 : MOSQUI_RESTORE
+
+// Collision Sides
+private alias 0 : CSIDE_FLOOR
+
+// Stage SFX
+private alias 2 : SFX_S_JAB
+
+// Badnik Quality / Property Values
+private alias 0 : GOOD_QUALITY
+private alias 1 : BAD_QUALITY
+
+// Priority
+private alias 0 : PRIORITY_BOUNDS
+private alias 1 : PRIORITY_ACTIVE
+
+
+event ObjectUpdate
+	if Object.Quality == GOOD_QUALITY
+		switch object.state
+		case MOSQUI_MOVE_LEFT
+			object.priority = PRIORITY_ACTIVE
+			object.frame++
+			object.frame &= 3
+
+			object.xpos -= 0x10000
+
+			Object.Timer--
+			if Object.Timer == -128
+				object.state = MOSQUI_MOVE_RIGHT
+				object.direction = FACING_LEFT
+			end if
+
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+			if object[0].ypos > object.ypos // Check that player is below Mosqui
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+				temp0 = object[0].ypos
+				temp0 -= object.ypos
+				if temp0 < 0x800000
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+					if object[0].xpos > object.xpos // Check that player is in attack range
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 = object[0].xpos
+						temp0 -= object.xpos
+					else
+						temp0 = object.xpos
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 -= object[0].xpos
+					end if
+					if temp0 < 0x300000
+						Object.Timer = 0
+						object.frame = 2
+						object.state = MOSQUI_TURN_DOWN
+					end if
+				end if
+			end if
+			break
+
+		case MOSQUI_MOVE_RIGHT
+			object.frame++
+			object.frame &= 3
+			object.xpos += 0x10000
+			Object.Timer++
+			if Object.Timer == 128
+				object.state = MOSQUI_MOVE_LEFT
+				object.direction = FACING_RIGHT
+			end if
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+			if object[0].ypos > object.ypos // Check that player is below Mosqui
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+				temp0 = object[0].ypos
+				temp0 -= object.ypos
+				if temp0 < 0x800000
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+					if object[0].xpos > object.xpos // Check that player is in attack range
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 = object[0].xpos
+						temp0 -= object.xpos
+					else
+						temp0 = object.xpos
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 -= object[0].xpos
+					end if
+					if temp0 < 0x300000
+						Object.Timer = 0
+						object.frame = 2
+						object.state = MOSQUI_TURN_DOWN
+					end if
+				end if
+			end if
+			break
+
+		case MOSQUI_TURN_DOWN
+			Object.Timer++
+			if Object.Timer == 8
+				Object.Timer = 0
+				object.frame++
+				if object.frame == 5
+					object.frame = 4
+					object.state = MOSQUI_DART
+				end if
+			end if
+			break
+
+		case MOSQUI_DART
+			object.ypos += 0x60000
+			ObjectTileCollision(CSIDE_FLOOR, 0, 14, 0)
+			if checkResult == true
+				object.state = MOSQUI_BLANK
+// WARNING: Function FUNC_PLAYSTAGESFX does not exist in RSDKv4!
+// Arguments: SFX_S_JAB, false
+
+			end if
+			break
+
+		case MOSQUI_BLANK
+			break
+
+		case MOSQUI_RESTORE
+			if object.outOfBounds == true
+				object.state = MOSQUI_MOVE_LEFT
+				object.direction = FACING_RIGHT
+				object.priority = PRIORITY_BOUNDS
+			end if
+			break
+
+		end switch
+	else
+		switch object.state
+		case MOSQUI_MOVE_LEFT
+			object.priority = PRIORITY_ACTIVE
+
+			object.frame++
+			object.frame %= 10
+
+			object.xpos -= 0x8000
+
+			Object.Timer--
+			if Object.Timer == -256
+				object.state = MOSQUI_MOVE_RIGHT
+				object.direction = FACING_LEFT
+			end if
+
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+			if object[0].ypos > object.ypos // Check that player is below Mosqui
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+				temp0 = object[0].ypos
+				temp0 -= object.ypos
+				if temp0 < 0x400000
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+					if object[0].xpos > object.xpos // Check that player is in attack range
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 = object[0].xpos
+						temp0 -= object.xpos
+					else
+						temp0 = object.xpos
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 -= object[0].xpos
+					end if
+					if temp0 < 0x300000
+						Object.Timer = 0
+						object.frame = 7
+						object.state = MOSQUI_TURN_DOWN
+					end if
+				end if
+			end if
+			break
+
+		case MOSQUI_MOVE_RIGHT
+			object.frame++
+			object.frame %= 10
+
+			object.xpos += 0x8000
+
+			Object.Timer++
+			if Object.Timer == 256
+				object.state = MOSQUI_MOVE_LEFT
+				object.direction = FACING_RIGHT
+			end if
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+			if object[0].ypos > object.ypos // Check that player is below Mosqui
+// WARNING: Variable VAR_PLAYERYPOS does not exist in RSDKv4!
+				temp0 = object[0].ypos
+				temp0 -= object.ypos
+				if temp0 < 0x400000
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+					if object[0].xpos > object.xpos // Check that player is in attack range
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 = object[0].xpos
+						temp0 -= object.xpos
+					else
+						temp0 = object.xpos
+// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
+						temp0 -= object[0].xpos
+					end if
+					if temp0 < 0x300000
+						Object.Timer = 0
+						object.frame = 7
+						object.state = MOSQUI_TURN_DOWN
+					end if
+				end if
+			end if
+			break
+
+		case MOSQUI_TURN_DOWN
+			Object.Timer++
+			if Object.Timer == 16
+				Object.Timer = 0
+				object.frame++
+				if object.frame == 10
+					object.frame = 9
+					object.state = MOSQUI_DART
+				end if
+			end if
+			break
+
+		case MOSQUI_DART
+			object.ypos += 0x60000
+			ObjectTileCollision(CSIDE_FLOOR, 0, 14, 0)
+			if checkResult == true
+				object.state = MOSQUI_BLANK
+			end if
+			break
+
+		case MOSQUI_BLANK
+			break
+
+		case MOSQUI_RESTORE
+			if object.outOfBounds == true
+				object.state = MOSQUI_MOVE_LEFT
+				object.priority = PRIORITY_BOUNDS
+			end if
+			break
+		end switch
+	end if
+
+	if object.outOfBounds == true
+		temp0 = object.xpos
+		temp1 = object.ypos
+
+		object.xpos = Object.XOriginPos
+		object.ypos = Object.YOriginPos
+
+		if object.outOfBounds == true
+			object.xpos = Object.XOriginPos
+			object.ypos = Object.YOriginPos
+
+			object.direction = FACING_RIGHT
+			Object.Timer = 0
+			object.frame = 0
+			object.priority = PRIORITY_BOUNDS
+
+			object.state = MOSQUI_MOVE_LEFT
+		else
+			object.xpos = temp0
+			object.ypos = temp1
+		end if
+	end if
+
+
+	if object.state < MOSQUI_RESTORE
+		BoxCollisionTest(C_TOUCH, object.entityPos, -15, -10, 15, 10, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+		if checkResult == true
+			CallFunction(Player_BadnikBreak)
+			if object.type == TypeName[Blank Object]	
+				CallFunction(EmeraldManager_AwardEmerald)	
+			end if
+		end if
+	end if
+end event
+
+
+event ObjectDraw
+	if object.state < MOSQUI_RESTORE
+		if Object.Quality == GOOD_QUALITY
+			if object.state < MOSQUI_TURN_DOWN
+				temp0 = object.frame
+				temp0 >>= 1
+				DrawSpriteFX(temp0, FX_FLIP, object.xpos, object.ypos)
+			else
+				DrawSpriteFX(object.frame, FX_FLIP, object.xpos, object.ypos)
+			end if
+		else
+			if object.state < MOSQUI_TURN_DOWN
+				temp0 = object.frame
+				temp0 /= 5
+				temp0 += 5
+				DrawSpriteFX(temp0, FX_FLIP, object.xpos, object.ypos)
+			else
+				DrawSpriteFX(object.frame, FX_FLIP, object.xpos, object.ypos)
+			end if
+		end if
+	end if
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R1/Objects.gif")
+
+	// Good Mosqui
+	SpriteFrame(-16, -11, 32, 24, 51, 1) // #0 - Mosqui Fly Frame 0
+	SpriteFrame(-16, -3, 32, 16, 51, 26) // #1 - Mosqui Fly Frame 1
+	SpriteFrame(-16, -14, 32, 32, 51, 43) // #2 - Mosqui Turning Frame 0
+	SpriteFrame(-6, -13, 24, 32, 117, 43) // #3 - Mosqui Turning Frame 1
+	SpriteFrame(-10, -14, 24, 32, 142, 43) // #4 - Mosqui Turning Frame 0
+
+	// Bad Mosqui
+	SpriteFrame(-16, -11, 32, 24, 84, 1) // #5 - Mosqui Fly Frame 0
+	SpriteFrame(-16, -3, 32, 16, 84, 26) // #6 - Mosqui Fly Frame 1
+	SpriteFrame(-16, -14, 32, 32, 84, 43) // #7 - Mosqui Turning Frame 0
+	SpriteFrame(-6, -13, 24, 32, 51, 76) // #8 - Mosqui Turning Frame 1
+	SpriteFrame(-10, -14, 24, 32, 76, 76) // #9 - Mosqui Turning Frame 2
+
+	// Used to be below LoadSpriteSheet, moved here for consistency
+	foreach (TypeName[Mosqui], arrayPos0, ALL_ENTITIES)
+		Object.XOriginPos[arrayPos0] = object[arrayPos0].xpos
+		Object.YOriginPos[arrayPos0] = object[arrayPos0].ypos
+		CallFunction(EmeraldManager_AddEntity)
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+// Property Value
+
+
+
+// type
+
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(Object.Quality)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R1/Objects.gif")
+
+	// Good Mosqui
+	SpriteFrame(-16, -11, 32, 24, 51, 1) // #0 - Mosqui Fly Frame 0
+
+	// Bad Mosqui
+	SpriteFrame(-16, -11, 32, 24, 84, 1) // #5 - Mosqui Fly Frame 0
+
+
+
+
+
+
+end event
