@@ -8,7 +8,7 @@ private alias object.value1 : Object.OnObject
 
 // Player Alias
 // WARNING: Variable VAR_PLAYERVALUE6 does not exist in RSDKv4!
-private alias object[0].value6 : Player.MinRollSpeed
+private alias object.value5 : Player.MinRollSpeed
 
 // Gravity
 private alias 0 : GRAVITY_GROUND
@@ -22,146 +22,96 @@ private alias object.value38 : player.hitboxTop
 private alias object.value41 : player.hitboxRight
 private alias object.value39 : player.hitboxBottom
 
-private alias Player_State_Ground : Player_State_SpinningTop
-
-private alias object[0].value1 : player.timer
-private alias object.value45 : ANI_SPINNING_TOP
+private alias object.value1 : player.timer
+private alias ANI_WALKING : ANI_SPINNING_TOP
 
 private alias 2 : Ring.AniCount
 
 event ObjectUpdate
-foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-	BoxCollisionTest(C_SOLID, object.entityPos, -16, -8, 16, 24, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
-
-	object.value45++
-
-	temp1 = object.rotation // This doesn't do anything...
-	if checkResult == true
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-		if object[0].state != Player_State_SpinningTop
-// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
-			object[0].speed = 0
-			Object.OnObject = true
-			Player.MinRollSpeed = 0x1000
-
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-			if object[0].xpos > object.xpos
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-				Player.Timer = object[0].xpos
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer -= object.xpos
-
-				object.rotation = 128
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+	
+		BoxCollisionTest(C_SOLID, object.entityPos, -16, -8, 16, 24, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+	
+	
+		temp1 = object.rotation // This doesn't do anything...
+		if checkResult == true
+	
+			if object[currentPlayer].state != Player_State_SpinningTop
+				object[currentPlayer].speed = 0
+				Object.OnObject = true
+				Player[currentPlayer].MinRollSpeed = 0x1000
+	
+				if object[currentPlayer].xpos > object.xpos
+					Player[currentPlayer].Timer = object[currentPlayer].xpos
+					Player[currentPlayer].Timer -= object.xpos
+	
+					object.rotation = 128
+				else
+					Player[currentPlayer].Timer = object.xpos
+					Player[currentPlayer].Timer -= object[currentPlayer].xpos
+	
+					object.rotation = 384
+				end if
+	
+			end if
+	
+			if object[currentPlayer].xpos > object.xpos
+				if object[currentPlayer].left == true
+					Player[currentPlayer].Timer -= 0x1000
+				end if
+	
+				if object[currentPlayer].right == true
+					Player[currentPlayer].Timer += 0x1000
+				end if
 			else
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer = object.xpos
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-				Player.Timer -= object[0].xpos
-
-				object.rotation = 384
+				if object[currentPlayer].left == true
+					Player[currentPlayer].Timer += 0x1000
+				end if
+	
+				if object[currentPlayer].right == true
+					Player[currentPlayer].Timer -= 0x1000
+				end if
 			end if
-
-		end if
-
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-		if object[0].xpos > object.xpos
-// WARNING: Variable VAR_PLAYERLEFT does not exist in RSDKv4!
-			if object[0].left == true
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer -= 0x1000
+	
+			object[currentPlayer].state = Player_State_SpinningTop
+	
+			object[currentPlayer].animation = ANI_SPINNING_TOP
+	
+			Sin(object[currentPlayer].xpos, object.rotation)
+			object[currentPlayer].xpos *= Player[currentPlayer].Timer
+			object[currentPlayer].xpos >>= 9
+			object[currentPlayer].xpos += object.xpos
+	
+			temp0 = object.rotation
+			temp0 -= 128
+			temp0 /= 86
+			object[currentPlayer].frame = temp0
+	
+			object.rotation += 16
+			if object.rotation > 639
+				object.rotation -= 512
 			end if
-
-// WARNING: Variable VAR_PLAYERRIGHT does not exist in RSDKv4!
-			if object[0].right == true
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer += 0x1000
+			if object[currentPlayer].jumpPress == true
+				CallFunction(Player_Action_Jump)
+				object[currentPlayer].speed = object[currentPlayer].xpos
+				object[currentPlayer].speed -= object.xpos
+				object[currentPlayer].speed >>= 2
+				Player[currentPlayer].Timer = 0
+				object[currentPlayer].state = Player_State_Air
+				PlaySfx(SfxName[Shot], false)
 			end if
 		else
-// WARNING: Variable VAR_PLAYERLEFT does not exist in RSDKv4!
-			if object[0].left == true
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer += 0x1000
-			end if
-
-// WARNING: Variable VAR_PLAYERRIGHT does not exist in RSDKv4!
-			if object[0].right == true
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-				Player.Timer -= 0x1000
-			end if
-		end if
-
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-		object[0].state = Player_State_SpinningTop
-
-// WARNING: Variable VAR_PLAYERANIMATION does not exist in RSDKv4!
-		object[0].animation = ANI_SPINNING_TOP
-
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-		Sin(object[0].xpos, object.rotation)
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-		object[0].xpos *= Player.Timer
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-		object[0].xpos >>= 9
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-		object[0].xpos += object.xpos
-
-		temp0 = object.rotation
-		temp0 -= 128
-		temp0 /= 86
-// WARNING: Variable VAR_PLAYERFRAME does not exist in RSDKv4!
-		object[0].frame = temp0
-
-		object.rotation += 16
-		if object.rotation > 639
-			object.rotation -= 512
-		end if
-
-// WARNING: Variable VAR_PLAYERJUMPPRESS does not exist in RSDKv4!
-		if object[0].jumpPress == true
-			CallFunction(Player_Action_Jump)
-// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
-// WARNING: Variable VAR_PLAYERXPOS does not exist in RSDKv4!
-			object[0].speed = object[0].xpos
-// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
-			object[0].speed -= object.xpos
-// WARNING: Variable VAR_PLAYERSPEED does not exist in RSDKv4!
-			object[0].speed >>= 2
-
-#platform: Use_Origins
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-			object[0].state = Player_State_Air_NoDropDash
-#endplatform
-
-#platform: Use_Standalone
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-			object[0].state = Player_State_Air
-#endplatform
-
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-			Player.Timer = 0
-// WARNING: Function FUNC_PLAYSTAGESFX does not exist in RSDKv4!
-// Arguments: SFX_S_SHOT, false
-
-		end if
-	else
-		if Object.OnObject == true
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-			if object[0].state == Player_State_SpinningTop
-// WARNING: Variable VAR_PLAYERGRAVITY does not exist in RSDKv4!
-				if object[0].gravity == GRAVITY_GROUND
-// WARNING: Variable VAR_PLAYERSTATE does not exist in RSDKv4!
-					object[0].state = Player_State_Ground
-					Object.OnObject = false
-// WARNING: Variable VAR_PLAYERTIMER does not exist in RSDKv4!
-					Player.Timer = 0
+			if Object.OnObject == true
+				if object[currentPlayer].state == Player_State_SpinningTop
+					if object[currentPlayer].gravity == GRAVITY_GROUND
+						object[currentPlayer].state = Player_State_Ground
+						Object.OnObject = false
+						Player[currentPlayer].Timer = 0
+					end if
 				end if
 			end if
 		end if
-	end if
-next
+	next
 end event
 
 

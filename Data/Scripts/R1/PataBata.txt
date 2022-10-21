@@ -97,14 +97,16 @@ event ObjectUpdate
 
 		end switch
 	end if
-
-	BoxCollisionTest(C_TOUCH, object.entityPos, -14, -14, 14, 14, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
-	if checkResult == true
-		CallFunction(Player_BadnikBreak)
-		if object.type == TypeName[Blank Object]	
-			CallFunction(EmeraldManager_AwardEmerald)	
+	
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		BoxCollisionTest(C_TOUCH, object.entityPos, -14, -14, 14, 14, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+		if checkResult == true
+			CallFunction(Player_BadnikBreak)
+			if object.type == TypeName[Blank Object]	
+				CallFunction(EmeraldManager_AwardEmerald)	
+			end if
 		end if
-	end if
+	next
 end event
 
 
