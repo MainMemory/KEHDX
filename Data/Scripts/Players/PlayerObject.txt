@@ -323,6 +323,8 @@ reserve function Player_TryTransform
 reserve function Player_State_BubbleBounce
 reserve function Player_Action_DblJumpSonic
 reserve function Player_HandleFlyCarry
+reserve function Player_State_SpinningTop
+reserve function Player_Do_Jump
 
 // ========================
 // Static Values
@@ -1815,6 +1817,7 @@ end function
 
 public function Player_Action_Jump
 	// Let's mind our head!!!
+	checkResult = false
 	temp1 = false
 	if player.collisionMode == 0
 		temp6 = player.xpos
@@ -2650,6 +2653,9 @@ public function Player_State_Ground
 	end if
 end function
 
+public function Player_Do_Jump
+	CallFunction(Player_Action_Jump)
+end function
 
 public function Player_State_Sleeping
 	if player.gravity == GRAVITY_AIR
@@ -4683,6 +4689,26 @@ public function Player_State_ContinueRun
 	end if
 end function
 
+// Palmtree Panic and Wacky Workbench spinning tops
+public function Player_State_SpinningTop
+	Player.Timer += Player.rollAnimationSpeed
+	if player.gravity == GRAVITY_AIR // Drop from them if you get out of range
+
+#platform: USE_ORIGINS
+		player.state = Player_State_Air_NoDropDash
+#endplatform
+
+#platform: USE_STANDALONE
+		player.state = Player_State_Air
+#endplatform
+
+		player.animation = ANI_WALKING
+		Player.Timer = 0
+		CallFunction(Player_HandleAirMovement)
+	else
+		CallFunction(Player_HandleOnGround)
+	end if
+end function
 
 // ========================
 // Events
