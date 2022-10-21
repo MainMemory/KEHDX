@@ -10,15 +10,18 @@
 
 private alias object.value0 : object.timer
 private alias object.value1 : object.originPos.y
+private alias object.value2 : object.emeraldsparkle
 
 private alias 0 : EMERALD_NONE
 private alias 1 : EMERALD_ITEM
 private alias 2 : EMERALD_OBTAINED
+private alias 3 : EMERALD_SPARKLE
 
 // Emerald Manager (HUD) Aliases
 private alias 0 : EMERALD_MODE_S2
 private alias 1 : EMERALD_MODE_HPZ
 private alias 2 : EMERALD_MODE_S1
+private alias 3 : EMERALD_MODE_CD
 
 
 // ========================
@@ -44,8 +47,10 @@ event ObjectUpdate
 		object.angle += 4
 		object.angle &= 511
 		
-		object.frame++
-		object.frame %= 96
+		if EmeraldManager_Mode != EMERALD_MODE_CD
+			object.frame++
+			object.frame %= 96
+		end if
 		
 		object.animationTimer++
 		object.animationTimer &= 15
@@ -61,7 +66,8 @@ event ObjectUpdate
 			
 			if checkResult == true
 				CallFunction(EmeraldManager_AwardEmerald)
-				ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+				object.state = EMERALD_SPARKLE
+				object.timer = 0
 			end if
 		next
 		break
@@ -102,6 +108,21 @@ event ObjectUpdate
 		end if
 		break
 		
+	case EMERALD_SPARKLE
+		object.timer++
+		if object.timer == 6
+			object.timer = 0
+			object.emeraldsparkle++
+			if object.emeraldsparkle >= 4
+				object.emeraldsparkle = 0
+				object.value3++
+			end if
+		end if
+		if object.value3 == 4
+			ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
+		end if
+		break
+
 	end switch
 end event
 
@@ -118,7 +139,7 @@ event ObjectDraw
 				temp0 = object.frame
 				temp0 -= 60
 				temp0 >>= 2
-				DrawSpriteFX(temp0, FX_INK, object.xpos, object.ypos)
+				DrawSprite(temp0)
 			end if
 			break
 			
@@ -134,6 +155,17 @@ event ObjectDraw
 			end if
 			break
 			
+		case EMERALD_MODE_CD
+			temp0 = object.frame
+			temp0 /= 12
+			object.frame++
+			if object.frame > 47
+				object.frame = 0
+			endif
+			temp0 += 12
+			DrawSprite(temp0)
+			break
+
 		end switch
 		break
 		
@@ -149,11 +181,20 @@ event ObjectDraw
 		case EMERALD_MODE_S1
 			temp0 = 10
 			break
+		case EMERALD_MODE_CD
+			temp0 = 12
+			break
 		end switch
 		
 		DrawSpriteFX(temp0, FX_INK, object.xpos, object.ypos)
 		break
 		
+	case EMERALD_SPARKLE
+		temp0 = 16
+		temp0 += object.emeraldsparkle
+		DrawSprite(temp0)
+		break
+
 	end switch
 end event
 
@@ -182,15 +223,30 @@ event ObjectStartup
 		// 10 - 11: S1 Emerald
 		SpriteFrame(-8, -8, 16, 16, 126, 158)
 		SpriteFrame(-8, -8, 16, 16, 143, 158)
+
+		//12 - 15: CD Time Stone
+		temp0 = 0
+		temp1 = 109
+		while temp0 < 4
+			SpriteFrame(-10, -12, 20, 24, temp1, 209)
+			temp1 += 21
+			temp0++
+		loop
 	else
 		// 0 - 11, make them all the same sprite
 		temp0 = 0
-		while temp0 < 12
+		while temp0 < 16
 			SpriteFrame(-8, -8, 16, 16, 177, 192)
 			temp0++
 		loop
 	end if
 	
+	//16 - 19, Emerald Sparkle
+	SpriteFrame(-12, -12, 24, 24, 206, 149)
+	SpriteFrame(-12, -12, 24, 24, 231, 149)
+	SpriteFrame(-12, -12, 24, 24, 206, 174)
+	SpriteFrame(-12, -12, 24, 24, 231, 174)
+
 	foreach (TypeName[Chaos Emerald], arrayPos0, ALL_ENTITIES)
 		object[arrayPos0].drawOrder = 4
 		object[arrayPos0].originPos.y = object[arrayPos0].ypos

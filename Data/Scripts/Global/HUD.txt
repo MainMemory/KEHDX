@@ -119,6 +119,7 @@ public value EmeraldManager_Mode = 0; // Default of EMERALD_MODE_S2, aliases are
 private alias 0 : EMERALD_MODE_S2
 private alias 1 : EMERALD_MODE_HPZ
 private alias 2 : EMERALD_MODE_S1
+private alias 3 : EMERALD_MODE_CD
 
 
 // ========================
@@ -771,6 +772,8 @@ event ObjectUpdate
 			stage.newXBoundary2 = tileLayer[0].xsize
 			stage.newXBoundary2 <<= 7
 			
+			stage.newXBoundary1 = stage.newXBoundary2
+
 			// Move the player to the ending position
 			player[0].state = Player_State_Air
 			player[0].xpos = EmeraldManager_EndX
@@ -913,10 +916,14 @@ event ObjectStartup
 	if stage.listPos == 9
 		EmeraldManager_Mode = EMERALD_MODE_HPZ
 	else
-		if stage.listPos > 9
-			EmeraldManager_Mode = EMERALD_MODE_S1
+		if stage.listPos > 15
+			EmeraldManager_Mode = EMERALD_MODE_CD
 		else
-			EmeraldManager_Mode = EMERALD_MODE_S2
+			if stage.listPos > 9
+				EmeraldManager_Mode = EMERALD_MODE_S1
+			else
+				EmeraldManager_Mode = EMERALD_MODE_S2
+			end if
 		end if
 	end if
 	
@@ -1045,6 +1052,9 @@ event ObjectStartup
 		SetTableValue( 0, temp0, EmeraldManager_RadarScale)
 		temp0++
 	loop
+	
+	stage.debugmode = 1
+
 end event
 
 
