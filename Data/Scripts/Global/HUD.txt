@@ -929,8 +929,8 @@ event ObjectStartup
 	
 	// KEHDX TODO: i think the sprites for these got messed up somewhere along the way, like a mix of s1 and s2 sprites in MODE_S2? i (think) i (lave) fixed them, but double-run by MM or anyone else more familiar with how it should be
 	switch EmeraldManager_Mode
-	case EMERALD_MODE_S2
-	default
+	case EMERALD_MODE_S2 //sonk 2
+	default //incase we ever add another radar
 		if saved.radarstyle == 0
 			// 38 - Old Emerald Radar
 			SpriteFrame(-8, -8, 16, 16, 52, 290)
@@ -946,7 +946,7 @@ event ObjectStartup
 		end if
 		break
 		
-	case EMERALD_MODE_HPZ
+	case EMERALD_MODE_HPZ //hidd pal
 		// 38 - HPZ Shard Radar
 		SpriteFrame(-8, -8, 16, 16, 1, 307)
 		
@@ -959,22 +959,27 @@ event ObjectStartup
 		end if
 		break
 		
-	case EMERALD_MODE_S1
+	case EMERALD_MODE_S1 //sonk 1
+		// 38 - S1 Emerald Radar
+		SpriteFrame(-8, -8, 16, 16, 103, 290)
+
 		if saved.radarstyle == 0
-			// 38 - New Emerald Radar
-			SpriteFrame(-8, -8, 16, 16, 52, 290)
-			
 			// 39 - New Got Emerald
 			SpriteFrame(0, 0, 16, 16, 86, 290)
 		else
-			// 38 - Old Emerald Radar
-			SpriteFrame(-8, -8, 16, 16, 1, 290)
-			
 			// 39 - Old Got Emerald
 			SpriteFrame(0, 0, 16, 16, 69, 290)
 		end if
 		break
 		
+	case EMERALD_MODE_CD //CD-eez Nuts
+		// 38 - CD Stone Radar
+		SpriteFrame(-8, -8, 16, 16, 52, 307)
+		
+		// 39 - CD Got Stone
+		SpriteFrame(0, 0, 16, 16, 69, 307)
+		break
+
 	end switch
 	
 	// 40-47 - Arrows
