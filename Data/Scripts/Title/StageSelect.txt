@@ -61,7 +61,7 @@ public alias 23 : SELECTION_STGSEL_COUNT // SELECTION_STGSEL_END + 1
 // The lowest bounds of the camrea
 // Used for touch input scrolling
 // ((SELECTION_STGSEL_END - 2) * 72)
-private alias 936 : STAGESEL_SCROLL_LOWBOUNDS
+private alias 1440 : STAGESEL_SCROLL_LOWBOUNDS
 
 // How tall each row should be
 private alias 72 : STAGESEL_STAGEROWSIZE
@@ -542,7 +542,7 @@ event ObjectUpdate
 				stage.listPos = 0
 				stage.activelist = BONUS_STAGE
 			else
-				stage.listPos = object.selection
+				stage.listPos = saveRAM[251]
 				stage.activelist = REGULAR_STAGE
 			end if
 
