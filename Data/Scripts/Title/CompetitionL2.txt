@@ -148,7 +148,7 @@ event ObjectUpdate
 				// In order to be able to use relative slots, we're doing some stage.entityPos trickery here
 				arrayPos0 = stage.entityPos
 				
-				stage.entityPos += 20
+				stage.entityPos += 50
 				
 				temp1 = vs.activePlayers
 				temp1 <<= 1
@@ -161,10 +161,13 @@ event ObjectUpdate
 					temp2 *= TypeName[Competition L1]
 					ResetObjectEntity(object.entityPos, temp2, temp0, object[32].xpos, object[32].ypos)
 					object.priority = 1
-					object.drawPos.x = object[+16].xpos
-					object.drawPos.y = object[+12].ypos
-					object.targetPos.x = object[+12].xpos
-					object.targetPos.y = object[+12].ypos
+					object.drawPos.x = object[-14].xpos //Make sure it equals 36
+			
+					//As for these, 32.
+					object.drawPos.y = object[-18].ypos
+					object.targetPos.x = object[-18].xpos
+					object.targetPos.y = object[-18].ypos
+
 					object.drawWidth = 127
 					object.drawHeight = 87
 					object.drawColour.r = 0xE0
@@ -263,7 +266,7 @@ event ObjectUpdate
 				
 				CheckEqual(keyPress[0].buttonB, true)
 				temp0 = checkResult
-				CheckEqual(object[+20].speed, 0) // P1 box, garunteed to be active
+				CheckEqual(object[+50].speed, 0) // P1 box, garunteed to be active
 				temp0 &= checkResult
 				if temp0 == true
 					object.dim = false
@@ -272,10 +275,10 @@ event ObjectUpdate
 					
 					// Make all the Ready boxes move out
 					// (Not using a loop here on purpose, that just makes things more
-					object[+20].state = COMP_SUB_READY_OUT
-					object[+21].state = COMP_SUB_READY_OUT
-					object[+22].state = COMP_SUB_READY_OUT
-					object[+23].state = COMP_SUB_READY_OUT
+					object[+50].state = COMP_SUB_READY_OUT
+					object[+51].state = COMP_SUB_READY_OUT
+					object[+52].state = COMP_SUB_READY_OUT
+					object[+53].state = COMP_SUB_READY_OUT
 				end if
 				
 			else
@@ -505,7 +508,7 @@ event ObjectDraw
 			object.spriteSheet = object[32].mainSheet
 			
 			temp0 = object.propertyValue
-			temp0 += 19
+			temp0 += 26
 			
 			temp1 = object.propertyValue
 			temp1 *= 7
@@ -613,7 +616,7 @@ event ObjectStartup
 	loop
 
 	temp2--
-	// Bottom row
+	// Bottom row, CD-eez Nuts
 	temp0 = 0
 	temp1 = 0
 	while temp0 < temp2
