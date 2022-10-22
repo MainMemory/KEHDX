@@ -108,7 +108,7 @@ event ObjectUpdate
 			
 			temp0 = 1
 			temp1 = 38
-			while temp0 <= SELECTION_STGSEL_COUNT // inclusive to reach SBZ (remember that here, stage IDs start at 1)
+			while temp0 <= SELECTION_STGSEL_COUNT // inclusive to reach MMZ (remember that here, stage IDs start at 1)
 				ResetObjectEntity(arrayPos0, TypeName[Competition L2], temp0, object.xpos, object.ypos)
 				object[arrayPos0].priority = 1
 				object[arrayPos0].iypos = temp1
@@ -374,11 +374,11 @@ event ObjectDraw
 		// We're the master object
 		
 		// Draw the "Select a Stage" header
-		DrawSpriteScreenXY(47, screen.xcenter, 16)
+		DrawSpriteScreenXY(61, screen.xcenter, 16)
 		
 		// Both boxes are the same dimensions
 		object.drawPos.y = 30
-		object.drawWidth = 128
+		object.drawWidth = 150
 		object.drawHeight = 180
 		object.drawColour.r = 0xE0
 		object.drawColour.g = 0x00
@@ -386,11 +386,11 @@ event ObjectDraw
 		
 		// First, left box with all the stage names
 		object.drawPos.x = screen.xcenter
-		object.drawPos.x -= 147
+		object.drawPos.x -= 160
 		CallFunction(KEH_DrawSelBox)
 		
 		// Then, right box with other stuff
-		object.drawPos.x += 152
+		object.drawPos.x += 165
 		object.drawPos.y = 30
 		CallFunction(KEH_DrawSelBox)
 		
@@ -399,7 +399,7 @@ event ObjectDraw
 		temp0 = object.drawWidth
 		temp0 /= 2
 		object.drawPos.x += temp0
-		DrawSpriteScreenXY(46, object.drawPos.x, 180)
+		DrawSpriteScreenXY(60, object.drawPos.x, 180)
 		
 		// Now, draw the icon on top of the emblem
 		SetActivePalette(1, 0, screen.ysize)
@@ -428,13 +428,14 @@ event ObjectDraw
 			temp1 = vs.playerIDs
 			temp1 &= 0xFF
 			temp1 += 49
+			temp1 += 14
 			DrawSpriteScreenXY(temp1, object.drawPos.x, 80)
 			
 			object.drawPos.x += 10
-			DrawSpriteScreenXY(48, object.drawPos.x, 80)
+			DrawSpriteScreenXY(62, object.drawPos.x, 80)
 			
 			object.drawPos.x += 20
-			DrawNumbers(36, object.drawPos.x, 76, 0, 2, 8, true)
+			DrawNumbers(50, object.drawPos.x, 76, 0, 2, 8, true)
 			
 			object.drawPos.x -= 30
 		end if
@@ -446,13 +447,14 @@ event ObjectDraw
 			temp1 &= 0xFF0000
 			temp1 >>= 16
 			temp1 += 49
+			temp1 += 14
 			DrawSpriteScreenXY(temp1, object.drawPos.x, 100)
 			
 			object.drawPos.x += 10
-			DrawSpriteScreenXY(48, object.drawPos.x, 100)
+			DrawSpriteScreenXY(62, object.drawPos.x, 100)
 			
 			object.drawPos.x += 20
-			DrawNumbers(36, object.drawPos.x, 96, 0, 2, 8, true)
+			DrawNumbers(50, object.drawPos.x, 96, 0, 2, 8, true)
 			
 			object.drawPos.x += 34 // hardcoded derivative of temp2 (temp2 - 10 - 20)
 		else
@@ -466,13 +468,14 @@ event ObjectDraw
 			temp1 &= 0xFF00
 			temp1 >>= 8
 			temp1 += 49
+			temp1 += 14
 			DrawSpriteScreenXY(temp1, object.drawPos.x, 80)
 			
 			object.drawPos.x += 10
-			DrawSpriteScreenXY(48, object.drawPos.x, 80)
+			DrawSpriteScreenXY(62, object.drawPos.x, 80)
 			
 			object.drawPos.x += 20
-			DrawNumbers(36, object.drawPos.x, 76, 0, 2, 8, true)
+			DrawNumbers(50, object.drawPos.x, 76, 0, 2, 8, true)
 			
 			object.drawPos.x -= 30
 		end if
@@ -484,13 +487,14 @@ event ObjectDraw
 			temp1 &= 0xFF000000
 			temp1 >>= 24
 			temp1 += 49
+			temp1 += 14
 			DrawSpriteScreenXY(temp1, object.drawPos.x, 100)
 			
 			object.drawPos.x += 10
-			DrawSpriteScreenXY(48, object.drawPos.x, 100)
+			DrawSpriteScreenXY(62, object.drawPos.x, 100)
 			
 			object.drawPos.x += 20
-			DrawNumbers(36, object.drawPos.x, 96, 0, 2, 8, true)
+			DrawNumbers(50, object.drawPos.x, 96, 0, 2, 8, true)
 		end if
 		
 		DrawRect(0, 0, screen.xsize, screen.ysize, 0x00, 0x20, 0x50, object.alpha)
@@ -519,8 +523,8 @@ event ObjectDraw
 			object.drawPos.y = object[32].scrOffset
 			object.drawPos.y += object.ypos
 			
-			object.drawPos.y >>= 16
-			
+			object.drawPos.y >>= 16	
+
 			temp2 = 7
 			temp3 = 0
 			
@@ -541,9 +545,11 @@ event ObjectDraw
 				CheckGreater(temp2, 0)
 				
 				if temp2 > 0
-					EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+					temp1 += 120
+					EditFrame(temp0, -10, temp3, 135, temp2, 0, temp1)
 					
 					DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
+					temp1 -= 120
 				end if
 			else
 				// Checking and cropping for lower bounds
@@ -563,7 +569,8 @@ event ObjectDraw
 			end if
 			
 			if checkResult == true
-				EditFrame(temp0, 0, temp3, 112, temp2, 0, temp1)
+				temp1 += 120
+				EditFrame(temp0, -10, temp3, 135, temp2, 0, temp1)
 				DrawSpriteScreenXY(temp0, object.drawPos.x, object.drawPos.y)
 			end if
 			
@@ -577,7 +584,7 @@ end event
 
 event ObjectStartup
 	// This object switches between two sheets, both of which have been loaded by Stage Select already, so let's skip over reloading them for right now
-	
+
 	// 0-3 - [1-4]P icons, for the main Menu sheet
 	SpriteFrame(-8, 0, 16, 7, 0, 72)
 	SpriteFrame(-8, 0, 16, 7, 0, 80)
@@ -585,8 +592,7 @@ event ObjectStartup
 	SpriteFrame(-8, 0, 16, 7, 0, 96)
 	
 	// 4-19 - Stage Icons, from the Icons sheet
-	temp2 = SELECTION_STGSEL_COUNT
-	temp2 /= 2
+	temp2 = 8
 	
 	// Top row
 	temp0 = 0
@@ -597,7 +603,7 @@ event ObjectStartup
 		temp0++
 	loop
 	
-	// Bottom row
+	// mid row
 	temp0 = 0
 	temp1 = 0
 	while temp0 < temp2
@@ -605,14 +611,24 @@ event ObjectStartup
 		temp1 += 32
 		temp0++
 	loop
+
+	temp2--
+	// Bottom row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(-16, -13, 32, 24, temp1, 48)
+		temp1 += 32
+		temp0++
+	loop
 	
 	// 20-35 - Stage Names, back to the main Menu sheet
 	// (yeah we could prolly just use the menu system, but we couldn't wrap crop the frames if they were text)
 	temp0 = 0
-	temp1 = 192
+	temp1 = 312
 	while temp0 < SELECTION_STGSEL_COUNT
 		// It is worth noting too, these values set here are absolutely useless since they get overwritten with EditFrame anyways
-		SpriteFrame(0, 0, 112, 7, 0, temp1)
+		SpriteFrame(0, 0, 135, 7, 0, temp1)
 		temp1 += 7
 		temp0++
 	loop
