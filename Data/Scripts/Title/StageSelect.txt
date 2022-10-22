@@ -55,8 +55,8 @@ private alias object.value4 : object.rank
 // object.selection Aliases
 // Also used by Comp Menu Local 2
 public alias 0  : SELECTION_STGSEL_START // EHZ
-public alias 15 : SELECTION_STGSEL_END   // SBZ
-public alias 16 : SELECTION_STGSEL_COUNT // SELECTION_STGSEL_END + 1
+public alias 22 : SELECTION_STGSEL_END   // MMZ
+public alias 23 : SELECTION_STGSEL_COUNT // SELECTION_STGSEL_END + 1
 
 // The lowest bounds of the camrea
 // Used for touch input scrolling
@@ -71,7 +71,7 @@ private alias 12 : STAGESEL_SPR_NUMBERS
 
 // These last two are used for stages, if stage count is ever changed than make sure to update these too
 private alias 22 : STAGESEL_SPR_STGICONS
-private alias 38 : STAGESEL_SPR_STGNAMES
+private alias 45 : STAGESEL_SPR_STGNAMES
 
 // Touch Input Aliases
 private alias -1 : TOUCHINPUT_NULL
@@ -140,9 +140,9 @@ private function StageSelect_DrawStageEntry
 	
 	// Draw the box
 	object.drawPos.x = screen.xcenter
-	object.drawPos.x -= 149
+	object.drawPos.x -= 168
 	object.drawPos.y = object.drawPos
-	object.drawWidth = 295
+	object.drawWidth = 336
 	object.drawHeight = 55
 	object.drawColour.r = 0xE0
 	object.drawColour.b = 0x00
@@ -167,7 +167,7 @@ private function StageSelect_DrawStageEntry
 	SetActivePalette(1, 0, screen.ysize)
 	
 	temp2 = screen.xcenter
-	temp2 -= 141
+	temp2 -= 168
 	
 	temp1 = temp0
 	temp1 += STAGESEL_SPR_STGICONS
@@ -179,8 +179,9 @@ private function StageSelect_DrawStageEntry
 	object.spriteSheet = object.mainSheet
 	SetActivePalette(0, 0, screen.ysize)
 	
-	// Go from Icon Frames to Name Frames (STAGESEL_SPR_STGNAMES - STAGESEL_SPR_STGICONS, in other words)
-	temp1 += SELECTION_STGSEL_COUNT
+	//Zone Name   
+	temp1 = temp0
+	temp1 += STAGESEL_SPR_STGNAMES
 	
 	// Draw the zone's name
 	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
@@ -205,7 +206,7 @@ private function StageSelect_DrawStageEntry
 	
 	// Play count
 	temp1 -= 34	
-	temp2 += 128
+	temp2 += 153
 	DrawNumbers(STAGESEL_SPR_NUMBERS, temp2, temp1, object[arrayPos0].playcount, 3, 8, false)
 	
 	// Tick marks
@@ -374,7 +375,9 @@ event ObjectUpdate
 			end if
 			
 			// If the player's touched the screen at all...
-			if touchscreen[0].down == true
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			
+			if checkResult > TOUCHINPUT_NULL
 				// ... then activate touch controls, and hide the Knuckles cursor too
 				options.physicalControls = false
 				object.selection = SELECTION_NULL
@@ -535,17 +538,17 @@ event ObjectUpdate
 			SetScreenFade(0, 0, 0, object.timer)
 		else
 			// If HPZ was selected, we should go to the special cutscene instead
-			CheckEqual(object.selection, 9)
-			stage.listPos = checkResult
-			stage.listPos ^= 1
-			stage.listPos *= object.selection
-			
-			stage.activeList = checkResult
-			stage.activeList++
-			
-			stage.playerListPos = 0
+			if object.selection == 9
+				stage.listPos = 0
+				stage.activelist = BONUS_STAGE
+			else
+				stage.listPos = object.selection
+				stage.activelist = REGULAR_STAGE
+			end if
+
 			player.lives = 3
-			
+			stage.playerListPos = saved.character
+
 			LoadStage()
 			StopMusic()
 			SetScreenFade(0, 0, 0, 0xFF)
@@ -617,13 +620,17 @@ event ObjectStartup
 	SpriteFrame(-20, -6, 40, 20, 85, 105)  // 4 - Blue back arrow
 	SpriteFrame(-20, -6, 40, 20, 85, 125)  // 5 - Red back arrow
 	
-	SpriteFrame(-101, 25, 45, 7, 0, 8) // 6 - Score:
-	SpriteFrame(-101, 41, 45, 7, 46, 8) // 7 - Rings:
+	//X offsets
+	temp0 = -125
+	temp1 = 39
+
+	SpriteFrame(temp0, 25, 45, 7, 0, 8) // 6 - Score:
+	SpriteFrame(temp0, 41, 45, 7, 46, 8) // 7 - Rings:
 	
-	SpriteFrame(19, 7, 85, 7, 413, 59)  // 8 - Play Count:
-	SpriteFrame(19, 19, 37, 7, 10, 15) // 9 - Time:
-	SpriteFrame(19, 31, 53, 7, 10, 143) // 10 - Deaths:
-	SpriteFrame(19, 43, 37, 7, 91, 8) // 11 - Rank:
+	SpriteFrame(temp1, 7, 85, 7, 413, 59)  // 8 - Play Count:
+	SpriteFrame(temp1, 19, 37, 7, 10, 15) // 9 - Time:
+	SpriteFrame(temp1, 31, 53, 7, 10, 143) // 10 - Deaths:
+	SpriteFrame(temp1, 43, 37, 7, 91, 8) // 11 - Rank:
 	
 	// 12-21 - Numbers (STAGESEL_SPR_NUMBERS)
 	temp0 = 0
@@ -635,15 +642,16 @@ event ObjectStartup
 	loop
 	
 	// These frames are for the "Icons" sheet
-	// 22-37 - Stage Icons, both S1 and S2 (STAGESEL_SPR_STGICONS)
-	temp2 = SELECTION_STGSEL_COUNT
-	temp2 /= 2
-	
+	// 22-44 - Stage Icons, both S1 and S2 (STAGESEL_SPR_STGICONS)
+	temp2 = 8
+
+	temp3 = -161 //X Offset
+
 	// Top row
 	temp0 = 0
 	temp1 = 0
 	while temp0 < temp2
-		SpriteFrame(-141, 16, 32, 24, temp1, 0)
+		SpriteFrame(temp3, 16, 32, 24, temp1, 0)
 		temp1 += 32
 		temp0++
 	loop
@@ -652,23 +660,33 @@ event ObjectStartup
 	temp0 = 0
 	temp1 = 0
 	while temp0 < temp2
-		SpriteFrame(-141, 16, 32, 24, temp1, 24)
+		SpriteFrame(temp3, 16, 32, 24, temp1, 24)
+		temp1 += 32
+		temp0++
+	loop
+
+	temp2-- //Only 7 stages in that row so
+	// Bottom row
+	temp0 = 0
+	temp1 = 0
+	while temp0 < temp2
+		SpriteFrame(temp3, 16, 32, 24, temp1, 48)
 		temp1 += 32
 		temp0++
 	loop
 	
-	// Not doing anything with the bottom row for now...
-	
+	temp2 = 0
 	// Now, all the frames are back to the "Menu" sheet
-	// 38-53 - Stage Names (STAGESEL_SPR_STGNAMES)
+	// 45-67 - Stage Names (STAGESEL_SPR_STGNAMES)
 	temp0 = 0
-	temp1 = 192
+	temp1 = 312
 	while temp0 < SELECTION_STGSEL_COUNT
-		SpriteFrame(-101, 9, 112, 7, 0, temp1)
+		SpriteFrame(-125, 9, 135, 7, 0, temp1)
 		temp1 += 7
 		temp0++
 	loop
 	
+
 	SetMusicTrack("2D.ogg", 2, 108000)
 	
 	arrayPos0 = 40
