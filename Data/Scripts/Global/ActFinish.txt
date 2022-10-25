@@ -361,6 +361,10 @@ event ObjectUpdate
 		break
 		
 	case ACTFINISH_MENU
+
+		//Turn off debug
+		stage.debugmode = false
+
 		if object.usingTouch == false
 			if keyPress[0].left == true
 				object.selection--

@@ -24,7 +24,8 @@ private alias object.gravity   : player.gravity
 // ========================
 
 event ObjectUpdate
-	if object.propertyValue == 0xFF
+	switch object.propertyValue 
+	case 0xFF
 		// The Master object, as placed in a level
 		
 		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
@@ -33,18 +34,34 @@ event ObjectUpdate
 		next
 		
 		object.type = TypeName[Blank Object]
-	else
+		break
+	case 3
 		// The individual, per-player object, as spawned by the Master
 		
-		currentPlayer = object.propertyValue
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 
-		if player[currentPlayer].gravity == GRAVITY_GROUND
-			object.type = TypeName[Blank Object]
-		else
-			player[currentPlayer].direction = object.direction
-			player[currentPlayer].animation = ANI_HURT
-		end if
-	end if
+			if player[currentPlayer].gravity == GRAVITY_GROUND
+				object.type = TypeName[Blank Object]
+			else
+				player[currentPlayer].direction = object.direction
+				player[currentPlayer].animation = ANI_JUMPING
+			end if
+		next
+		break
+	case 4
+		// The individual, per-player object, as spawned by the Master
+		
+		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+			if player[currentPlayer].gravity == GRAVITY_GROUND
+				object.type = TypeName[Blank Object]
+			else
+				player[currentPlayer].direction = object.direction
+				player[currentPlayer].animation = ANI_HURT
+			end if
+		next
+		break
+	end switch
 end event
 
 

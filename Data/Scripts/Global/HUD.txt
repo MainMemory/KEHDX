@@ -1058,7 +1058,7 @@ event ObjectStartup
 		temp0++
 	loop
 	
-	stage.debugmode = 1
+
 
 end event
 

@@ -29,6 +29,11 @@ private alias object.value38 : player.hitboxTop
 private alias object.value41 : player.hitboxRight
 private alias object.value39 : player.hitboxBottom
 
+private alias 0 : EMERALD_MODE_S2
+private alias 1 : EMERALD_MODE_HPZ
+private alias 2 : EMERALD_MODE_S1
+private alias 3 : EMERALD_MODE_CD
+
 // Monitor type aliases
 private alias 0  : MONITOR_BLANK
 private alias 1  : MONITOR_RINGS
@@ -147,9 +152,11 @@ event ObjectUpdate
 	
 	if object.propertyValue == MONITOR_TELEPORT
 		if object.noBounds == false
-			temp0 = object.ixpos
-			temp0 += 30
-			stage.newXBoundary2 = temp0
+			if stage.listPos != 13
+				temp0 = object.ixpos
+				temp0 += 30
+				stage.newXBoundary2 = temp0
+			end if
 		end if
 		
 		if object[9].state == 3
@@ -337,7 +344,24 @@ event ObjectStartup
 	SpriteFrame(-8, -9, 16, 14, 35, 96)
 	SpriteFrame(-8, -9, 16, 14, 18, 111)
 	SpriteFrame(-8, -9, 16, 14, 35, 111)
-	SpriteFrame(-8, -9, 16, 14, 18, 141)
+
+	//Emerald Monitor
+	switch EmeraldManager_Mode
+	case EMERALD_MODE_S1 //hedge 1
+		SpriteFrame(-8, -9, 16, 14, 35, 171)
+		break
+	case EMERALD_MODE_CD //hedge compact disc
+		SpriteFrame(-8, -9, 16, 14, 18, 186)
+		break
+	case EMERALD_MODE_S2 //hedge 2
+	default
+		SpriteFrame(-8, -9, 16, 14, 18, 141)
+		break
+	case EMERALD_MODE_HPZ //hedge in castle
+		SpriteFrame(-8, -9, 16, 14, 35, 186)
+		break
+	end switch
+
 	SpriteFrame(-8, -9, 16, 14, 35, 126)
 	SpriteFrame(-8, -9, 16, 14, 18, 126)
 	SpriteFrame(-8, -9, 16, 14, 35, 141)
@@ -437,7 +461,10 @@ event RSDKLoad
 	SpriteFrame(-8, -9, 16, 14, 35, 96)
 	SpriteFrame(-8, -9, 16, 14, 18, 111)
 	SpriteFrame(-8, -9, 16, 14, 35, 111)
-	SpriteFrame(-8, -9, 16, 14, 18, 141)
+	switch
+		SpriteFrame(-8, -9, 16, 14, 18, 141) 
+		break
+	end switch
 	SpriteFrame(-8, -9, 16, 14, 35, 126)
 	SpriteFrame(-8, -9, 16, 14, 18, 126)
 	SpriteFrame(-8, -9, 16, 14, 35, 141)

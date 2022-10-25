@@ -183,8 +183,8 @@ event ObjectUpdate
 			// Init
 			object.pause.state++
 			object.pause.usingTouch = false
-			object.pause.drawnBG = false
-			
+			object.pause.drawnBG = false		
+
 			// Not falling through on purpose, we want a one frame delay
 			break
 			
@@ -458,7 +458,7 @@ event ObjectDraw
 			temp1 -= 28
 			
 			// Background
-			DrawRect(temp0, temp1, 78, 56, 224, 80, 96, 0x80)
+			DrawRect(temp0, temp1, 78, 56, 224, 80, 96, 0xE0)
 			
 			// Now, draw the left border
 			// A 1px black column, followed by a 3px red
