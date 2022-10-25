@@ -2,13 +2,101 @@
 //--------Scripted by Christian Whitehead 'The Taxman'--------//
 //-------Unpacked By Rubberduckycooly's Script Unpacker-------//
 
+//Use to be a Palette handler, now it's the setup.
+
 // Aliases
 private alias object.value0 : Object.Timer
 
 // Priority
 private alias 1 : PRIORITY_ACTIVE
 
+// Tracks
+private alias 0 : TRACK_STAGE
+private alias 2 : TRACK_INVINCIBLE
+private alias 4 : TRACK_BOSS
+
+// Music Events
+private alias 0 : MUSICEVENT_FADETOBOSS
+private alias 1 : MUSICEVENT_FADETOSTAGE
+private alias 2 : MUSICEVENT_TRANSITION
+
+private alias 0 : MUSICEVENT_FLAG_NOCHANGE
+private alias 1 : MUSICEVENT_FLAG_SPEEDUP
+private alias 2 : MUSICEVENT_FLAG_SLOWDOWN
+
+// Music loops
+
+//These two are the same because we didn't add
+private alias 142428 : MUSIC_LOOP_R1   
+private alias 142428 : MUSIC_LOOP_R1_F 
+
+private alias 39528  : MUSIC_LOOP_INV
+private alias 30436  : MUSIC_LOOP_INV_F
+
+private function R1Setup_SpeedUpMusic
+	// 25 = SLOT_MUSICEVENT_CHANGE
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, MUSICEVENT_TRANSITION)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, MUSICEVENT_FLAG_NOCHANGE)
+	temp0 &= checkResult
+	if temp0 == false
+		switch music.currentTrack
+		case TRACK_STAGE
+			SetMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F)
+			SwapMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F, 0)
+			break
+
+		case TRACK_INVINCIBLE
+			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
+			SwapMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F, 8000)
+			break
+
+		case TRACK_BOSS // not used I think
+			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
+			SetMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F)
+			break
+		end switch
+	else
+		stage.musicFlag = MUSICEVENT_FLAG_SPEEDUP
+	end if
+end function
+
+
+private function R1Setup_SlowDownMusic
+	// 25 = SLOT_MUSICEVENT_CHANGE
+	CheckEqual(object[25].type, TypeName[Music Event])
+	temp0 = checkResult
+	CheckEqual(object[25].propertyValue, MUSICEVENT_TRANSITION)
+	temp0 &= checkResult
+	CheckEqual(stage.musicFlag, MUSICEVENT_FLAG_NOCHANGE)
+	temp0 &= checkResult
+	if temp0 == false
+		switch music.currentTrack
+		case TRACK_STAGE
+			SetMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV)
+			SwapMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1, 0)
+			break
+
+		case TRACK_INVINCIBLE
+			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1)
+			SwapMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV, 12650)
+			break
+
+		case TRACK_BOSS // not used I think
+			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1)
+			SetMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV)
+			break
+		end switch
+	else
+		stage.musicFlag = MUSICEVENT_FLAG_SLOWDOWN
+	end if
+end function
+
+
 event ObjectUpdate
+	//Palette
 	Object.Timer++
 	if Object.Timer == 6
 		Object.Timer = 0
@@ -19,13 +107,19 @@ end event
 
 
 event ObjectStartup
+	//Set this to object slot 19
 	object[19].type = TypeName[R1 Setup]
 	object[19].priority = PRIORITY_ACTIVE
 
+	//Spawn flowers when enemy dies
 	animaltype1 = TypeName[Flower]
 	animaltype2 = animaltype1
 
- 	SetMusicTrack("R1A.ogg", 0, 142428)
+	//Music
+ 	SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1)
+	SpeedUpMusic = R1Setup_SpeedUpMusic
+	SlowDownMusic = R1Setup_SlowDownMusic
+
 end event
 
 

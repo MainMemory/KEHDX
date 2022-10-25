@@ -39,7 +39,7 @@ private alias 0 : CONTROLMODE_NORMAL
 //KEHDX stuff
 private alias ANI_JUMPING : ANI_ROLL3D
 private alias Player_State_Static : Player_State_Ramp3D
-private alias object[0].value1  : player.timer
+private alias object[currentPlayer].value1  : player.timer
 
 //Hitboxes
 private alias object.value40 : player.hitboxLeft
@@ -51,21 +51,21 @@ event ObjectUpdate
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 	switch object.propertyValue
 	case RAMP3D_RUN
-		if object[0].gravity == GRAVITY_GROUND
+		if object[currentPlayer].gravity == GRAVITY_GROUND
 			BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
 			if checkResult == true
 
-				if object[0].state != Player_State_Static
-					object[0].state = Player_State_Static
+				if object[currentPlayer].state != Player_State_Static
+					object[currentPlayer].state = Player_State_Static
 
-					object[0].scrollTracking = true
-					object[0].tileCollisions = false
+					object[currentPlayer].scrollTracking = true
+					object[currentPlayer].tileCollisions = false
 
-					object[0].speed = 0
-					object[0].xvel = 0
-					object[0].yvel = -0xC0000
+					object[currentPlayer].speed = 0
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].yvel = -0xC0000
 
-					object[0].animationSpeed = 0
+					object[currentPlayer].animationSpeed = 0
 				end if
 			end if
 		end if
@@ -76,30 +76,30 @@ event ObjectUpdate
 		if checkResult == true
 
 #platform: USE_ORIGINS
-		object[0].state = Player_State_Air_NoDropDash
+		object[currentPlayer].state = Player_State_Air_NoDropDash
 #endplatform
 
 #platform: USE_STANDALONE
-		object[0].state = Player_State_Air
+		object[currentPlayer].state = Player_State_Air
 #endplatform
 
-			object[0].tileCollisions = true
+			object[currentPlayer].tileCollisions = true
 
-			object[0].speed = 0x80000
-			object[0].xvel = 0x80000
-			object[0].yvel = -0xE0000
+			object[currentPlayer].speed = 0x80000
+			object[currentPlayer].xvel = 0x80000
+			object[currentPlayer].yvel = -0xE0000
 
-			object[0].gravity = GRAVITY_AIR
-			object[0].rotation = 384
+			object[currentPlayer].gravity = GRAVITY_AIR
+			object[currentPlayer].rotation = 384
 
 			stage.newYBoundary2 = 1280
 			stage.newXBoundary1 = 2080
 
-			if object[0].animation == ANI_ROLL3D
-				object[0].animation = ANI_JUMPING
+			if object[currentPlayer].animation == ANI_ROLL3D
+				object[currentPlayer].animation = ANI_JUMPING
 			else
-				if object[0].animation != ANI_JUMPING
-					object[0].animation = ANI_RUNNING
+				if object[currentPlayer].animation != ANI_JUMPING
+					object[currentPlayer].animation = ANI_RUNNING
 				end if
 			end if
 
@@ -116,34 +116,34 @@ event ObjectUpdate
 		break
 
 	case RAMP3D_EXIT
-		if object[0].state == Player_State_Static
+		if object[currentPlayer].state == Player_State_Static
 			BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
 			if checkResult == true
 
 #platform: USE_ORIGINS
-				object[0].state = Player_State_Air_NoDropDash
+				object[currentPlayer].state = Player_State_Air_NoDropDash
 #endplatform
 
 #platform: USE_STANDALONE
-				object[0].state = Player_State_Air
+				object[currentPlayer].state = Player_State_Air
 #endplatform
 
-				object[0].tileCollisions = true
+				object[currentPlayer].tileCollisions = true
 
-				object[0].speed = 0x40000
-				object[0].xvel = 0x40000
-				object[0].yvel = -0xC0000
+				object[currentPlayer].speed = 0x40000
+				object[currentPlayer].xvel = 0x40000
+				object[currentPlayer].yvel = -0xC0000
 
-				object[0].gravity = GRAVITY_AIR
-				object[0].rotation = 384
+				object[currentPlayer].gravity = GRAVITY_AIR
+				object[currentPlayer].rotation = 384
 
 				stage.newYBoundary2 = 1280
 
-				if object[0].animation == ANI_ROLL3D
-					object[0].animation = ANI_JUMPING
+				if object[currentPlayer].animation == ANI_ROLL3D
+					object[currentPlayer].animation = ANI_JUMPING
 				else
-					if object[0].animation != ANI_JUMPING
-						object[0].animation = ANI_RUNNING
+					if object[currentPlayer].animation != ANI_JUMPING
+						object[currentPlayer].animation = ANI_RUNNING
 					end if
 				end if
 			end if
@@ -151,7 +151,7 @@ event ObjectUpdate
 		break
 
 	case RAMP3D_SET_YBOUND
-		if object[0].xpos > object.xpos
+		if object[currentPlayer].xpos > object.xpos
 			stage.curYBoundary2 = 1024
 		else
 			stage.curYBoundary2 = 1280
@@ -159,30 +159,30 @@ event ObjectUpdate
 		break
 
 	case RAMP3D_ENTER
-		if object[0].xpos > object.xpos
-			if object[0].gravity == GRAVITY_GROUND
-				if object[0].state != Player_State_Static
-					if object[0].state == Player_State_Roll
+		if object[currentPlayer].xpos > object.xpos
+			if object[currentPlayer].gravity == GRAVITY_GROUND
+				if object[currentPlayer].state != Player_State_Static
+					if object[currentPlayer].state == Player_State_Roll
 
-						if object[0].angle > 216
-							object[0].animation = ANI_JUMPING
+						if object[currentPlayer].angle > 216
+							object[currentPlayer].animation = ANI_JUMPING
 						else
-							if object[0].angle == 0
-								object[0].animation = ANI_JUMPING
+							if object[currentPlayer].angle == 0
+								object[currentPlayer].animation = ANI_JUMPING
 							else
-								object[0].animation = ANI_ROLL3D
+								object[currentPlayer].animation = ANI_ROLL3D
 							end if
 						end if
 					else
 
-						if object[0].speed != 0
-							object[0].state = Player_State_Ground
+						if object[currentPlayer].speed != 0
+							object[currentPlayer].state = Player_State_Ground
 						end if
 					end if
 				end if
 			end if
 
-			StarBush1.XOriginPos = object[0].xpos
+			StarBush1.XOriginPos = object[currentPlayer].xpos
 			StarBush1.XOriginPos -= object.xpos
 
 			BoostSpinner.XOriginPos = StarBush1.XOriginPos
@@ -196,7 +196,7 @@ event ObjectUpdate
 			BoostSpinner.XOriginPos += BoostSpinner.XPos
 
 			temp0 = object.ypos
-			temp0 -= object[0].ypos
+			temp0 -= object[currentPlayer].ypos
 			if temp0 < 0xE00000
 
 				temp0 = object[0].xpos
@@ -226,26 +226,26 @@ event ObjectUpdate
 
 			BoostSpinner.XOriginPos = BoostSpinner.XPos
 
-			if object[0].gravity == GRAVITY_GROUND
-				if object[0].state == Player_State_Ground
-					object[0].state = Player_State_Ground
+			if object[currentPlayer].gravity == GRAVITY_GROUND
+				if object[currentPlayer].state == Player_State_Ground
+					object[currentPlayer].state = Player_State_Ground
 				end if
 			end if
 
 		end if
-		Player.XOriginPos = object[0].xpos
+		Player.XOriginPos = object[currentPlayer].xpos
 		break
 
 	case RAMP3D_DROP
 #platform: USE_ORIGINS
-		CheckEqual(object[0].state, Player_State_Air)
+		CheckEqual(object[currentPlayer].state, Player_State_Air)
 		temp0 = checkResult
-		CheckEqual(object[0].state, Player_State_Air)
+		CheckEqual(object[currentPlayer].state, Player_State_Air)
 		temp0 |= checkResult
 #endplatform
 
 #platform: USE_STANDALONE
-		CheckEqual(object[0].state, Player_State_Air) // used to be a straight check, changed to be have a cleaner check with origins
+		CheckEqual(object[currentPlayer].state, Player_State_Air) // used to be a straight check, changed to be have a cleaner check with origins
 		temp0 = checkResult
 #endplatform
 
@@ -253,21 +253,21 @@ event ObjectUpdate
 		BoxCollisionTest(C_TOUCH, object.entityPos, -16, -128, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
 
 			if checkResult == true
-				object[0].animation = ANI_RUNNING
-				Player.XOriginPos = object[0].xpos
+				object[currentPlayer].animation = ANI_RUNNING
+				Player.XOriginPos = object[currentPlayer].xpos
 			end if
 
-			if object[0].animation == ANI_RUNNING
-				object[0].speed = 0
-				object[0].xvel = 0
-				object[0].xpos = Player.XOriginPos
+			if object[currentPlayer].animation == ANI_RUNNING
+				object[currentPlayer].speed = 0
+				object[currentPlayer].xvel = 0
+				object[currentPlayer].xpos = Player.XOriginPos
 			end if
 		end if
 		break
 
 	case RAMP3D_SET_YBOUND2
-		if object[0].ypos < object.ypos
-			if object[0].xpos > object.xpos
+		if object[currentPlayer].ypos < object.ypos
+			if object[currentPlayer].xpos > object.xpos
 				stage.curYBoundary2 = 792
 			else
 				stage.curYBoundary2 = 1024
@@ -276,11 +276,11 @@ event ObjectUpdate
 		break
 
 	case RAMP3D_RUN_FROM_TOP
-		if object[0].xpos > object.xpos
+		if object[currentPlayer].xpos > object.xpos
 			stage.curYBoundary2 = 1024
-			if object[0].gravity == GRAVITY_GROUND
-				if object[0].state == Player_State_Static
-					object[0].state = Player_State_Ground
+			if object[currentPlayer].gravity == GRAVITY_GROUND
+				if object[currentPlayer].state == Player_State_Static
+					object[currentPlayer].state = Player_State_Ground
 				end if
 			end if
 		else
@@ -293,30 +293,30 @@ event ObjectUpdate
 		if checkResult == true
 
 #platform: USE_ORIGINS
-		object[0].state = Player_State_Air_NoDropDash
+		object[currentPlayer].state = Player_State_Air_NoDropDash
 #endplatform
 
 #platform: USE_STANDALONE
-		object[0].state = Player_State_Air
+		object[currentPlayer].state = Player_State_Air
 #endplatform
 
-			object[0].tileCollisions = true
+			object[currentPlayer].tileCollisions = true
 
-			object[0].speed = 0x80000
-			object[0].xvel = 0x80000
-			object[0].yvel = -0xE0000
+			object[currentPlayer].speed = 0x80000
+			object[currentPlayer].xvel = 0x80000
+			object[currentPlayer].yvel = -0xE0000
 
-			object[0].gravity = GRAVITY_AIR
-			object[0].rotation = 384
+			object[currentPlayer].gravity = GRAVITY_AIR
+			object[currentPlayer].rotation = 384
 
 			stage.newYBoundary2 = 1280
 			stage.newXBoundary1 = 2080
 
-			if object[0].animation == ANI_ROLL3D
-				object[0].animation = ANI_JUMPING
+			if object[currentPlayer].animation == ANI_ROLL3D
+				object[currentPlayer].animation = ANI_JUMPING
 			else
-				if object[0].animation != ANI_JUMPING
-					object[0].animation = ANI_RUNNING
+				if object[currentPlayer].animation != ANI_JUMPING
+					object[currentPlayer].animation = ANI_RUNNING
 				end if
 			end if
 
@@ -331,13 +331,13 @@ event ObjectUpdate
 			loop
 		end if
 
-		if object[0].yvel < 0
-			object[0].controlMode = CONTROLMODE_NONE
-			object[0].left = false
-			object[0].right = false
+		if object[currentPlayer].yvel < 0
+			object[currentPlayer].controlMode = CONTROLMODE_NONE
+			object[currentPlayer].left = false
+			object[currentPlayer].right = false
 			object.priority = PRIORITY_ACTIVE
 		else
-			object[0].controlMode = CONTROLMODE_NORMAL
+			object[currentPlayer].controlMode = CONTROLMODE_NORMAL
 			object.priority = PRIORITY_BOUNDS
 		end if
 
@@ -348,14 +348,14 @@ end event
 
 
 event ObjectStartup
-	if object[0].xpos > 0x7D00000
+	if object[currentPlayer].xpos > 0x7D00000
 		stage.curYBoundary2 = 1280
 		object[15].type = TypeName[BackgroundFX]
 		object[15].priority = PRIORITY_ACTIVE
 		object[15].drawOrder = 0
 	end if
 
-	if object[0].xpos > 0xFA00000
+	if object[currentPlayer].xpos > 0xFA00000
 		stage.curYBoundary2 = 1024
 	end if
 end event
