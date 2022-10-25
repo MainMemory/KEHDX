@@ -51,6 +51,13 @@ private alias 0 : KEHDX_DISABLESPLASHES
 // ========================
 
 event ObjectUpdate
+
+	if KeyPress[0].start == true
+		if object.state <= SEGA_SHOWSEGALOGO
+			object.state = SEGA_FADETOTITLE
+		end if
+	end if
+
 	switch object.state
 	case SEGA_SETUP
 		object.alpha 		= 0x00

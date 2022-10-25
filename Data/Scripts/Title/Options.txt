@@ -58,18 +58,13 @@ reserve function Options_Button_RadarStyle
 // Function Definitions
 // ========================
 
-// Do note that actually saving isn't done here in any of these functions, instead the game saves only upon exiting the menu
-
 private function Options_Button_Character
 	temp0 = keyPress[0].left
 	temp0 |= keyPress[0].right
-	
-	if options.physicalControls == false
-		temp0 = true
-	end if
-	
+			
 	if temp0 == true
-		saved.character ^= 1
+		saved.character++
+		saved.character &= 1
 	end if
 	
 	switch saved.character
@@ -83,17 +78,15 @@ private function Options_Button_Character
 		
 	end switch
 	
+	WriteSaveRAM()
+	
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
 end function
 
 
-private function Options_Button_Radar
-	if options.physicalControls == false
-		keyPress[0].right = true
-	end if
-	
+private function Options_Button_Radar 
 	if keyPress[0].right == true
 		saved.radar++
 		saved.radar %= 3
@@ -118,9 +111,10 @@ private function Options_Button_Radar
 	case 2
 		EditMenuEntry(MENU_1, "ARROWS", 8, true)
 		break
-		
 	end switch
 	
+	WriteSaveRAM()
+
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -129,7 +123,6 @@ end function
 
 private function Options_Button_SoundTest
 	// KEHDX TODO: unimplemented
-	
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -138,7 +131,6 @@ end function
 
 private function Options_Button_MusicSwitch
 	// KEHDX TODO: unimplemented
-	
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -148,13 +140,10 @@ end function
 private function Options_Button_RadarStyle
 	temp0 = keyPress[0].left
 	temp0 |= keyPress[0].right
-	
-	if options.physicalControls == false
-		temp0 = true
-	end if
-	
+			
 	if temp0 == true
-		saved.radarstyle ^= 1
+		saved.radarstyle++
+		saved.radarstyle &= 1
 	end if
 	
 	switch saved.radarstyle
@@ -168,6 +157,8 @@ private function Options_Button_RadarStyle
 		
 	end switch
 	
+	WriteSaveRAM()
+
 	if options.physicalControls == false
 		object.selection = SELECTION_NULL
 	end if
@@ -243,12 +234,16 @@ event ObjectUpdate
 				object.state = OPTIONS_EXIT
 			end if
 			
-			if touchscreen[0].down == true
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			if checkResult > TOUCHINPUT_NULL
 				// Activate touch controls
 				options.physicalControls = false
 				object.selection = selection_NULL
 			end if
 		else
+			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
+			temp3 = checkResult
+			
 			// Touch inputs, including the current unimplemented buttons
 			
 			// Left bounds
@@ -276,7 +271,7 @@ event ObjectUpdate
 			loop
 			
 			// Check for the exit button
-			if touchscreen[0].down == true
+			if temp3 > TOUCHINPUT_NULL
 				CheckTouchRect(10, 190, 60, 220)
 				if checkResult > TOUCHINPUT_NULL
 					object.selection = object.buttonID

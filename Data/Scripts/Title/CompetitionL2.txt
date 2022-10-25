@@ -296,7 +296,7 @@ event ObjectUpdate
 			
 			object.timer++
 			CheckEqual(object.timer, 60)
-			object.state += checkResult
+			object.state += checkresult
 			break
 			
 		case COMP_MENU_FADEGAME
@@ -308,13 +308,14 @@ event ObjectUpdate
 			else
 				// Special handling for HPZ and its intro cutscene scene, on another list
 				
-				stage.listPos = object.selection
-				stage.listPos--
-				
-				if stage.listPos == 9
-					stage.activeList = BONUS_STAGE
+
+				if object.selection == 10
+					stage.listPos = 0
+					stage.activelist = BONUS_STAGE
 				else
-					stage.activeList = REGULAR_STAGE
+					stage.listPos = object.selection
+					stage.listPos--
+					stage.activelist = REGULAR_STAGE
 				end if
 				
 				// KEHDX TODO: temp, set up actual values here later

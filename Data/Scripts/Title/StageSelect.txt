@@ -316,7 +316,7 @@ event ObjectUpdate
 			object.state = 6
 			return
 		end if
-		
+
 		if options.physicalControls == true
 			// Using Physical Controls, with fixed scrolling
 			
@@ -536,13 +536,16 @@ event ObjectUpdate
 			object.timer += 8
 			music.volume -= 2
 			SetScreenFade(0, 0, 0, object.timer)
+			if keyPress[0].buttonZ == true
+				stage.debugmode = true
+			end if
 		else
 			// If HPZ was selected, we should go to the special cutscene instead
 			if object.selection == 9
 				stage.listPos = 0
 				stage.activelist = BONUS_STAGE
 			else
-				stage.listPos = saveRAM[251]
+				stage.listPos = object.selection
 				stage.activelist = REGULAR_STAGE
 			end if
 
