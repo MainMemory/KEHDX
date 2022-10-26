@@ -75,7 +75,6 @@ public function KEH_RunButton
 	// This function is called to update a button, with the values specified
 	
 	// Preconditions:
-	// - temp3 is if the screen is held at all or not (-1, 0, or above)
 	// - object.buttonLeft is the XPos of the left bounds of the button
 	// - object.buttonRight is the XPos of the right bounds of the button
 	// - object.buttonTop is the YPos of the top bounds of the button
@@ -83,7 +82,7 @@ public function KEH_RunButton
 	// - object.buttonID is the button ID of the button
 	// - object.buttonFunc is the function ID of the button, to be called if the button was pressed
 	
-	if temp3 > TOUCHINPUT_NULL
+	if touchscreen[0].down == true
 		CheckTouchRect(object.buttonLeft, object.buttonTop, object.buttonRight, object.buttonBottom)
 		if checkResult > TOUCHINPUT_NULL
 			object.selection = object.buttonID
@@ -267,17 +266,12 @@ event ObjectUpdate
 			end if
 			
 			// If the player's touched the screen at all...
-			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-			if checkResult > TOUCHINPUT_NULL
+			if touchscreen[0].down == true
 				// ... then activate touch controls, and hide the Knuckles cursor too
 				options.physicalControls = false
 				object.selection = SELECTION_NULL
 			end if
 		else
-			// Seeing if the player's got a finger on the screen at all
-			CheckTouchRect(0, 0, screen.xsize, screen.ysize)
-			temp3 = checkResult
-			
 			// Get the base XPos of the button, center screen aligned
 			
 			// Left bounds

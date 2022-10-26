@@ -296,7 +296,7 @@ event ObjectUpdate
 			
 			object.timer++
 			CheckEqual(object.timer, 60)
-			object.state += checkresult
+			object.state += checkResult
 			break
 			
 		case COMP_MENU_FADEGAME

@@ -151,12 +151,10 @@ event ObjectUpdate
 	end if
 	
 	if object.propertyValue == MONITOR_TELEPORT
-		if object.noBounds == false
-			if stage.listPos != 13
-				temp0 = object.ixpos
-				temp0 += 30
-				stage.newXBoundary2 = temp0
-			end if
+		if object.noBounds == false // Value, as set from the editor
+			temp0 = object.ixpos
+			temp0 += 30
+			stage.newXBoundary2 = temp0
 		end if
 		
 		if object[9].state == 3
@@ -345,7 +343,7 @@ event ObjectStartup
 	SpriteFrame(-8, -9, 16, 14, 18, 111)
 	SpriteFrame(-8, -9, 16, 14, 35, 111)
 
-	//Emerald Monitor
+	// Emerald icon frames
 	switch EmeraldManager_Mode
 	case EMERALD_MODE_S1 //hedge 1
 		SpriteFrame(-8, -9, 16, 14, 35, 171)
@@ -417,6 +415,9 @@ event RSDKEdit
 			checkResult >>= 4
 			checkResult &= 0xF
 			break
+		case 2 // enforceBounds
+			CheckNotEqual(object.noBounds, false)
+			break
 		end switch
 	else
 		switch editor.variableID
@@ -435,6 +436,10 @@ event RSDKEdit
 			temp0 <<= 4
 			object.propertyValue &= 0xF
 			object.propertyValue |= temp0
+			break
+		case 2 // enforceBounds
+			object.noBounds = editor.variableValue
+			object.noBounds ^= true
 			break
 		end switch
 	end if
@@ -461,10 +466,7 @@ event RSDKLoad
 	SpriteFrame(-8, -9, 16, 14, 35, 96)
 	SpriteFrame(-8, -9, 16, 14, 18, 111)
 	SpriteFrame(-8, -9, 16, 14, 35, 111)
-	switch
-		SpriteFrame(-8, -9, 16, 14, 18, 141) 
-		break
-	end switch
+	SpriteFrame(-8, -9, 16, 14, 18, 141)
 	SpriteFrame(-8, -9, 16, 14, 35, 126)
 	SpriteFrame(-8, -9, 16, 14, 18, 126)
 	SpriteFrame(-8, -9, 16, 14, 35, 141)
@@ -511,5 +513,9 @@ event RSDKLoad
 	AddEnumVariable("Random", 14)
 	AddEnumVariable("Shields Toggle", 15)
 	
-	SetVariableAlias(ALIAS_VAR_VAL2, "noBounds")
+	// 0 is enforce bounds in-game, we're flipping the displayed set here because that looks cleaner
+	AddEditorVariable("enforceBounds")
+	SetActiveVariable("enforceBounds")
+	AddEnumVariable("False", false)
+	AddEnumVariable("True",  true)
 end event
