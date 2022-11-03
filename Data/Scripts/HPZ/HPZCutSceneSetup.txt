@@ -313,8 +313,8 @@ event ObjectUpdate
 		if object.alpha == 255
 			// On to the real stage!
 			
-			stage.listPos = 9
 			stage.activeList = REGULAR_STAGE
+			stage.listPos = 9
 			LoadStage()
 			
 			StopMusic()
