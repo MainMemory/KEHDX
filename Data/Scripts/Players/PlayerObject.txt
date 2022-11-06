@@ -1817,7 +1817,6 @@ end function
 
 public function Player_Action_Jump
 	// Let's mind our head!!!
-	checkResult = false
 	temp1 = false
 	if player[currentplayer].collisionMode == 0
 		temp6 = player[currentplayer].xpos
@@ -1831,7 +1830,7 @@ public function Player_Action_Jump
 		player[currentplayer].ypos = temp7
 		temp0 = player[currentplayer].collisionBottom
 		if player[currentplayer].animation != ANI_JUMPING
-			player.iypos -= player[currentplayer].jumpOffset
+			player[currentplayer].iypos -= player[currentplayer].jumpOffset
 			temp0 += player[currentplayer].jumpOffset
 		end if
 		ObjectTileCollision(0, 0, temp0, player[currentplayer].collisionPlane)
@@ -1850,7 +1849,7 @@ public function Player_Action_Jump
 		player[currentplayer].xvel >>= 8
 
 		Sin256(player[currentplayer].yvel, player[currentplayer].angle)
-		player.yvel *= player[currentplayer].speed
+		player[currentplayer].yvel *= player[currentplayer].speed
 		Cos256(temp0, player[currentplayer].angle)
 		temp0 *= temp1
 		player[currentplayer].yvel -= temp0
@@ -1925,6 +1924,7 @@ public function Player_Action_Spindash
 	object[tempObjectPos].drawOrder = 4
 	object[tempObjectPos].direction = player.direction
 end function
+
 
 
 public function Player_State_Transform
@@ -2979,7 +2979,7 @@ public function Player_State_Crouch
 			player.timer = 0
 		else
 			if player.jumpPress == true
-				CallFunction(Player_Action_Spindash)
+				CallFunction(player.spindashFunction)
 			end if
 		end if
 	end if
@@ -4953,7 +4953,7 @@ event ObjectStartup
 		camera[0].enabled = true
 		camera[0].style = CAMERASTYLE_FOLLOW
 		camera[0].target = 0
-
+ 
 		currentPlayer = 0
 		
 		ResetObjectEntity(0, TypeName[Player Object], 0, player[arrayPos0].xpos, player[arrayPos0].ypos)
@@ -4975,7 +4975,7 @@ event ObjectStartup
 		player[0].hitboxRight 			= C_BOX
 		player[0].hitboxBottom 			= C_BOX
 
-		// Reset things for Super forms
+		// Resetthings for Super forms
 		Player_superState 		= SUPERSTATE_NONE
 		Player_superRingLossTimer = 0
 		Player_superBlendClr 		= 0
