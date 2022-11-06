@@ -5,6 +5,7 @@
 // Aliases
 private alias object.value0 : Object.Rotation
 private alias object.value1 : Object.OnObject
+private alias object.value2 : Object.OriginYPos
 
 // Player Alias
 // WARNING: Variable VAR_PLAYERVALUE6 does not exist in RSDKv4!
@@ -92,12 +93,18 @@ event ObjectUpdate
 				object.rotation -= 512
 			end if
 			if object[currentPlayer].jumpPress == true
+
 				CallFunction(Player_Action_Jump)
+
 				object[currentPlayer].speed = object[currentPlayer].xpos
 				object[currentPlayer].speed -= object.xpos
 				object[currentPlayer].speed >>= 2
+
 				Player[currentPlayer].Timer = 0
 				object[currentPlayer].state = Player_State_Air
+
+				Object.ypos = Object.OriginYPos
+
 				PlaySfx(SfxName[Shot], false)
 			end if
 		else
@@ -136,6 +143,11 @@ event ObjectStartup
 	SpriteFrame(-16, -8, 32, 16, 101, 76) // #0 - Spin Top Frame 0
 	SpriteFrame(-16, -8, 32, 16, 101, 76) // #1 - Spin Top Frame 1
 	SpriteFrame(-16, -8, 32, 16, 134, 76) // #2 - Spin Top Frame 2
+
+	foreach (TypeName[Spinning Top], arrayPos0, ALL_ENTITIES)
+		Object[arrayPos0].OriginYPos = Object[arrayPos0].ypos
+	next
+
 end event
 
 
