@@ -1819,55 +1819,55 @@ public function Player_Action_Jump
 	// Let's mind our head!!!
 	checkResult = false
 	temp1 = false
-	if player.collisionMode == 0
-		temp6 = player.xpos
-		temp7 = player.ypos
-		temp0 = player.collisionTop
+	if player[currentplayer].collisionMode == 0
+		temp6 = player[currentplayer].xpos
+		temp7 = player[currentplayer].ypos
+		temp0 = player[currentplayer].collisionTop
 		temp0 -= 2
-		ObjectTileCollision(3, 0, temp0, player.collisionPlane)
+		ObjectTileCollision(3, 0, temp0, player[currentplayer].collisionPlane)
 		
 		temp1 = checkResult
-		player.xpos = temp6
-		player.ypos = temp7
-		temp0 = player.collisionBottom
-		if player.animation != ANI_JUMPING
-			player.iypos -= player.jumpOffset
-			temp0 += player.jumpOffset
+		player[currentplayer].xpos = temp6
+		player[currentplayer].ypos = temp7
+		temp0 = player[currentplayer].collisionBottom
+		if player[currentplayer].animation != ANI_JUMPING
+			player.iypos -= player[currentplayer].jumpOffset
+			temp0 += player[currentplayer].jumpOffset
 		end if
-		ObjectTileCollision(0, 0, temp0, player.collisionPlane)
+		ObjectTileCollision(0, 0, temp0, player[currentplayer].collisionPlane)
 	end if
 
 	if temp1 == false
-		player.controlLock = 0
-		player.gravity = GRAVITY_AIR
-		temp1 = player.jumpStrength
-		temp1 += player.gravityStrength
-		Sin256(player.xvel, player.angle)
-		player.xvel *= temp1
-		Cos256(temp0, player.angle)
-		temp0 *= player.speed
-		player.xvel += temp0
-		player.xvel >>= 8
+		player[currentplayer].controlLock = 0
+		player[currentplayer].gravity = GRAVITY_AIR
+		temp1 = player[currentplayer].jumpStrength
+		temp1 += player[currentplayer].gravityStrength
+		Sin256(player[currentplayer].xvel, player[currentplayer].angle)
+		player[currentplayer].xvel *= temp1
+		Cos256(temp0, player[currentplayer].angle)
+		temp0 *= player[currentplayer].speed
+		player[currentplayer].xvel += temp0
+		player[currentplayer].xvel >>= 8
 
-		Sin256(player.yvel, player.angle)
-		player.yvel *= player.speed
-		Cos256(temp0, player.angle)
+		Sin256(player[currentplayer].yvel, player[currentplayer].angle)
+		player.yvel *= player[currentplayer].speed
+		Cos256(temp0, player[currentplayer].angle)
 		temp0 *= temp1
-		player.yvel -= temp0
-		player.yvel >>= 8
+		player[currentplayer].yvel -= temp0
+		player[currentplayer].yvel >>= 8
 
-		player.speed = player.xvel
-		player.scrollTracking = true
-		player.animation = ANI_JUMPING
-		player.angle = 0
-		player.collisionMode = CMODE_FLOOR
-		player.timer = 1
+		player[currentplayer].speed = player[currentplayer].xvel
+		player[currentplayer].scrollTracking = true
+		player[currentplayer].animation = ANI_JUMPING
+		player[currentplayer].angle = 0
+		player[currentplayer].collisionMode = CMODE_FLOOR
+		player[currentplayer].timer = 1
 		CallFunction(Player_HandleRollAnimSpeed)
 
-		if player.state == Player_State_Roll
-			player.state = Player_State_RollJump
+		if player[currentplayer].state == Player_State_Roll
+			player[currentplayer].state = Player_State_RollJump
 		else
-			player.state = Player_State_Air
+			player[currentplayer].state = Player_State_Air
 		end if
 
 #platform: USE_STANDALONE
@@ -1882,8 +1882,8 @@ public function Player_Action_Jump
 		end if
 #endplatform
 
-		player.collisionDisabled = true
-		player.jumpAbilityState = 1
+		player[currentplayer].collisionDisabled = true
+		player[currentplayer].jumpAbilityState = 1
 	end if
 	
 #platform: USE_ORIGINS
@@ -2979,7 +2979,7 @@ public function Player_State_Crouch
 			player.timer = 0
 		else
 			if player.jumpPress == true
-				CallFunction(player.spindashFunction)
+				CallFunction(Player_Action_Spindash)
 			end if
 		end if
 	end if
