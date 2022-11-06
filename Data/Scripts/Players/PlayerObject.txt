@@ -324,7 +324,6 @@ reserve function Player_State_BubbleBounce
 reserve function Player_Action_DblJumpSonic
 reserve function Player_HandleFlyCarry
 reserve function Player_State_SpinningTop
-reserve function Player_Do_Jump
 
 // ========================
 // Static Values
@@ -1817,56 +1816,57 @@ end function
 
 public function Player_Action_Jump
 	// Let's mind our head!!!
+	checkResult = false
 	temp1 = false
-	if player[currentplayer].collisionMode == 0
-		temp6 = player[currentplayer].xpos
-		temp7 = player[currentplayer].ypos
-		temp0 = player[currentplayer].collisionTop
+	if player.collisionMode == 0
+		temp6 = player.xpos
+		temp7 = player.ypos
+		temp0 = player.collisionTop
 		temp0 -= 2
-		ObjectTileCollision(3, 0, temp0, player[currentplayer].collisionPlane)
+		ObjectTileCollision(3, 0, temp0, player.collisionPlane)
 		
 		temp1 = checkResult
-		player[currentplayer].xpos = temp6
-		player[currentplayer].ypos = temp7
-		temp0 = player[currentplayer].collisionBottom
-		if player[currentplayer].animation != ANI_JUMPING
-			player[currentplayer].iypos -= player[currentplayer].jumpOffset
-			temp0 += player[currentplayer].jumpOffset
+		player.xpos = temp6
+		player.ypos = temp7
+		temp0 = player.collisionBottom
+		if player.animation != ANI_JUMPING
+			player.iypos -= player.jumpOffset
+			temp0 += player.jumpOffset
 		end if
-		ObjectTileCollision(0, 0, temp0, player[currentplayer].collisionPlane)
+		ObjectTileCollision(0, 0, temp0, player.collisionPlane)
 	end if
 
 	if temp1 == false
-		player[currentplayer].controlLock = 0
-		player[currentplayer].gravity = GRAVITY_AIR
-		temp1 = player[currentplayer].jumpStrength
-		temp1 += player[currentplayer].gravityStrength
-		Sin256(player[currentplayer].xvel, player[currentplayer].angle)
-		player[currentplayer].xvel *= temp1
-		Cos256(temp0, player[currentplayer].angle)
-		temp0 *= player[currentplayer].speed
-		player[currentplayer].xvel += temp0
-		player[currentplayer].xvel >>= 8
+		player.controlLock = 0
+		player.gravity = GRAVITY_AIR
+		temp1 = player.jumpStrength
+		temp1 += player.gravityStrength
+		Sin256(player.xvel, player.angle)
+		player.xvel *= temp1
+		Cos256(temp0, player.angle)
+		temp0 *= player.speed
+		player.xvel += temp0
+		player.xvel >>= 8
 
-		Sin256(player[currentplayer].yvel, player[currentplayer].angle)
-		player[currentplayer].yvel *= player[currentplayer].speed
-		Cos256(temp0, player[currentplayer].angle)
+		Sin256(player.yvel, player.angle)
+		player.yvel *= player.speed
+		Cos256(temp0, player.angle)
 		temp0 *= temp1
-		player[currentplayer].yvel -= temp0
-		player[currentplayer].yvel >>= 8
+		player.yvel -= temp0
+		player.yvel >>= 8
 
-		player[currentplayer].speed = player[currentplayer].xvel
-		player[currentplayer].scrollTracking = true
-		player[currentplayer].animation = ANI_JUMPING
-		player[currentplayer].angle = 0
-		player[currentplayer].collisionMode = CMODE_FLOOR
-		player[currentplayer].timer = 1
+		player.speed = player.xvel
+		player.scrollTracking = true
+		player.animation = ANI_JUMPING
+		player.angle = 0
+		player.collisionMode = CMODE_FLOOR
+		player.timer = 1
 		CallFunction(Player_HandleRollAnimSpeed)
 
-		if player[currentplayer].state == Player_State_Roll
-			player[currentplayer].state = Player_State_RollJump
+		if player.state == Player_State_Roll
+			player.state = Player_State_RollJump
 		else
-			player[currentplayer].state = Player_State_Air
+			player.state = Player_State_Air
 		end if
 
 #platform: USE_STANDALONE
@@ -1881,8 +1881,8 @@ public function Player_Action_Jump
 		end if
 #endplatform
 
-		player[currentplayer].collisionDisabled = true
-		player[currentplayer].jumpAbilityState = 1
+		player.collisionDisabled = true
+		player.jumpAbilityState = 1
 	end if
 	
 #platform: USE_ORIGINS
@@ -1924,7 +1924,6 @@ public function Player_Action_Spindash
 	object[tempObjectPos].drawOrder = 4
 	object[tempObjectPos].direction = player.direction
 end function
-
 
 
 public function Player_State_Transform
@@ -2653,9 +2652,6 @@ public function Player_State_Ground
 	end if
 end function
 
-public function Player_Do_Jump
-	CallFunction(Player_Action_Jump)
-end function
 
 public function Player_State_Sleeping
 	if player.gravity == GRAVITY_AIR
@@ -4953,7 +4949,7 @@ event ObjectStartup
 		camera[0].enabled = true
 		camera[0].style = CAMERASTYLE_FOLLOW
 		camera[0].target = 0
- 
+
 		currentPlayer = 0
 		
 		ResetObjectEntity(0, TypeName[Player Object], 0, player[arrayPos0].xpos, player[arrayPos0].ypos)
@@ -4975,7 +4971,7 @@ event ObjectStartup
 		player[0].hitboxRight 			= C_BOX
 		player[0].hitboxBottom 			= C_BOX
 
-		// Resetthings for Super forms
+		// Reset things for Super forms
 		Player_superState 		= SUPERSTATE_NONE
 		Player_superRingLossTimer = 0
 		Player_superBlendClr 		= 0

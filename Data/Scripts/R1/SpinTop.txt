@@ -18,6 +18,18 @@ private alias 1 : GRAVITY_AIR
 // Stage SFX
 private alias 1 : SFX_S_SHOT
 
+private alias object.state : player.state
+private alias object.xpos : player.xpos
+private alias object.speed : player.speed
+private alias object.frame : player.frame
+private alias object.animation : player.animation
+private alias object.gravity : player.gravity
+private alias object.jumpPress : player.jumpPress
+private alias object.up : player.up
+private alias object.down : player.down
+private alias object.left : player.left
+private alias object.right : player.right
+
 private alias object.value40 : player.hitboxLeft
 private alias object.value38 : player.hitboxTop
 private alias object.value41 : player.hitboxRight
@@ -26,7 +38,6 @@ private alias object.value39 : player.hitboxBottom
 private alias object.value1 : player.timer
 private alias ANI_WALKING : ANI_SPINNING_TOP
 
-private alias 2 : Ring.AniCount
 
 event ObjectUpdate
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
@@ -37,81 +48,80 @@ event ObjectUpdate
 		temp1 = object.rotation // This doesn't do anything...
 		if checkResult == true
 	
-			if object[currentPlayer].state != Player_State_SpinningTop
-				object[currentPlayer].speed = 0
+			if player[currentPlayer].state != Player_State_SpinningTop
+				player[currentPlayer].speed = 0
 				Object.OnObject = true
 				Player[currentPlayer].MinRollSpeed = 0x1000
 	
-				if object[currentPlayer].xpos > object.xpos
-					Player[currentPlayer].Timer = object[currentPlayer].xpos
+				if player[currentPlayer].xpos > object.xpos
+					Player[currentPlayer].Timer = player[currentPlayer].xpos
 					Player[currentPlayer].Timer -= object.xpos
 	
 					object.rotation = 128
 				else
 					Player[currentPlayer].Timer = object.xpos
-					Player[currentPlayer].Timer -= object[currentPlayer].xpos
+					Player[currentPlayer].Timer -= player[currentPlayer].xpos
 	
 					object.rotation = 384
 				end if
 	
 			end if
 	
-			if object[currentPlayer].xpos > object.xpos
-				if object[currentPlayer].left == true
+			if player[currentPlayer].xpos > object.xpos
+				if player[currentPlayer].left == true
 					Player[currentPlayer].Timer -= 0x1000
 				end if
 	
-				if object[currentPlayer].right == true
+				if player[currentPlayer].right == true
 					Player[currentPlayer].Timer += 0x1000
 				end if
 			else
-				if object[currentPlayer].left == true
+				if player[currentPlayer].left == true
 					Player[currentPlayer].Timer += 0x1000
 				end if
 	
-				if object[currentPlayer].right == true
+				if player[currentPlayer].right == true
 					Player[currentPlayer].Timer -= 0x1000
 				end if
 			end if
 	
-			object[currentPlayer].state = Player_State_SpinningTop
+			player[currentPlayer].state = Player_State_SpinningTop
 	
-			object[currentPlayer].animation = ANI_SPINNING_TOP
+			player[currentPlayer].animation = ANI_SPINNING_TOP
 	
-			Sin(object[currentPlayer].xpos, object.rotation)
-			object[currentPlayer].xpos *= Player[currentPlayer].Timer
-			object[currentPlayer].xpos >>= 9
-			object[currentPlayer].xpos += object.xpos
+			Sin(player[currentPlayer].xpos, object.rotation)
+			player[currentPlayer].xpos *= Player[currentPlayer].Timer
+			player[currentPlayer].xpos >>= 9
+			player[currentPlayer].xpos += object.xpos
 	
 			temp0 = object.rotation
 			temp0 -= 128
 			temp0 /= 86
-			object[currentPlayer].frame = temp0
+			player[currentPlayer].frame = temp0
 	
 			object.rotation += 16
 			if object.rotation > 639
 				object.rotation -= 512
 			end if
-			if object[currentPlayer].jumpPress == true
+			
+			if player[currentPlayer].jumpPress == true
+				
+				player[currentPlayer].state = Player_Action_Jump
+				player[currentPlayer].timer = 0
+				
+				player[currentPlayer].speed = player[currentPlayer].xpos
+				player[currentPlayer].speed -= object.xpos
+				player[currentPlayer].speed >>= 2
 
-				CallFunction(Player_Action_Jump)
-
-				object[currentPlayer].speed = object[currentPlayer].xpos
-				object[currentPlayer].speed -= object.xpos
-				object[currentPlayer].speed >>= 2
-
-				Player[currentPlayer].Timer = 0
-				object[currentPlayer].state = Player_State_Air
-
-				Object.ypos = Object.OriginYPos
+				object.ypos = Object.OriginYPos
 
 				PlaySfx(SfxName[Shot], false)
 			end if
 		else
 			if Object.OnObject == true
-				if object[currentPlayer].state == Player_State_SpinningTop
-					if object[currentPlayer].gravity == GRAVITY_GROUND
-						object[currentPlayer].state = Player_State_Ground
+				if player[currentPlayer].state == Player_State_SpinningTop
+					if player[currentPlayer].gravity == GRAVITY_GROUND
+						player[currentPlayer].state = Player_State_Ground
 						Object.OnObject = false
 						Player[currentPlayer].Timer = 0
 					end if
@@ -125,10 +135,8 @@ end event
 event ObjectDraw
 	DrawSprite(object.frame)
 
-	temp0 = Ring.AniCount
-	temp0 &= 1
-
-	if temp0 == 0
+	GetBit(temp0, ringTimer, 0)
+	if temp0 == false
 		object.frame++
 		if object.frame > 2
 			object.frame = 0
