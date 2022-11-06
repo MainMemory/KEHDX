@@ -28,7 +28,7 @@ private alias 2 : MUSICEVENT_FLAG_SLOWDOWN
 
 //These two are the same because we didn't add
 private alias 142428 : MUSIC_LOOP_R1   
-private alias 142428 : MUSIC_LOOP_R1_F 
+private alias 113679 : MUSIC_LOOP_R1_F 
 
 private alias 39528  : MUSIC_LOOP_INV
 private alias 30436  : MUSIC_LOOP_INV_F
@@ -45,16 +45,16 @@ private function R1Setup_SpeedUpMusic
 		switch music.currentTrack
 		case TRACK_STAGE
 			SetMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F)
-			SwapMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F, 0)
+			SwapMusicTrack("R1A_F.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F, 7920)
 			break
 
 		case TRACK_INVINCIBLE
-			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
+			SetMusicTrack("R1A_F.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
 			SwapMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F, 8000)
 			break
 
 		case TRACK_BOSS // not used I think
-			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
+			SetMusicTrack("R1A_F.ogg", TRACK_STAGE, MUSIC_LOOP_R1_F)
 			SetMusicTrack("Invincibility_F.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV_F)
 			break
 		end switch
@@ -76,12 +76,12 @@ private function R1Setup_SlowDownMusic
 		switch music.currentTrack
 		case TRACK_STAGE
 			SetMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV)
-			SwapMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1, 0)
+			SwapMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1, 12500)
 			break
 
 		case TRACK_INVINCIBLE
 			SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1)
-			SwapMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV, 12650)
+			SwapMusicTrack("Invincibility.ogg", TRACK_INVINCIBLE, MUSIC_LOOP_INV, 12500)
 			break
 
 		case TRACK_BOSS // not used I think
@@ -119,7 +119,6 @@ event ObjectStartup
  	SetMusicTrack("R1A.ogg", TRACK_STAGE, MUSIC_LOOP_R1)
 	SpeedUpMusic = R1Setup_SpeedUpMusic
 	SlowDownMusic = R1Setup_SlowDownMusic
-
 end event
 
 

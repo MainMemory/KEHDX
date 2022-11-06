@@ -337,7 +337,20 @@ event ObjectUpdate
 			object[currentPlayer].right = false
 			object.priority = PRIORITY_ACTIVE
 		else
-			object[currentPlayer].controlMode = CONTROLMODE_NORMAL
+			if options.vsMode == true
+				currentPlayer = 0
+				while currentPlayer < playerCount
+#platform: USE_STANDALONE
+					object[currentPlayer].controlMode = CONTROLMODE_P1
+#endplatform
+#platform: USE_ORIGINS
+					object[currentPlayer].controlMode = currentPlayer
+#endplatform
+					currentPlayer++
+				loop
+			else
+				object[currentPlayer].controlMode = CONTROLMODE_NORMAL
+			end if
 			object.priority = PRIORITY_BOUNDS
 		end if
 
