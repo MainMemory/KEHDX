@@ -229,6 +229,12 @@ event ObjectUpdate
 			screen[0].cameraX = player[0].ixpos
 			screen[0].cameraY = player[0].iypos
 			
+			stage.curYBoundary2 = stage.oldYBoundary
+			stage.curXBoundary1 = 0
+			if stage.listPos == 16
+				object[15].type = TypeName[Blank Object]
+			end if
+
 			// Not a good solution, but it works
 			// This manages starting exceptions - LZ and HPZ are started falling (see below) and LZ in particular should be started facing left
 			CheckEqual(stage.listPos, STAGE_R_LABYRINTHZONE)
