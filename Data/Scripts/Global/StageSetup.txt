@@ -34,6 +34,7 @@ private alias  3 : SELECTION_MAX
 
 private alias object.value3 : object.pause.drawnBG
 private alias object.value4 : object.pause.usingTouch
+private alias object.value5 : object.pause.drawit
 
 // Menu Boot Mode Aliases
 private alias 3 : BOOTMODE_STAGESELECT
@@ -185,10 +186,17 @@ event ObjectUpdate
 			object.pause.usingTouch = false
 			object.pause.drawnBG = false		
 
+			//Not yet
+			object.pause.drawit = false
+
 			// Not falling through on purpose, we want a one frame delay
 			break
 			
 		case PAUSE_MAIN
+
+			//Let the menu draw now
+			object.pause.drawit = true
+
 			if object.pause.usingTouch == false
 				if keyPress[0].up == true
 					object.pause.selection--
@@ -217,6 +225,9 @@ event ObjectUpdate
 					
 					object.pause.state = PAUSE_CONTINUE
 					object.pause.state += object.pause.selection
+
+					//magic trick
+					object.pause.drawit = false
 				end if
 				
 				object.pause.usingTouch = touchScreen[0].down
@@ -244,6 +255,9 @@ event ObjectUpdate
 								
 								object.pause.state = PAUSE_CONTINUE
 								object.pause.state += object.pause.selection
+
+								//magic trick
+								object.pause.drawit = false
 							end if
 						else
 							if object.pause.selection == temp2
@@ -303,7 +317,7 @@ event ObjectUpdate
 			object.pause.timer++
 			
 			// "Choppy" on purpose, can be changed if desired
-			if object.pause.timer == 21
+			if object.pause.timer == 41
 				LoadStage()
 			end if
 			break
@@ -430,12 +444,7 @@ end event
 
 
 event ObjectDraw
-	CheckEqual(stage.state, STAGE_PAUSED)
-	temp0 = checkResult
-	CheckNotEqual(object.pause.state, PAUSE_FADEOUT)
-	temp0 &= checkResult
-	
-	if temp0 == true
+	if object.pause.drawit == true
 		// Draw the Pause Menu
 		// We don't want to draw this when fading out, just like SA2
 		
@@ -526,6 +535,7 @@ event ObjectStartup
 
 	stage.deathBoundary = stage.curYBoundary2
 	stage.deathBoundary <<= 16
+	stage.oldYBoundary = stage.curYBoundary2
 	
 	foreach (TypeName[Stage Setup], arrayPos0, ALL_ENTITIES)
 		ResetObjectEntity(arrayPos0, TypeName[Blank Object], 0, 0, 0)
