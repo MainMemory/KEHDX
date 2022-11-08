@@ -754,8 +754,8 @@ public function Player_ProcessUpdateP2_VS
 	if player.scrollDelay > 0
 		player.scrollDelay--
 		if player.scrollDelay == 0
-			if object.entityPos == camera[currentPlayer].target
-				camera[0].style = CAMERASTYLE_FOLLOW
+			if object.entityPos == camera[1].target
+				camera[1].style = CAMERASTYLE_FOLLOW
 			end if
 		end if
 	end if
