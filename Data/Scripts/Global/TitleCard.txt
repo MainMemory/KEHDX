@@ -311,6 +311,8 @@ event ObjectDraw
 		// Red Rect (& Red Sidebar)
 		DrawRect(0, 0, object.redRectPos, screen.ysize, 0xE0, 0x00, 0x00, 0xFF) // Red Rect
 		DrawSpriteScreenXY(26, object.redRectPos, 0) // Red Sidebar
+		//DrawSpriteScreenXY(33, object.redRectPos, screen.ycenter) // knux
+
 
 		temp0 = screen.xcenter
 		temp0 += temp2
@@ -338,6 +340,7 @@ event ObjectDraw
 		DrawSpriteScreenXY(31, temp0, 176)
 		DrawRect(0, 0, object.redRectPos, screen.ysize, 0xE0, 0x00, 0x00, 0xFF)
 		DrawSpriteScreenXY(26, object.redRectPos, 0)
+		//DrawSpriteScreenXY(33, object.redRectPos, screen.ycenter) // knux
 
 		temp0 = screen.xcenter
 		temp0 += temp2
@@ -410,14 +413,17 @@ event ObjectStartup
 	SpriteFrame(0, 0, 62, 16, 83, 1) 	// Zone - #27
 	SpriteFrame(63, 0, 16, 29, 42, 1) 	// Act 1 - #28
 	SpriteFrame(63, 0, 23, 29, 59, 1) 	// Act 2 - #29
-	SpriteFrame(63, 0, 23, 32, 42, 31) 	// Act 3 - #30
-	SpriteFrame(0, 0, 140, 5, 37, 73) 	// "Sonic The Hedgehog" - #31
+	SpriteFrame(63, 0, 23, 32, 42, 31) // Act 3 - #30
+	SpriteFrame(-45, 0, 185, 5, 37, 73)// "Knuckles' Emerald Hunt DX" - #31
 
 	if vs.playerID == 0
 		SpriteFrame(-160, -16, 136, 7, 110, 172)	// "Waiting for 2P" - #32
 	else
 		SpriteFrame(-160, -16, 136, 7, 110, 164) 	// "Waiting for 1P" - #32
 	end if
+
+	SpriteFrame(-149, -63, 149, 126, 0, 390) // 33
+
 
 	if options.vsMode == true
 		CallNativeFunction2(ReceiveEntity, 0x400, true)
