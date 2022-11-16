@@ -44,101 +44,101 @@ foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 	if checkResult == true
 		switch object.propertyValue
 		case HORIZONTAL_TUBE
-			if object[0].speed > 0
-				if object[0].state != Player_State_TubeRoll
+			if object[currentPlayer].speed > 0
+				if object[currentPlayer].state != Player_State_TubeRoll
 					PlaySfx(SFX_G_RELEASE, false)
 				end if
 
-				object[0].direction = FACING_RIGHT
-				object[0].state = Player_State_TubeRoll
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].direction = FACING_RIGHT
+				object[currentPlayer].state = Player_State_TubeRoll
+				object[currentPlayer].animation = ANI_JUMPING
 
-				if object[0].speed < 0xA0000
-					object[0].speed = 0xA0000
+				if object[currentPlayer].speed < 0xA0000
+					object[currentPlayer].speed = 0xA0000
 				end if
 			else
-				if object[0].gravity == GRAVITY_GROUND
+				if object[currentPlayer].gravity == GRAVITY_GROUND
 
-					if object[0].speed > -0x20000
-						object[0].speed = -0x20000
+					if object[currentPlayer].speed > -0x20000
+						object[currentPlayer].speed = -0x20000
 					end if
 
 				end if
-				object[0].state = Player_State_Roll
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].state = Player_State_Roll
+				object[currentPlayer].animation = ANI_JUMPING
 			end if
 			break
 
 		case VERTICAL_TUBE
-			if object[0].state != Player_State_TubeRoll
+			if object[currentPlayer].state != Player_State_TubeRoll
 				PlaySfx(SFX_G_RELEASE, false)
 			end if
-			object[0].gravity = GRAVITY_GROUND
-			object[0].state = Player_State_TubeRoll
-			object[0].animation = ANI_JUMPING
-			object[0].collisionMode = CMODE_RWALL
-			object[0].angle = 64
-			object[0].speed = 0x100000
+			object[currentPlayer].gravity = GRAVITY_GROUND
+			object[currentPlayer].state = Player_State_TubeRoll
+			object[currentPlayer].animation = ANI_JUMPING
+			object[currentPlayer].collisionMode = CMODE_RWALL
+			object[currentPlayer].angle = 64
+			object[currentPlayer].speed = 0x100000
 			break
 
 		case BOOST_ANGLE_TUBE
 			if Object.OnObject == false
 
-				if object[0].collisionMode == CMODE_FLOOR
-					object[0].collisionMode = CMODE_ROOF
-					FlipSign(object[0].speed)
-					object[0].angle = 128
+				if object[currentPlayer].collisionMode == CMODE_FLOOR
+					object[currentPlayer].collisionMode = CMODE_ROOF
+					FlipSign(object[currentPlayer].speed)
+					object[currentPlayer].angle = 128
 				else
-					object[0].collisionMode = CMODE_FLOOR
-					FlipSign(object[0].speed)
-					object[0].angle = 0
-					object[0].ypos += 0x40000
+					object[currentPlayer].collisionMode = CMODE_FLOOR
+					FlipSign(object[currentPlayer].speed)
+					object[currentPlayer].angle = 0
+					object[currentPlayer].ypos += 0x40000
 				end if
 
-				object[0].state = Player_State_TubeRoll
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].state = Player_State_TubeRoll
+				object[currentPlayer].animation = ANI_JUMPING
 
 			end if
 			break
 
 		case BOOST_VERTICAL_TUBE
-			if object[0].yvel < 0
+			if object[currentPlayer].yvel < 0
 
-				object[0].gravity = GRAVITY_GROUND
-				object[0].state = Player_State_TubeRoll
-				object[0].animation = ANI_JUMPING
-				object[0].collisionMode = CMODE_LWALL
-				object[0].angle = 192
-				object[0].speed = object[0].yvel
-				FlipSign(object[0].speed)
+				object[currentPlayer].gravity = GRAVITY_GROUND
+				object[currentPlayer].state = Player_State_TubeRoll
+				object[currentPlayer].animation = ANI_JUMPING
+				object[currentPlayer].collisionMode = CMODE_LWALL
+				object[currentPlayer].angle = 192
+				object[currentPlayer].speed = object[currentPlayer].yvel
+				FlipSign(object[currentPlayer].speed)
 
 			end if
 			break
 
 		case HORIZONTAL_EXIT_TUBE
-			if object[0].speed < 0
-				if object[0].state != Player_State_TubeRoll
+			if object[currentPlayer].speed < 0
+				if object[currentPlayer].state != Player_State_TubeRoll
 					PlaySfx(SFX_G_RELEASE, false)
 				end if
 
-				object[0].state = Player_State_Air
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].state = Player_State_Air
+				object[currentPlayer].animation = ANI_JUMPING
 			else
-				object[0].state = Player_State_Roll
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].state = Player_State_Roll
+				object[currentPlayer].animation = ANI_JUMPING
 			end if
 			break
 
 		case VERTICAL_EXIT_TUBE
-			if object[0].gravity == GRAVITY_AIR
-				object[0].xvel = Object.LaunchSpeed
-				object[0].speed = Object.LaunchSpeed
-				object[0].state = Player_State_Air
+			if object[currentPlayer].gravity == GRAVITY_AIR
+				object[currentPlayer].xvel = Object.LaunchSpeed
+				object[currentPlayer].speed = Object.LaunchSpeed
+				object[currentPlayer].state = Player_State_Air
 			else
-				if object[0].collisionMode == CMODE_LWALL
-					object[0].angle = 196
-					Cos256(temp0, object[0].angle)
-					temp0 *= object[0].speed
+				if object[currentPlayer].collisionMode == CMODE_LWALL
+					object[currentPlayer].angle = 196
+					Cos256(temp0, object[currentPlayer].angle)
+					temp0 *= object[currentPlayer].speed
 					temp0 >>= 8
 					if temp0 != 0
 						Object.LaunchSpeed = temp0
@@ -148,26 +148,26 @@ foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
 			break
 
 		case SPEED_LIMITED_TUBE
-			if object[0].state == Player_State_TubeRoll
+			if object[currentPlayer].state == Player_State_TubeRoll
 
-				if object[0].yvel < -0x60000
-					object[0].yvel = -0x60000
+				if object[currentPlayer].yvel < -0x60000
+					object[currentPlayer].yvel = -0x60000
 				end if
 
 			else
-				object[0].animation = ANI_JUMPING
+				object[currentPlayer].animation = ANI_JUMPING
 			end if
 			break
 
 		case EXIT_ANGLE_TUBE
-			if object[0].state == Player_State_TubeRoll
+			if object[currentPlayer].state == Player_State_TubeRoll
 				object.propertyValue = EXIT_BOOST_TUBE
 			end if
 			break
 
 		case EXIT_BOOST_TUBE
-			if object[0].gravity == GRAVITY_AIR
-				object[0].yvel = -0xA8000
+			if object[currentPlayer].gravity == GRAVITY_AIR
+				object[currentPlayer].yvel = -0xA8000
 				object.propertyValue = EXIT_ANGLE_TUBE
 			end if
 			break

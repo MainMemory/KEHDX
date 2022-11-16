@@ -6,45 +6,33 @@
 //Karl's Note (After rework): worth it
 
 // Aliases
-private alias object.value0 : Object.Timer
+
+// A bitfield, for all the active players
+private alias object.state : object.activePlayers
+
+// The object's per-player "timer" value is value[currentPlayer], ie value0 for P1, value1 for P2, onwards and so forth
+
 
 // Player Aliases
-private alias object[currentplayer].value7 : Player.InvincibleTimer
-private alias object[currentplayer].value8 : Player.BlinkTimer
-
-// States
-private alias 0 : TUNNELPATH_IDLE
-private alias 1 : TUNNELPATH_ACTIVE
-
-// Players
-private alias 0 : PLAYER_SONIC
-
-// Global SFX
-private alias 7 : SFX_G_RELEASE
-
-// Stage SFX
-private alias 0 : SFX_S_CRUMBLE
-
-// Property Values
-private alias 0 : TUNNEL_ENTRY
-private alias 1 : TUNNEL_HOLE
-
-// Priority
-private alias 0 : PRIORITY_BOUNDS
-private alias 1 : PRIORITY_ACTIVE
-
+private alias object.value7 : player.invincibleTimer
+private alias object.value8 : player.blinkTimer
 private alias object.value40 : player.hitboxLeft
 private alias object.value38 : player.hitboxTop
 private alias object.value41 : player.hitboxRight
 private alias object.value39 : player.hitboxBottom
 
-public alias saveRAM[202] : saved.character
+// Property Values
+private alias 0 : TUNNEL_ENTRY
+private alias 1 : TUNNEL_HOLE
+
+private alias saveRAM[202] : saved.character
+
 
 // ========================
 // Tables
 // ========================
 
-public table TunnelPath_XPos
+private table TunnelPath_XPos
 	0x13F0B100, 0x1400B100, 0x1410B100, 0x1420B100, 0x1430B100, 0x1440B100, 0x1450B100, 0x1460B100, 0x1470B100, 0x1478B100, 0x147F8C00, 0x14866700, 0x148D4200, 0x14904200, 0x14904200 
 	0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14904200, 0x14804200, 0x14704200, 0x14604200, 0x14504200, 0x14404200, 0x14304200
 	0x14204200, 0x14104200, 0x14004200, 0x13F84200, 0x13F04200, 0x13F04200, 0x13F04200, 0x13F04200, 0x13F04200, 0x14004200, 0x14104200, 0x14204200, 0x14304200, 0x14404200, 0x144BAF00
@@ -58,7 +46,7 @@ public table TunnelPath_XPos
 	0x17086C00, 0x17006C00, 0x16F06C00, 0x16E09A00, 0x16E09A00
 end table
 
-public table TunnelPath_YPos 
+private table TunnelPath_YPos 
 	0xF06500, 0xF06500, 0xF06500, 0xF06500, 0xF06500, 0xF06500, 0xF74000, 0xFE1B00, 0x104F600, 0x108F600, 0x118F600, 0x128F600, 0x138F600, 0x140F600, 0x150F600, 0x160F600, 0x170F600
 	0x180F600, 0x190F600, 0x1A0F600, 0x1B0F600, 0x1C0F600, 0x1D0F600, 0x1E0F600, 0x1E5C200, 0x1EA8E00, 0x1EF5A00, 0x1F42600, 0x1F8F200, 0x1F2F200, 0x1ECF200, 0x1E6F200, 0x1E0F200
 	0x1D0F200, 0x1C0F200, 0x1B0F200, 0x1A0F200, 0x190F200, 0x180F200, 0x170F200, 0x16CF200, 0x168F200, 0x16CF200, 0x170F200, 0x180F200, 0x190F200, 0x1A0F200, 0x1A8F200, 0x1AC8000
@@ -71,87 +59,100 @@ public table TunnelPath_YPos
 	0x296F000, 0x29D5600, 0x2A05600, 0x2B05600, 0x2C05600, 0x2D05600, 0x2E05600, 0x2E6BC00, 0x2ED2200, 0x2F02200, 0x2E68800, 0x2E4F900, 0x2E4F900
 end table
 
-event ObjectUpdate
-currentplayer = 0
-while currentplayer < playercount
-	if object[currentplayer].state == Player_State_Static
-		if object.state == TUNNELPATH_ACTIVE
-	
-			if object[currentplayer].state == Player_State_Death
-				object.state = TUNNELPATH_IDLE
-			end if
-	
-			temp0 = Object.Timer
-			Object.Timer++
-	
-			object[currentplayer].speed = object[currentplayer].xpos
-	
-			object[currentplayer].visible = false
-	
-			object[currentplayer].Interaction = false
 
-			GetTableValue(object[currentplayer].xpos, temp0, TunnelPath_XPos)
-			GetTableValue(object[currentplayer].ypos, temp0, TunnelPath_YPos)
-	
-			// activate shit
-			switch temp0
-			case 57
-			case 60
-			case 63
-			case 66
-			//splash
-				CreateTempObject(TypeName[WaterfallSplash], 0, object[currentplayer].xpos, object[currentplayer].ypos)
-				break
-			case 155
-			//get out
-				object[currentplayer].visible = true
-				object[currentplayer].tileCollisions = true
-	
-				object.state = TUNNELPATH_IDLE
-				object.priority = PRIORITY_BOUNDS
-	
-				object[currentplayer].xvel = -0xC0000
-				object[currentplayer].speed = -0xC0000
-				object[currentplayer].state = Player_State_Ground
-				object[currentplayer].Interaction = true
-	
-				if object[+1].type == TypeName[Blank Object]
-					object[+1].type = TypeName[TunnelPath]
-					PlaySfx(SfxName[Crumble], false)
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	currentPlayer = 0
+	while currentPlayer < playerCount
+		if object[currentPlayer].state == Player_State_Static
+			GetBit(temp1, object.activePlayers, currentPlayer)
+			GetObjectValue(temp0, currentPlayer, object.entityPos) // object.playerX.timer
+		
+			if temp1 == true
+				if object[currentPlayer].state == Player_State_Death
+					SetBit(object.activePlayers, currentPlayer, false)
+					temp1 = false
 				end if
-				break
-			end switch
-	
-			if temp0 > 155
-				temp0 = 155
-			end if
-	
-			if object.state > TUNNELPATH_IDLE
-				object[currentplayer].speed -= object[currentplayer].xpos
-				FlipSign(object[currentplayer].speed)
+				
+				temp0++ // object.playerX.timer
+				
+				object[currentPlayer].speed = object[currentPlayer].xpos
+				object[currentPlayer].visible = false
+				object[currentPlayer].Interaction = false
+
+				GetTableValue(object[currentPlayer].xpos, temp0, TunnelPath_XPos)
+				GetTableValue(object[currentPlayer].ypos, temp0, TunnelPath_YPos)
+		
+				// activate shit
+				switch temp0
+				case 57
+				case 60
+				case 63
+				case 66
+					// Splash
+					CreateTempObject(TypeName[WaterfallSplash], 0, object[currentPlayer].xpos, object[currentPlayer].ypos)
+					break
+					
+				case 155
+					// Exit
+					object[currentPlayer].visible = true
+					object[currentPlayer].tileCollisions = true
+					
+					SetBit(object.activePlayers, currentPlayer, false)
+					temp1 = false
+					
+					if object.activePlayers == 0 // All bits empty, no players in the tube
+						object.priority = PRIORITY_BOUNDS
+					end if
+		
+					object[currentPlayer].xvel = -0xC0000
+					object[currentPlayer].speed = -0xC0000
+					object[currentPlayer].state = Player_State_Ground
+					object[currentPlayer].Interaction = true
+		
+					if object[+1].type == TypeName[Blank Object]
+						object[+1].type = TypeName[Tunnel Path]
+						PlaySfx(SfxName[Crumble], false)
+					end if
+					break
+					
+				end switch
+		
+				if temp0 > 155
+					temp0 = 155
+				end if
+				SetObjectValue(temp0, currentPlayer, object.entityPos) // object.playerX.timer
+				
+				if temp1 == true
+					object[currentPlayer].speed -= object[currentPlayer].xpos
+					FlipSign(object[currentPlayer].speed)
+				end if
 			end if
 		end if
-	end if
-	currentplayer++
-loop
-
+		
+		currentPlayer++
+	loop
+	
 	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-
 		if object.propertyValue == TUNNEL_ENTRY
-			if object[currentplayer].state != Player_State_Static
+			if object[currentPlayer].state != Player_State_Static
 				BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
-	
+				
 				if checkResult == true
-					object[currentplayer].state = Player_State_Static
-					if Player[currentplayer].BlinkTimer > 0
-						Player[currentplayer].InvincibleTimer = 0
-						Player[currentplayer].BlinkTimer = 0
+					object[currentPlayer].state = Player_State_Static
+					if player[currentPlayer].blinkTimer > 0
+						player[currentPlayer].invincibleTimer = 0
+						player[currentPlayer].blinkTimer = 0
 					end if
-					object[currentplayer].tileCollisions = false
-					object[currentplayer].visible = false
-	
-					object.state = TUNNELPATH_ACTIVE
-					Object.Timer = 0
+					object[currentPlayer].tileCollisions = false
+					object[currentPlayer].visible = false
+					
+					SetBit(object.activePlayers, currentPlayer, true)
+					SetObjectValue(0, currentPlayer, object.entityPos) // object.playerX.timer
+					
 					object.priority = PRIORITY_ACTIVE
 	
 					PlaySfx(SfxName[Release], false)
@@ -171,15 +172,16 @@ end event
 
 event ObjectStartup
 	LoadSpriteSheet("R1/Objects3.gif")
-	switch saved.character 
-
+	
 	// #0 - Wall Hole
-
+	switch saved.character
 	case 0
 	default
+		// Knuckles
 		SpriteFrame(-17, -20, 34, 40, 145, 167) 
 		break
 	case 1
+		// Tikal
 		SpriteFrame(-15, -19, 30, 38, 147, 208) 
 		break
 	end switch
@@ -198,6 +200,6 @@ end event
 event RSDKLoad
 	LoadSpriteSheet("R1/Objects.gif")
 	SpriteFrame(-16, -16, 32, 32, 34, 175) // #0 - Wall Hole
-
-
+	
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
 end event
