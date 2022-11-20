@@ -1,0 +1,196 @@
+//---------------Sonic CD Speed Booster Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Timer
+private alias object.value1 : Object.DrawOffsetX
+
+// Booster Cartridge Aliases
+private alias object.value1 : Object.XVelocity
+private alias object.value2 : Object.YVelocity
+
+// Base State
+private alias 0 : SPEEDBOOSTER_IDLE
+
+// Pair of States for when the player is shot right
+private alias 1 : SPEEDBOOSTER_RECOIL_R
+private alias 2 : SPEEDBOOSTER_RECOVER_R
+
+// Pair of States for when the player is shot left
+private alias 3 : SPEEDBOOSTER_RECOIL_L
+private alias 4 : SPEEDBOOSTER_RECOVER_L
+
+// Priority
+private alias 0 : PRIORITY_BOUNDS
+private alias 1 : PRIORITY_ACTIVE
+
+// Stage SFX
+private alias 0 : SFX_S_LARGEBOOSTER // In origins, this SFX is Launcher
+private alias 1 : SFX_S_SWITCH
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	switch object.state
+	case SPEEDBOOSTER_RECOIL_R
+		if Object.Timer < 6
+			Object.DrawOffsetX -= 0x80000
+			Object.Timer++
+		else
+			Object.Timer = 0
+			object.state++
+		end if
+		break
+
+	case SPEEDBOOSTER_RECOVER_R
+		if Object.Timer < 6
+			Object.DrawOffsetX += 0x80000
+			Object.Timer++
+		else
+			Object.Timer = 0
+			object.state = SPEEDBOOSTER_IDLE
+			object.priority = PRIORITY_BOUNDS
+		end if
+		break
+
+	case SPEEDBOOSTER_RECOIL_L
+		if Object.Timer < 6
+			Object.DrawOffsetX += 0x80000
+			Object.Timer++
+		else
+			Object.Timer = 0
+			object.state++
+		end if
+		break
+
+	case SPEEDBOOSTER_RECOVER_L
+		if Object.Timer < 6
+			Object.DrawOffsetX -= 0x80000
+			Object.Timer++
+		else
+			Object.Timer = 0
+			object.state = SPEEDBOOSTER_IDLE
+			object.priority = PRIORITY_BOUNDS
+		end if
+		break
+
+	end switch
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+	if object.state == SPEEDBOOSTER_IDLE
+		if object[currentPlayer].state != Player_State_Air
+
+			if object[currentPlayer].state != Player_State_LedgePullUp
+				BoxCollisionTest(C_TOUCH, object.entityPos, -32, -12, 32, 4, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+			end if
+
+			if checkResult == true
+
+				//Glide Slide and Drop Stuff incase the player is in these states
+				if object[currentPlayer].state == Player_State_GlideDrop
+					object[currentPlayer].animation = ANI_RUNNING
+					object[currentPlayer].state = Player_State_Ground
+					CallFunction(Player_HandleOnGround)	
+				end if
+
+				if object[currentPlayer].state == Player_State_GlideSlide
+					object[currentPlayer].animation = ANI_RUNNING
+					object[currentPlayer].state = Player_State_Ground
+					CallFunction(Player_HandleOnGround)	
+				end if
+
+
+				// Make the Speed Boster always active for the next few frames
+				object.priority = PRIORITY_ACTIVE
+
+				PlaySfx(SfxName[LargeBooster], 0)
+
+				// Different actions for the different directions the player will be sent
+				if object[currentPlayer].speed > 0
+					object.state = SPEEDBOOSTER_RECOIL_R
+					object[currentPlayer].speed = 0x100000
+					object[currentPlayer].direction = FACING_RIGHT
+
+					CreateTempObject(TypeName[Fire Trail], 0, object.xpos, object.ypos)
+					object[TempObjectPos].xpos -= 0x180000
+					object[TempObjectPos].ypos -= 0x60000
+
+					CreateTempObject(TypeName[BoosterCartridge], 0, object.xpos, object.ypos)
+					object[TempObjectPos].xvel = -0x20000
+					object[TempObjectPos].yvel = -0x70000
+				else
+					object.state = SPEEDBOOSTER_RECOIL_L
+					object[currentPlayer].speed = -0x100000
+					object[currentPlayer].direction = FACING_LEFT
+
+					CreateTempObject(TypeName[Fire Trail], 0, object.xpos, object.ypos)
+					object[TempObjectPos].xpos += 0x180000
+					object[TempObjectPos].ypos -= 0x60000
+					object[TempObjectPos].direction = FACING_LEFT
+
+					CreateTempObject(TypeName[BoosterCartridge], 0, object.xpos, object.ypos)
+					object[TempObjectPos].xvel = -0x20000
+					object[TempObjectPos].yvel = -0x70000
+					object[TempObjectPos].direction = FACING_LEFT
+				end if
+			end if
+		end if
+	end if
+	next
+
+end event
+
+
+event ObjectDraw
+
+	temp0 = Object.DrawOffsetX
+	temp0 += object.xpos
+	DrawSpriteXY(0, temp0, object.ypos)
+
+end event
+
+
+event ObjectStartup
+
+	LoadSpriteSheet("R7/Objects.gif")
+
+	// Booster Frame
+	SpriteFrame(-32, -12, 64, 24, 34, 96)
+
+	foreach (TypeName[Speed Booster], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].drawOrder = 4
+	next
+
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	DrawSprite(0)
+
+	if Editor.ShowGizmos == true
+		// Draw the Booster's activation box
+
+		temp0 = object.ixpos
+		temp0 -= 32
+		temp1 = object.iypos
+		temp1 -= 12
+
+	end if
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R7/Objects.gif")
+	SpriteFrame(-32, -12, 64, 24, 34, 96)
+
+
+end event

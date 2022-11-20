@@ -1,0 +1,494 @@
+//---------------Sonic CD R Spring Cage Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Note - Object[+1] should be an R7Spring object
+
+// Aliases
+private alias object.value0 : Object.FullAngle
+private alias object.value1 : Object.Angle
+private alias object.value3 : Object.RightArmOffset
+
+// R7 Spring Aliases
+private alias object.value0 : Object.Timer
+
+// States
+private alias 0 : RSPRINGCAGE_IDLE
+private alias 1 : RSPRINGCAGE_LOCKINPLAYER
+private alias 2 : RSPRINGCAGE_SHOOTPLAYER
+private alias 3 : RSPRINGCAGE_RESTORE
+
+// Gravity
+private alias 1 : GRAVITY_AIR
+
+// Stage SFX
+private alias 0 : SFX_S_LARGEBOOSTER // In origins, this SFX is Launcher
+private alias 1 : SFX_S_SWITCH
+
+// Property Values
+private alias 0 : ROTATING_CAGE
+private alias 1 : STATIC_CAGE
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+	switch object.state
+	case RSPRINGCAGE_IDLE
+		if object.propertyValue == ROTATING_CAGE
+			Object.FullAngle++
+			Object.FullAngle %= 48
+
+			Object.Angle = Object.FullAngle
+			Object.Angle /= 6
+		end if
+		break
+
+	case RSPRINGCAGE_LOCKINPLAYER
+		if Object.RightArmOffset > 0
+			// Close it in, 2 pixels per frame
+			Object.RightArmOffset -= 0x20000
+		else
+			PlaySfx(SfxName[Switch], false)
+			object.state++
+		end if
+		break
+
+	case RSPRINGCAGE_SHOOTPLAYER
+		if object[currentPlayer].state != Player_State_Death
+			if object.propertyValue == ROTATING_CAGE
+				Object.FullAngle++
+				Object.FullAngle %= 48
+				Object.Angle = Object.FullAngle
+				Object.Angle /= 6
+			end if
+
+			object[currentPlayer].animation = ANI_JUMPING
+
+			object[currentPlayer].xpos = object.xpos
+			object[currentPlayer].ypos = object.ypos
+
+			switch Object.Angle
+			case 0
+				object[currentPlayer].xpos += 0x200000 // Offset of 32 pixels right
+				break
+			case 1
+				object[currentPlayer].xpos += 0x180000 // Offset of 24 pixels right
+				object[currentPlayer].ypos -= 0x180000 // Offset of 24 pixels up
+				break
+			case 2
+				object[currentPlayer].ypos -= 0x200000 // Offset of 32 pixels up
+				break
+			case 3
+				object[currentPlayer].xpos -= 0x180000 // Offset of 24 pixels left
+				object[currentPlayer].ypos -= 0x180000 // Offset of 24 pixels up
+				break
+			case 4
+				object[currentPlayer].xpos -= 0x200000 // Offset of 32 pixels left
+				break
+			case 5
+				object[currentPlayer].xpos -= 0x180000 // Offset of 24 pixels left
+				object[currentPlayer].ypos += 0x180000 // Offset of 24 pixels down
+				break
+			case 6
+				object[currentPlayer].ypos += 0x200000 // Offset of 32 pixels down
+				break
+			case 7
+				object[currentPlayer].xpos += 0x180000 // Offset of 24 pixels right
+				object[currentPlayer].ypos += 0x180000 // Offset of 24 pixels down
+				break
+			end switch
+
+			if object[currentPlayer].jumpPress == true
+				PlaySfx(SfxName[LargeBooster], false)
+
+
+#platform: USE_ORIGINS
+				object[currentPlayer].state = Player_State_Air_NoDropDash
+#endplatform
+
+#platform: USE_STANDALONE
+				object[currentPlayer].state = Player_State_Air
+#endplatform
+				object[currentPlayer].gravity = GRAVITY_AIR
+				object[currentPlayer].Timer = 0
+
+				// Tell the spring to start animating
+				Object.Timer[+1] = 1
+
+				object.state++
+				switch Object.Angle
+				case 0
+					object[currentPlayer].speed = 0x100000
+					object[currentPlayer].xvel = 0x100000
+					object[currentPlayer].yvel = 0
+					break
+				case 1
+					object[currentPlayer].speed = 0xC0000
+					object[currentPlayer].xvel = 0xC0000
+					object[currentPlayer].yvel = -720896
+					break
+				case 2
+					object[currentPlayer].speed = 0
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].yvel = -0x100000
+					break
+				case 3
+					object[currentPlayer].speed = -0xC0000
+					object[currentPlayer].xvel = -0xC0000
+					object[currentPlayer].yvel = -720896
+					break
+				case 4
+					object[currentPlayer].speed = -0x100000
+					object[currentPlayer].xvel = -0x100000
+					object[currentPlayer].yvel = 0
+					break
+				case 5
+					object[currentPlayer].speed = -0xC0000
+					object[currentPlayer].xvel = -0xC0000
+					object[currentPlayer].yvel = 720896
+					break
+				case 6
+					object[currentPlayer].speed = 0
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].yvel = 0x100000
+					break
+				case 7
+					object[currentPlayer].speed = 0xC0000
+					object[currentPlayer].xvel = 0xC0000
+					object[currentPlayer].yvel = 720896
+					break
+				end switch
+			end if
+		else
+			object.state = RSPRINGCAGE_RESTORE
+		end if
+		break
+
+	case RSPRINGCAGE_RESTORE
+		if Object.Timer[+1] == 0
+			if Object.RightArmOffset < 0x300000
+				// Opening it back up, 8 pixels per frame
+				Object.RightArmOffset += 0x80000
+			else
+				object.state = RSPRINGCAGE_IDLE
+			end if
+		end if
+		break
+
+	end switch
+
+	// Change the spring's angle
+
+	switch Object.Angle
+	case 0
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 1
+		break
+	case 1
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 4
+		break
+	case 2
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 0
+		break
+	case 3
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 5
+		break
+	case 4
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 2
+		break
+	case 5
+		object[+1].direction = 2
+		object[+1].propertyValue = 5
+		break
+	case 6
+		object[+1].direction = FACING_RIGHT
+		object[+1].propertyValue = 3
+		break
+	case 7
+		object[+1].direction = 2
+		object[+1].propertyValue = 4
+		break
+	end switch
+
+	if object.state == RSPRINGCAGE_IDLE
+		BoxCollisionTest(C_TOUCH, object.entityPos, -24, -24, 24, 24, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+		if checkResult == true
+			object.state = RSPRINGCAGE_LOCKINPLAYER
+
+			// Put the player inside the cage
+			object[currentPlayer].xpos = object.xpos
+			object[currentPlayer].ypos = object.ypos
+			object[currentPlayer].state = Player_State_Static
+			object[currentPlayer].animation = ANI_JUMPING
+			object[currentPlayer].speed = 0
+			object[currentPlayer].xvel = 0
+			object[currentPlayer].yvel = 0
+
+			// 8 possible directions, 8 possible jump locations~
+			switch Object.Angle
+			case 0
+				object[currentPlayer].xpos += 0x200000 // Offset of 32 pixels right
+				break
+			case 1
+				object[currentPlayer].xpos += 0x180000 // Offset of 24 pixels right
+				object[currentPlayer].ypos -= 0x180000 // Offset of 24 pixels up
+				break
+			case 2
+				object[currentPlayer].ypos -= 0x200000 // Offset of 32 pixels up
+				break
+			case 3
+				object[currentPlayer].xpos -= 0x180000 // Offset of 24 pixels left
+				object[currentPlayer].ypos -= 0x180000 // Offset of 24 pixels up
+				break
+			case 4
+				object[currentPlayer].xpos -= 0x200000 // Offset of 32 pixels left
+				break
+			case 5
+				object[currentPlayer].xpos -= 0x180000 // Offset of 24 pixels left
+				object[currentPlayer].ypos += 0x180000 // Offset of 24 pixels down
+				break
+			case 6
+				object[currentPlayer].ypos += 0x200000 // Offset of 32 pixels down
+				break
+			case 7
+				object[currentPlayer].xpos += 0x180000 // Offset of 24 pixels right
+				object[currentPlayer].ypos += 0x180000 // Offset of 24 pixels down
+				break
+			end switch
+		end if
+	end if
+	next
+end event
+
+
+event ObjectDraw
+
+	// Different draw routines for the 8 possible directions
+
+	switch Object.Angle
+	case 0
+		DrawSprite(1)
+		object.direction = 2
+		temp0 = object.xpos
+		temp0 -= Object.RightArmOffset
+		DrawSpriteFX(1, FX_FLIP, temp0, object.ypos)
+		break
+
+	case 1
+		DrawSprite(2)
+		object.direction = 3
+		temp2 = Object.RightArmOffset
+		temp2 >>= 1
+		temp0 = object.xpos
+		temp0 -= temp2
+		temp1 = object.ypos
+		temp1 += temp2
+		DrawSpriteFX(3, FX_FLIP, temp0, temp1)
+		break
+
+	case 2
+		DrawSprite(4)
+		object.direction = FACING_LEFT
+		temp1 = object.ypos
+		temp1 += Object.RightArmOffset
+		DrawSpriteFX(4, FX_FLIP, object.xpos, temp1)
+		break
+
+	case 3
+		object.direction = FACING_LEFT
+		temp2 = Object.RightArmOffset
+		temp2 >>= 1
+		temp0 = object.xpos
+		temp0 += temp2
+		temp1 = object.ypos
+		temp1 += temp2
+		DrawSpriteFX(2, FX_FLIP, temp0, temp1)
+		object.direction = 2
+		DrawSpriteFX(3, FX_FLIP, object.xpos, object.ypos)
+		break
+
+	case 4
+		temp0 = object.xpos
+		temp0 += Object.RightArmOffset
+		DrawSpriteXY(5, temp0, object.ypos)
+		object.direction = 2
+		DrawSpriteFX(5, FX_FLIP, object.xpos, object.ypos)
+		break
+
+	case 5
+		object.direction = 3
+		DrawSpriteFX(2, FX_FLIP, object.xpos, object.ypos)
+		object.direction = FACING_RIGHT
+		temp2 = Object.RightArmOffset
+		temp2 >>= 1
+		temp0 = object.xpos
+		temp0 += temp2
+		temp1 = object.ypos
+		temp1 -= temp2
+		DrawSpriteFX(3, FX_FLIP, temp0, temp1)
+		break
+
+	case 6
+		object.direction = 2
+		temp1 = object.ypos
+		temp1 -= Object.RightArmOffset
+		DrawSpriteFX(4, FX_FLIP, object.xpos, temp1)
+		object.direction = 3
+		DrawSpriteFX(4, FX_FLIP, object.xpos, object.ypos)
+		break
+
+	case 7
+		object.direction = 2
+		temp2 = Object.RightArmOffset
+		temp2 >>= 1
+		temp0 = object.xpos
+		temp0 -= temp2
+		temp1 = object.ypos
+		temp1 -= temp2
+		DrawSpriteFX(2, FX_FLIP, temp0, temp1)
+		object.direction = FACING_LEFT
+		DrawSpriteFX(3, FX_FLIP, object.xpos, object.ypos)
+		break
+
+	end switch
+
+	DrawSprite(0)
+
+end event
+
+
+event ObjectStartup
+
+	LoadSpriteSheet("R7/Objects.gif")
+
+	// Cage Frames
+
+	// Pivot Post Frame
+	SpriteFrame(-8, -8, 16, 16, 90, 52)
+
+	// Top Horizontal Half
+	SpriteFrame(-8, -28, 64, 24, 34, 96)
+
+	// Top Diagonal Half
+	SpriteFrame(-24, -56, 56, 56, 59, 121)
+
+	// Bottom Diagonal Half
+	SpriteFrame(-56, -24, 56, 56, 59, 121)
+
+	// (Shared) Vertical Half
+	SpriteFrame(-28, -56, 24, 64, 34, 121)
+
+	// Buttom Horizontal Half
+	SpriteFrame(-56, -28, 64, 24, 34, 96)
+
+	// Setup all Rotating Cage objects within the level
+	foreach (TypeName[R Spring Cage], arrayPos0, ALL_ENTITIES)
+
+			// Focus on the Cage's corresponding R7 Spring object
+			arrayPos1 = arrayPos0
+			arrayPos1++
+
+			object[arrayPos0].drawOrder = 4
+
+			// Set the right arm to start 48 pixels back
+			Object.RightArmOffset[arrayPos0] = 0x300000
+
+			// Move the spring to the Cage's position too
+			object[arrayPos1].xpos = object[arrayPos0].xpos
+			object[arrayPos1].ypos = object[arrayPos0].ypos
+	next
+
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(0)
+	object.direction = FACING_LEFT
+	temp1 = object.ypos
+	temp1 += 0x300000
+	DrawSpriteFX(0, FX_FLIP, object.xpos, temp1)
+
+	if Editor.ShowGizmos == true
+		// TODO: change this to "R7 Spring" once GetObjectType works with spaces
+
+
+		arrayPos1 = object.entityPos
+		arrayPos1++
+		if object[arrayPos1].type != temp0
+			// Uh oh! The next object is supposed to be a special spring, but here it isn't...
+			// Gotta let the user know!
+
+			Editor.DrawingOverlay = true
+
+			// First draw a red line from the cage to the invalid object
+
+
+			// And now draw an X
+
+			temp0 = object[arrayPos1].xpos
+			temp0 -= 0x100000
+
+			temp1 = object[arrayPos1].ypos
+			temp1 -= 0x100000
+
+			temp2 = object[arrayPos1].xpos
+			temp2 += 0x100000
+
+			temp3 = object[arrayPos1].ypos
+			temp3 += 0x100000
+
+
+
+
+			Editor.DrawingOverlay = false
+		end if
+	end if
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R7/Objects.gif")
+	SpriteFrame(-28, -56, 24, 64, 34, 121)
+
+
+
+
+
+end event

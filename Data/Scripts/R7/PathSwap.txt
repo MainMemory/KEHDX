@@ -1,0 +1,207 @@
+//-----------------Sonic CD Path Swap Script------------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.Timer
+private alias object.value7 : Object.Interacted
+
+private alias object.value1 : Object.ChunkX1
+private alias object.value3 : Object.ChunkX2
+private alias object.value2 : Object.ChunkY1
+private alias object.value4 : Object.ChunkY2
+
+// Old holds the chunk ID of what's already there on the level map, New holds what it should be replaced with
+private alias object.value5 : Object.ChunkIDOld
+private alias object.value6 : Object.ChunkIDNew
+
+private alias 0 : PATHSWAP_UNTOUCHED
+private alias 1 : PATHSWAP_INTERACTED
+
+// Priority
+private alias 0 : PRIORITY_BOUNDS
+private alias 1 : PRIORITY_ACTIVE
+
+public value PathSwap_Frame = 0
+public value PathSwap_Flag  = 0
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	if object.state == PATHSWAP_INTERACTED
+		if Object.Timer < 39
+			Object.Timer++
+		else
+			object.state = PATHSWAP_UNTOUCHED
+			Object.Timer = 0
+			object.priority = PRIORITY_BOUNDS
+		end if
+
+		PathSwap_Frame = Object.Timer
+		PathSwap_Frame /= 5
+	end if
+
+	if PathSwap_Flag == false
+		temp0 = Object.ChunkIDOld
+	else
+		temp0 = Object.ChunkIDNew
+	end if
+
+	if object.propertyValue != 1
+		SetTileLayerEntry(temp0, 0, Object.ChunkX1, Object.ChunkY1)
+		temp0++
+		SetTileLayerEntry(temp0, 0, Object.ChunkX2, Object.ChunkY1)
+		temp0++
+		SetTileLayerEntry(temp0, 0, Object.ChunkX1, Object.ChunkY2)
+		temp0++
+		SetTileLayerEntry(temp0, 0, Object.ChunkX2, Object.ChunkY2)
+	end if
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+	if object.propertyValue < 2
+		if object.state == PATHSWAP_UNTOUCHED
+			if PathSwap_Frame == 0
+
+				BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+				if checkResult == true
+					if Object.Interacted == false
+						object.state = PATHSWAP_INTERACTED
+						object.priority = PRIORITY_ACTIVE
+						Object.Interacted = true
+						PathSwap_Flag++
+						PathSwap_Flag &= true
+					end if
+				else
+					Object.Interacted = false
+				end if
+			end if
+		end if
+	end if
+
+	next
+end event
+
+
+event ObjectDraw
+	if object.propertyValue < 2
+		DrawSprite(PathSwap_Frame)
+	end if
+end event
+
+
+event ObjectStartup
+
+	LoadSpriteSheet("R7/Objects.gif")
+
+	// Path Swapper Frames
+	SpriteFrame(-24, -15, 48, 40, 109, 18)
+	SpriteFrame(-24, -11, 48, 36, 158, 22)
+	SpriteFrame(-24, -7, 48, 32, 207, 26)
+	SpriteFrame(-24, -11, 48, 36, 158, 63)
+	SpriteFrame(-24, -15, 48, 40, 109, 59)
+	SpriteFrame(-24, -11, 48, 36, 158, 63)
+	SpriteFrame(-24, -7, 48, 32, 207, 26)
+	SpriteFrame(-24, -11, 48, 36, 158, 22)
+
+	PathSwap_Flag = false
+	PathSwap_Frame = 0
+
+	foreach (TypeName[Path Swap], arrayPos0, ALL_ENTITIES)
+
+
+			// Setup chunk positions
+
+			Object.ChunkX1[arrayPos0] = object[arrayPos0].ixpos
+			Object.ChunkX1[arrayPos0] >>= 8
+			Object.ChunkX1[arrayPos0] <<= 1
+
+			Object.ChunkX2[arrayPos0] = Object.ChunkX1[arrayPos0]
+			Object.ChunkX2[arrayPos0]++
+
+			Object.ChunkY1[arrayPos0] = object[arrayPos0].iypos
+			Object.ChunkY1[arrayPos0] >>= 8
+			Object.ChunkY1[arrayPos0] <<= 1
+
+			Object.ChunkY2[arrayPos0] = Object.ChunkY1[arrayPos0]
+			Object.ChunkY2[arrayPos0]++
+
+			// Setup chunk IDs
+
+			// Get the base chunk ID
+			GetTileLayerEntry(Object.ChunkIDOld[arrayPos0], 0, Object.ChunkX1[arrayPos0], Object.ChunkY1[arrayPos0])
+
+			// The chunk's B replacement is always 4 chunks immediately after it
+			Object.ChunkIDNew[arrayPos0] = Object.ChunkIDOld[arrayPos0]
+			Object.ChunkIDNew[arrayPos0] += 4
+
+	next
+
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+
+
+event RSDKDraw
+	CheckEqual(object.propertyValue, 2)
+	object.inkEffect = checkResult
+
+	DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
+
+	if Editor.ShowGizmos == true
+		Editor.DrawingOverlay = true
+
+		temp0 = object.ixpos
+		temp0 -= 16
+		temp1 = object.iypos
+		temp1 -= 16
+
+
+		Editor.DrawingOverlay = false
+	end if
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R7/Objects.gif")
+	SpriteFrame(-24, -15, 48, 40, 109, 18)
+
+
+
+
+	// Bit of a guess here - 
+	// Subtype 0 is used just about everywhere, 2 is used in SSZ1B once, and then 2 is completely unused it seems?
+
+
+
+	// Used to update chunks but without the sign being visible there
+end event

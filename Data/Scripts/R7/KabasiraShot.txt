@@ -1,0 +1,111 @@
+//---------------Sonic CD Kabasira Shot Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+// Value0 is skipped over
+private alias object.value1 : Object.XVelocity
+private alias object.value2 : Object.YVelocity
+
+// Global SFX
+private alias 22 : SFX_G_EXPLOSION
+
+private alias 0 : DIRECTION_RIGHT
+private alias 1 : DIRECTION_LEFT
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	// Update movement
+	object.xpos += Object.XVelocity
+	object.ypos += Object.YVelocity
+
+	if object.outOfBounds == true
+		object.type = TypeName[Blank Object]
+	end if
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+		BoxCollisionTest(C_TOUCH, object.entityPos, -6, -6, 6, 6, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+		if checkResult == true
+			if object[currentPlayer].animation == ANI_JUMPING
+				ResetObjectEntity(object.entityPos, TypeName[Explosion], 0, object.xpos, object.ypos)
+				PlaySfx(SFX_G_EXPLOSION, false)
+			else
+				if object[currentPlayer].animation == ANI_SPINDASH
+					ResetObjectEntity(object.entityPos, TypeName[Explosion], 0, object.xpos, object.ypos)
+					PlaySfx(SFX_G_EXPLOSION, false)
+				else
+					// The player's not in an attacking animation, go ahead and hurt them
+					CallFunction(Player_Hit)
+				end if
+			end if
+		end if
+	next
+end event
+
+
+event ObjectDraw
+	// Use different sprites based on the shot's direction
+	if object.propertyValue == DIRECTION_RIGHT
+		// Going right!
+
+		DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
+		DrawSpriteFX(1, FX_INK, object.xpos, object.ypos)
+	else
+		// Heading left!
+
+		DrawSpriteFX(2, FX_INK, object.xpos, object.ypos)
+		DrawSpriteFX(3, FX_INK, object.xpos, object.ypos)
+	end if
+
+end event
+
+
+event ObjectStartup
+
+	LoadSpriteSheet("R7/Objects.gif")
+
+	// 0-1 - Going Right Frames
+	SpriteFrame(-8, -8, 16, 16, 133, 100)
+	SpriteFrame(-8, -6, 8, 8, 243, 101)
+
+	// 2-3 - Going Left Frames
+	SpriteFrame(-8, -8, 16, 16, 201, 100)
+	SpriteFrame(4, -6, 8, 8, 240, 65)
+
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	if object.propertyValue == DIRECTION_RIGHT
+		DrawSpriteFX(0, FX_INK, object.xpos, object.ypos)
+		DrawSpriteFX(1, FX_INK, object.xpos, object.ypos)
+	else
+		DrawSpriteFX(2, FX_INK, object.xpos, object.ypos)
+		DrawSpriteFX(3, FX_INK, object.xpos, object.ypos)
+	end if
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R7/Objects.gif")
+
+	SpriteFrame(-8, -8, 16, 16, 133, 100)
+	SpriteFrame(-8, -6, 8, 8, 243, 101)
+
+	SpriteFrame(-8, -8, 16, 16, 201, 100)
+	SpriteFrame(4, -6, 8, 8, 240, 65)
+
+	// Although used by the object, this object shouldn't even be placed in the scene at all
+	// (i still set up a object preview for it anyways though :)
+
+end event

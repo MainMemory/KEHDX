@@ -1,0 +1,313 @@
+//----------------Sonic CD Tube Switch Script-----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+private alias object.value0 : Object.InTube
+
+// Player Aliases
+private alias 1 : Player.MinRollSpeed //Not really used in V4 I think????
+
+// Collision Modes
+private alias 0 : CMODE_FLOOR
+private alias 1 : CMODE_LWALL
+private alias 2 : CMODE_ROOF
+private alias 3 : CMODE_RWALL
+
+// Gravity
+private alias 0 : GRAVITY_GROUND
+private alias 1 : GRAVITY_AIR
+
+// Property Values
+private alias 0 : TUBESW_ENTER_H_L
+private alias 1 : TUBESW_ENTER_V
+private alias 2 : TUBESW_ENTER_V_TUBE
+private alias 3 : TUBESW_H_LABYRINTH
+private alias 4 : TUBESW_ENTER_H_R
+private alias 5 : TUBESW_V_LABYRINTH
+private alias 6 : TUBESW_LABYRINTH_SPRING
+private alias 7 : TUBESW_LABYRINTH_EXIT_UPWARDS
+
+private alias object.value34 : object.collisionDisabled
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+
+	if object[currentPlayer].collisionDisabled == true
+		object[currentPlayer].collisionDisabled = false
+	end if
+
+	//Make sure the player is not in these states
+	CheckEqual(object[currentPlayer].state, Player_State_Climb)
+	temp0 = checkresult
+	CheckEqual(object[currentPlayer].state, Player_State_LedgePullUp)
+	temp0 |= checkResult
+
+	if temp0 == 0	
+		BoxCollisionTest(C_TOUCH, object.entityPos, -16, -16, 16, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+		temp1 = checkresult
+	end if
+
+	if temp1 == true
+		switch object.propertyValue
+		case TUBESW_ENTER_H_L
+			if Object.InTube == false
+				if object[currentPlayer].state != Player_State_Roll
+					object[currentPlayer].state = Player_State_Roll
+					object[currentPlayer].gravity = GRAVITY_GROUND
+					object[currentPlayer].animation = ANI_JUMPING
+					Player.MinRollSpeed = 0xD0000
+				else
+					object[currentPlayer].state = Player_State_Roll
+					object[currentPlayer].animation = ANI_JUMPING
+				end if
+			end if
+			break
+
+		case TUBESW_ENTER_V
+
+#platform: USE_ORIGINS
+			object[currentPlayer].state = Player_State_Air_NoDropDash
+#endplatform
+
+#platform: USE_STANDALONE
+			object[currentPlayer].state = Player_State_Air
+#endplatform
+
+			object[currentPlayer].animation = ANI_JUMPING
+			if object[currentPlayer].gravity == GRAVITY_AIR
+				if object[currentPlayer].yvel < 0
+					object[currentPlayer].yvel = -0xD0000
+				else
+					object[currentPlayer].yvel = 0xD0000
+				end if
+			else
+				switch object[currentPlayer].collisionMode
+				case CMODE_LWALL
+					if object[currentPlayer].speed < 0
+						object[currentPlayer].yvel = 0xD0000
+					else
+						object[currentPlayer].yvel = -0xD0000
+					end if
+					break
+				case CMODE_RWALL
+					if object[currentPlayer].speed < 0
+						object[currentPlayer].yvel = -0xD0000
+					else
+						object[currentPlayer].yvel = 0xD0000
+					end if
+					break
+				end switch
+			end if
+			object[currentPlayer].gravity = GRAVITY_AIR
+			object[currentPlayer].xpos = object.xpos
+			object[currentPlayer].xvel = 0
+			object[currentPlayer].speed = 0
+			break
+
+		case TUBESW_ENTER_V_TUBE
+			if Object.InTube == false
+				if object[currentPlayer].state != Player_State_TubeAirRoll
+					object[currentPlayer].xpos = object.xpos
+					object[currentPlayer].state = Player_State_TubeAirRoll
+					object[currentPlayer].animation = ANI_JUMPING
+					Player.MinRollSpeed = 0xD0000
+					object[currentPlayer].collisionMode = CMODE_RWALL
+					object[currentPlayer].angle = 64
+					object[currentPlayer].gravity = GRAVITY_GROUND
+					object[currentPlayer].xvel = 0
+					if object[currentPlayer].yvel < 0
+						object[currentPlayer].speed = -0xD0000
+					else
+						object[currentPlayer].speed = 0xD0000
+					end if
+					object[currentPlayer].yvel = 0
+					object[currentPlayer].right = false
+					object[currentPlayer].left = false
+				else
+
+#platform: USE_ORIGINS
+					object[currentPlayer].state = Player_State_Air_NoDropDash
+#endplatform
+
+#platform: USE_STANDALONE
+					object[currentPlayer].state = Player_State_Air
+#endplatform
+					object[currentPlayer].animation = ANI_JUMPING
+					switch object[currentPlayer].collisionMode
+					case 1
+						if object[currentPlayer].speed < 0
+							object[currentPlayer].yvel = 0xD0000
+						else
+							object[currentPlayer].yvel = -0xD0000
+						end if
+						break
+					case 3
+						if object[currentPlayer].speed < 0
+							object[currentPlayer].yvel = -0xD0000
+						else
+							object[currentPlayer].yvel = 0xD0000
+						end if
+						break
+					end switch
+					object[currentPlayer].gravity = GRAVITY_AIR
+					object[currentPlayer].xpos = object.xpos
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].speed = 0
+				end if
+			end if
+			break
+
+		case TUBESW_H_LABYRINTH
+			if Object.InTube == false
+				if object[currentPlayer].collisionMode == CMODE_ROOF
+					object[currentPlayer].collisionMode = CMODE_FLOOR
+					object[currentPlayer].angle = 0
+					FlipSign(object[currentPlayer].speed)
+					FlipSign(object[currentPlayer].xvel)
+				end if
+			end if
+			break
+
+		case TUBESW_ENTER_H_R
+			if Object.InTube == false
+				object[currentPlayer].state = Player_State_Roll
+				object[currentPlayer].animation = ANI_JUMPING
+				if object[currentPlayer].xpos < object.xpos
+					if object[currentPlayer].speed < 0xA0000
+						object[currentPlayer].speed = 0xA0000
+					end if
+					object[currentPlayer].direction = FACING_RIGHT
+				else
+					if object[currentPlayer].speed > -0xA0000
+						object[currentPlayer].speed = -0xA0000
+					end if
+					object[currentPlayer].direction = FACING_LEFT
+				end if
+			end if
+			break
+
+		case TUBESW_V_LABYRINTH
+			if object[currentPlayer].yvel < 0
+				if object[currentPlayer].state != Player_State_TubeAirRoll
+					if object[currentPlayer].left == true
+						object[currentPlayer].state = Player_State_TubeAirRoll
+						object[currentPlayer].gravity = GRAVITY_GROUND
+						object[currentPlayer].collisionMode = CMODE_RWALL
+						object[currentPlayer].angle = 64
+						object[currentPlayer].animation = ANI_JUMPING
+						Player.MinRollSpeed = 0xD0000
+						object[currentPlayer].speed = -0xD0000
+						object[currentPlayer].xvel = 0
+						object[currentPlayer].yvel = 0
+						object[currentPlayer].xpos -= 0x80000
+					end if
+
+					if object[currentPlayer].right == true
+						object[currentPlayer].state = Player_State_TubeAirRoll
+						object[currentPlayer].gravity = GRAVITY_GROUND
+						object[currentPlayer].collisionMode = CMODE_LWALL
+						object[currentPlayer].angle = 192
+						object[currentPlayer].animation = ANI_JUMPING
+						Player.MinRollSpeed = 0xD0000
+						object[currentPlayer].speed = 0xD0000
+						object[currentPlayer].xvel = 0
+						object[currentPlayer].yvel = 0
+						object[currentPlayer].xpos += 0x80000
+					end if
+				end if
+			end if
+			break
+
+		case TUBESW_LABYRINTH_SPRING
+			if Object.InTube == false
+
+#platform: USE_ORIGINS
+				// In Origins, both versions of the Air state are checked against just in case
+				CheckEqual(object[currentPlayer].state, Player_State_Air_NoDropDash)
+				temp0 = checkResult
+				CheckEqual(object[currentPlayer].state, Player_State_Air)
+				temp0 |= checkResult
+				if temp0 != false
+					object[currentPlayer].xpos = object.xpos
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].speed = 0
+				end if
+#endplatform
+
+#platform: USE_STANDALONE
+				// In Standalone, we don't have any pesky Dropdash to worry about
+				if object[currentPlayer].state == Player_State_Air
+					object[currentPlayer].xpos = object.xpos
+					object[currentPlayer].xvel = 0
+					object[currentPlayer].speed = 0
+				end if
+#endplatform
+
+			end if
+			break
+
+		case TUBESW_LABYRINTH_EXIT_UPWARDS
+			if Object.InTube == false
+				if object[currentPlayer].collisionMode == CMODE_ROOF
+					object[currentPlayer].collisionMode = CMODE_FLOOR
+					object[currentPlayer].angle += 128
+					FlipSign(object[currentPlayer].speed)
+					FlipSign(object[currentPlayer].xvel)
+				end if
+			end if
+			break
+
+		end switch
+
+		Object.InTube = true
+	else
+		Object.InTube = false
+	end if
+	next
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+event RSDKDraw
+	// This object doesn't have a debug view, so this is custom
+	// It draws a square out of tubeswitch icons
+
+	temp0 = object.xpos
+	temp0 -= 0x80000
+	temp1 = object.ypos
+	temp1 -= 0x80000
+	DrawSpriteXY(0, temp0, temp1)
+	temp0 += 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+	temp1 += 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+	temp0 -= 0x100000
+	DrawSpriteXY(0, temp0, temp1)
+
+	if Editor.ShowGizmos == true
+		// Draw the tube switch's hitbox, purposefully ignoring Editor.DrawingOverlay
+
+		temp0 = object.ixpos
+		temp0 -= 16
+		temp1 = object.iypos
+		temp1 -= 16
+
+	end if
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Display.gif")
+	SpriteFrame(-8, -8, 16, 16, 173, 67) // "T" (ubeswitch) icon
+
+	// TODO: how would you even name these
+end event

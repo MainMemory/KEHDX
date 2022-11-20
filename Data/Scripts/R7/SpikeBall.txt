@@ -1,0 +1,218 @@
+//-----------------Sonic CD Spike Ball Script-----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+
+// Either X or Y-based, depending on the Object's Property Value
+private alias object.value2 : Object.Velocity
+
+// Value3 is unused...
+
+// Timers
+// (These count towards the "Time" values, at which point states switch)
+private alias object.value0 : Object.PauseTimer
+private alias object.value1 : Object.SpikesOutTimer
+
+// Durations
+// (How long, in frames, the SpikeBall will do the action for)
+private alias object.value4 : Object.ShootTime
+private alias object.value5 : Object.RetractTime
+private alias object.value6 : Object.PauseTime
+
+// HUD Alias
+private alias object[24].propertyValue : HUD.CurrentTimePeriod
+
+// States
+private alias 0 : SPIKEBALL_H_MOVERIGHT
+private alias 1 : SPIKEBALL_H_PAUSERIGHT
+private alias 2 : SPIKEBALL_H_MOVELEFT
+private alias 3 : SPIKEBALL_H_PAUSELEFT
+
+private alias 4 : SPIKEBALL_V_MOVEDOWN
+private alias 5 : SPIKEBALL_V_PAUSEDOWN
+private alias 6 : SPIKEBALL_V_MOVEUP
+private alias 7 : SPIKEBALL_V_PAUSEUP
+
+// Time Periods
+private alias 0 : TIME_PRESENT
+private alias 1 : TIME_PAST
+private alias 2 : TIME_GOOD_FUTURE
+private alias 3 : TIME_BAD_FUTURE
+
+// Property Values
+private alias 0 : HORZ_SPIKE
+private alias 1 : VERT_SPIKE
+
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
+
+event ObjectUpdate
+
+	switch object.state
+
+		// Horizontal Spike Ball States
+	case SPIKEBALL_H_MOVERIGHT
+		if Object.SpikesOutTimer < Object.ShootTime
+			Object.SpikesOutTimer++
+			object.xpos += Object.Velocity
+		else
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_H_PAUSERIGHT
+		if Object.PauseTimer < Object.PauseTime
+			Object.PauseTimer++
+		else
+			Object.PauseTimer = 0
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_H_MOVELEFT
+		if Object.SpikesOutTimer > Object.RetractTime
+			Object.SpikesOutTimer--
+			object.xpos -= Object.Velocity
+		else
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_H_PAUSELEFT
+		if Object.PauseTimer < Object.PauseTime
+			Object.PauseTimer++
+		else
+			Object.PauseTimer = 0
+			object.state = SPIKEBALL_H_MOVERIGHT
+		end if
+		break
+
+
+		// Vertical Spike Ball States
+	case SPIKEBALL_V_MOVEDOWN
+		if Object.SpikesOutTimer < Object.ShootTime
+			Object.SpikesOutTimer++
+			object.ypos += Object.Velocity
+		else
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_V_PAUSEDOWN
+		if Object.PauseTimer < Object.PauseTime
+			Object.PauseTimer++
+		else
+			Object.PauseTimer = 0
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_V_MOVEUP
+		if Object.SpikesOutTimer > Object.RetractTime
+			Object.SpikesOutTimer--
+			object.ypos -= Object.Velocity
+		else
+			object.state++
+		end if
+		break
+
+	case SPIKEBALL_V_PAUSEUP
+		if Object.PauseTimer < Object.PauseTime
+			Object.PauseTimer++
+		else
+			Object.PauseTimer = 0
+			object.state = SPIKEBALL_V_MOVEDOWN
+		end if
+		break
+
+	end switch
+
+
+	foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
+		BoxCollisionTest(C_TOUCH, object.entityPos, -12, -12, 12, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+
+		if checkResult == true
+			CallFunction(Player_Hit)
+		end if
+	next
+
+end event
+
+
+event ObjectDraw
+	DrawSprite(0)
+end event
+
+
+event ObjectStartup
+	LoadSpriteSheet("R7/Objects.gif")
+
+	// Spike Ball Frame
+	SpriteFrame(-16, -16, 32, 32, 1, 199)
+
+	foreach (TypeName[Spike Ball], arrayPos0, ALL_ENTITIES)
+		if object[arrayPos0].propertyValue == VERT_SPIKE
+			object[arrayPos0].state = SPIKEBALL_V_MOVEDOWN
+
+			Object.Velocity[arrayPos0] = 0x10000
+			Object.ShootTime[arrayPos0] = 32
+			Object.RetractTime[arrayPos0] = -32
+			Object.PauseTime[arrayPos0] = 20
+		else
+			Object.Velocity[arrayPos0] = 0x10000
+			Object.ShootTime[arrayPos0] = 48
+			Object.RetractTime[arrayPos0] = -48
+			Object.PauseTime[arrayPos0] = 20
+		end if
+	next
+
+end event
+
+
+// ========================
+// Editor Subs
+// ========================
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+// Property Value
+
+
+// Type
+
+
+
+
+
+
+
+event RSDKDraw
+	DrawSprite(0)
+
+	// TODO: it would be cool to see the path of the spike ball via an arrow
+	// however, spike movement is dependant on time period, so that complicates things...
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("R7/Objects.gif")
+	SpriteFrame(-16, -16, 32, 32, 1, 199)
+
+
+
+
+
+end event
