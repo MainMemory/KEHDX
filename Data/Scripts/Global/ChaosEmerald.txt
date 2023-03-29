@@ -1,7 +1,7 @@
 // ----------------------------------
 // RSDK Project: Knuckles' Emerald Hunt
 // Script Description: Chaos Emerald Object
-// Script Author: MainMemory
+// Script Author: MainMemory, KarlEmerald, Lave Slime
 // ----------------------------------
 
 // ========================
@@ -23,6 +23,11 @@ private alias 1 : EMERALD_MODE_HPZ
 private alias 2 : EMERALD_MODE_S1
 private alias 3 : EMERALD_MODE_CD
 
+//Hitboxes
+private alias object.value40 : player.hitboxLeft
+private alias object.value38 : player.hitboxTop
+private alias object.value41 : player.hitboxRight
+private alias object.value39 : player.hitboxBottom
 
 // ========================
 // Events
@@ -36,7 +41,9 @@ event ObjectUpdate
 		Print(object.entityPos, true, true)
 		break
 		
-	case EMERALD_ITEM
+	case EMERALD_ITEM //Basic State, floatin and movin
+	
+		//Makes it where object don't move
 		if object.propertyvalue != 9
 			Sin(temp0, object.angle)
 			temp0 <<= 10
@@ -47,6 +54,7 @@ event ObjectUpdate
 		object.angle += 4
 		object.angle &= 511
 		
+		//cd time stone speed
 		if EmeraldManager_Mode != EMERALD_MODE_CD
 			object.frame++
 			object.frame %= 96
@@ -57,27 +65,40 @@ event ObjectUpdate
 		
 		// Check interaction with players
 		foreach (GROUP_PLAYERS, currentPlayer, ACTIVE_ENTITIES)
-			if EmeraldManager_Mode == EMERALD_MODE_HPZ
+			switch EmeraldManager_Mode 
+			case EMERALD_MODE_HPZ
 				// HPZ's got vertical emerald shards, which are just a tad bit larger
-				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
-			else
-				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
-			end if
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+				break
+			default 
+				//S1's and S2's emeralds are the same size 
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)			
+				break
+			case EMERALD_MODE_CD 
+				//Time Stones are a bit larger
+				BoxCollisionTest(C_TOUCH, object.entityPos, -10, -12, 10, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)			
+				break
+			end switch
 			
+			//Did you touch it?
+			//If so, you got it!!!
 			if checkResult == true
 				CallFunction(EmeraldManager_AwardEmerald)
 				object.state = EMERALD_SPARKLE
 				object.timer = 0
-			end if
+			end if	
 		next
 		break
 		
-	case EMERALD_OBTAINED
+	case EMERALD_OBTAINED //the HUD makes a temp object using this state
+	
+		//Set Position
 		currentPlayer = object.propertyValue
 		object.xpos = object[currentPlayer].xpos
 		object.ypos = object[currentPlayer].ypos
 		object.ypos -= 0x261A80
 		
+		//Object Flashing
 		object.timer++
 		if object.timer < 150
 			temp0 = object.timer
@@ -103,12 +124,15 @@ event ObjectUpdate
 				break
 			end switch
 		else
+			//Goodbye...
 			CallFunction(EmeraldManager_DeleteEmerald)
 			ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
 		end if
 		break
 		
-	case EMERALD_SPARKLE
+	case EMERALD_SPARKLE //Emerald has cute sparkles like Sonic 1
+	
+		//Change frame
 		object.timer++
 		if object.timer == 6
 			object.timer = 0
@@ -118,6 +142,8 @@ event ObjectUpdate
 				object.value3++
 			end if
 		end if
+		
+		//Object gets deleted
 		if object.value3 == 4
 			ResetObjectEntity(object.entityPos, TypeName[Blank Object], 0, 0, 0)
 		end if
@@ -129,7 +155,7 @@ end event
 
 event ObjectDraw
 	switch object.state
-	case EMERALD_ITEM
+	case EMERALD_ITEM //Draws main emerald
 		switch EmeraldManager_Mode
 		case EMERALD_MODE_S2
 		default
@@ -169,7 +195,7 @@ event ObjectDraw
 		end switch
 		break
 		
-	case EMERALD_OBTAINED
+	case EMERALD_OBTAINED //Draws emerald when obtained, only one frame
 		switch EmeraldManager_Mode
 		case EMERALD_MODE_S2
 		default
@@ -189,7 +215,7 @@ event ObjectDraw
 		DrawSpriteFX(temp0, FX_INK, object.xpos, object.ypos)
 		break
 		
-	case EMERALD_SPARKLE
+	case EMERALD_SPARKLE // cute sparkles
 		temp0 = 16
 		temp0 += object.emeraldsparkle
 		DrawSprite(temp0)
