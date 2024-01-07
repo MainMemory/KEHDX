@@ -10,7 +10,6 @@
 
 private alias object.value0 : object.timer
 private alias object.value1 : object.originPos.y
-private alias object.value2 : object.emeraldsparkle
 
 private alias 0 : EMERALD_NONE
 private alias 1 : EMERALD_ITEM
@@ -23,11 +22,6 @@ private alias 1 : EMERALD_MODE_HPZ
 private alias 2 : EMERALD_MODE_S1
 private alias 3 : EMERALD_MODE_CD
 
-//Hitboxes
-private alias object.value40 : player.hitboxLeft
-private alias object.value38 : player.hitboxTop
-private alias object.value41 : player.hitboxRight
-private alias object.value39 : player.hitboxBottom
 
 // ========================
 // Events
@@ -68,15 +62,15 @@ event ObjectUpdate
 			switch EmeraldManager_Mode 
 			case EMERALD_MODE_HPZ
 				// HPZ's got vertical emerald shards, which are just a tad bit larger
-				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -16, 8, 16, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)
 				break
-			default 
+			default
 				//S1's and S2's emeralds are the same size 
-				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)			
+				BoxCollisionTest(C_TOUCH, object.entityPos, -8, -8, 8, 8, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)			
 				break
 			case EMERALD_MODE_CD 
 				//Time Stones are a bit larger
-				BoxCollisionTest(C_TOUCH, object.entityPos, -10, -12, 10, 12, currentPlayer, player[currentPlayer].hitboxLeft, player[currentPlayer].hitboxTop, player[currentPlayer].hitboxRight, player[currentPlayer].hitboxBottom)			
+				BoxCollisionTest(C_TOUCH, object.entityPos, -10, -12, 10, 12, currentPlayer, C_BOX, C_BOX, C_BOX, C_BOX)			
 				break
 			end switch
 			
@@ -86,6 +80,7 @@ event ObjectUpdate
 				CallFunction(EmeraldManager_AwardEmerald)
 				object.state = EMERALD_SPARKLE
 				object.timer = 0
+				object.frame = 0
 			end if	
 		next
 		break
@@ -136,9 +131,9 @@ event ObjectUpdate
 		object.timer++
 		if object.timer == 6
 			object.timer = 0
-			object.emeraldsparkle++
-			if object.emeraldsparkle >= 4
-				object.emeraldsparkle = 0
+			object.frame++
+			if object.frame >= 4
+				object.frame = 0
 				object.value3++
 			end if
 		end if
@@ -217,7 +212,7 @@ event ObjectDraw
 		
 	case EMERALD_SPARKLE // cute sparkles
 		temp0 = 16
-		temp0 += object.emeraldsparkle
+		temp0 += object.frame
 		DrawSprite(temp0)
 		break
 
