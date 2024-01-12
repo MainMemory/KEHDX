@@ -43,6 +43,9 @@ private alias object.value24 : object.drawColour.r
 private alias object.value25 : object.drawColour.g
 private alias object.value26 : object.drawColour.b
 
+//Used for text position
+private alias object.value27 : object.textPosMode
+
 // Object holder Aliases
 // (Blank Object used to hold info)
 private alias object.value0 : object.score
@@ -76,6 +79,12 @@ private alias 45 : STAGESEL_SPR_STGNAMES
 // Touch Input Aliases
 private alias -1 : TOUCHINPUT_NULL
 
+//Text Aliases
+private alias 0 : TEXTINFO_TEXTDATA
+private alias 1 : TEXTINFO_TEXTSIZE
+
+private alias 0 : TEXTPOS_NORMAL
+private alias 1 : TEXTPOS_CENTER
 
 // ========================
 // Function Declarations
@@ -90,6 +99,8 @@ reserve function StageSelect_DrawStageEntry
 // Used to check if a Stage box is within view
 reserve function StageSelect_CheckBoxBounds
 
+// Used for drawing text for a stage box
+reserve function StageSelect_TextRendering
 
 // ========================
 // Function Defintitions
@@ -127,6 +138,51 @@ private function StageSelect_GetScrollOffset
 end function
 
 
+private function StageSelect_TextRendering
+	//Here, we're handling text stuff.
+
+	//Start the loop and get X
+	switch object.textPosMode
+	case TEXTPOS_NORMAL
+		temp4 = temp2
+		break
+	case TEXTPOS_CENTER
+		temp4 = temp2
+		temp3 = 0
+		GetTextInfo(temp2, 1, TEXTINFO_TEXTSIZE, temp1, 0)
+		while temp3 < temp2
+			temp4 -= 4
+			temp3++		
+		loop		
+		break
+	end switch
+	
+	temp3 = 0
+	//Get the length
+	GetTextInfo(temp2, 1, TEXTINFO_TEXTSIZE, temp1, 0)
+	while temp3 < temp2
+		GetTextInfo(temp5, 1, TEXTINFO_TEXTDATA, temp1, temp3) //What Letter is it?
+		
+		switch temp5
+		default
+			temp5 += 3
+			DrawSpriteScreenXY(temp5, temp4, object.drawPos.y)
+			break
+		case 32
+			break
+		case 42
+			DrawSpriteScreenXY(94, temp4, object.drawPos.y)
+			break
+		case 58
+			DrawSpriteScreenXY(95, temp4, object.drawPos.y)
+			break			
+		end switch	
+		temp4 += 8
+		temp3++		
+	loop
+end function
+
+
 private function StageSelect_DrawStageEntry
 	// This function is called in order to draw an Act listing
 	
@@ -151,23 +207,12 @@ private function StageSelect_DrawStageEntry
 	object.drawColour.g = checkResult
 	CallFunction(KEH_DrawSelBox)
 	
-	// Draw with the Main sheet for now
-	object.spriteSheet = object.mainSheet
-		
-	// Draw all the texts
-	// (Score, Rings, Play Count, Time, Deaths, Rank, ...)
-	temp1 = 6
-	while temp1 < 12
-		DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
-		temp1++
-	loop
-	
 	// Switch to the Icons sheet and palette now that we're drawing the, well, icons
 	object.spriteSheet = object.iconSheet
 	SetActivePalette(1, 0, screen.ysize)
 	
 	temp2 = screen.xcenter
-	temp2 -= 168
+	temp2 -= 125
 	
 	temp1 = temp0
 	temp1 += STAGESEL_SPR_STGICONS
@@ -181,10 +226,51 @@ private function StageSelect_DrawStageEntry
 	
 	//Zone Name   
 	temp1 = temp0
-	temp1 += STAGESEL_SPR_STGNAMES
+	object.drawPos.y += 9 
 	
 	// Draw the zone's name
-	DrawSpriteScreenXY(temp1, screen.xcenter, object.drawPos)
+	object.textPosMode = TEXTPOS_NORMAL
+	CallFunction(StageSelect_TextRendering)
+	
+	object.textPosMode = TEXTPOS_NORMAL
+	temp1 = 25
+	temp2 = screen.xcenter
+	temp2 -= 125
+	object.drawPos.y += 16 
+	object.textPosMode = TEXTPOS_NORMAL
+	
+	CallFunction(StageSelect_TextRendering)
+	
+	temp1 = 26
+	temp2 = screen.xcenter
+	temp2 -= 125	
+	object.drawPos.y += 16 
+	CallFunction(StageSelect_TextRendering)
+
+	temp1 = 27
+	temp2 = screen.xcenter
+	temp2 += 39
+	object.drawPos.y = object.drawPos
+	object.drawPos.y += 7
+	CallFunction(StageSelect_TextRendering)
+
+	temp1 = 28
+	temp2 = screen.xcenter
+	temp2 += 39	
+	object.drawPos.y += 12
+	CallFunction(StageSelect_TextRendering)
+
+	temp1 = 29
+	temp2 = screen.xcenter
+	temp2 += 39	
+	object.drawPos.y += 12
+	CallFunction(StageSelect_TextRendering)
+
+	temp1 = 30
+	temp2 = screen.xcenter
+	temp2 += 39	
+	object.drawPos.y += 12
+	CallFunction(StageSelect_TextRendering)
 	
 	// Now, all the numbers!
 	
@@ -580,7 +666,12 @@ event ObjectDraw
 	// Select Stage Header
 	temp1 = 16
 	CallFunction(StageSelect_GetScrollOffset)
-	DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	//DrawSpriteScreenXY(1, screen.xcenter, temp1)
+	object.drawPos.y = temp1
+	temp1 = 24
+	temp2 = screen.xcenter
+	object.textPosMode = TEXTPOS_CENTER
+	CallFunction(StageSelect_TextRendering)
 	
 	if options.physicalControls == false
 		// Draw the back button
@@ -612,6 +703,7 @@ end event
 event ObjectStartup
 	LoadSpriteSheet("KEHMenu/Menu.gif")
 	LoadSpriteSheet("KEHMenu/Icons.gif")
+	LoadTextFile(1, "Data/Game/Menu.txt")
 	
 	// These frames are for the "Menu" sheet
 	SpriteFrame(0, 0, 1, 1, 0, 0)           // 0 - Placeholder (formerly selection box, don't want to shift around 53 following sprite frame IDs at the moment)
@@ -627,7 +719,7 @@ event ObjectStartup
 	temp0 = -125
 	temp1 = 39
 
-	SpriteFrame(temp0, 25, 45, 7, 0, 8) // 6 - Score:
+	SpriteFrame(temp0, 0,0, 7, 0, 8) // 6 - Score:
 	SpriteFrame(temp0, 41, 45, 7, 46, 8) // 7 - Rings:
 	
 	SpriteFrame(temp1, 7, 85, 7, 413, 59)  // 8 - Play Count:
@@ -689,6 +781,29 @@ event ObjectStartup
 		temp0++
 	loop
 	
+	temp2 = 0
+	// Alphabet Time!!!
+	// 68-82 - A to O
+	temp0 = 0
+	temp1 = 8
+	while temp0 < 15
+		SpriteFrame(0, 0, 8, 7, temp1, 33)
+		temp1 += 8
+		temp0++
+	loop
+
+	// Do you know your ABCs?
+	// 83-93 - P to Z
+	temp0 = 0
+	temp1 = 0
+	while temp0 < 11
+		SpriteFrame(0, 0, 8, 7, temp1, 41)
+		temp1 += 8
+		temp0++
+	loop
+
+	SpriteFrame(0, 0, 6, 7, 81, 17) // 94 *
+	SpriteFrame(2, 0, 3, 7, 82, 25) // 95 :
 
 	SetMusicTrack("2D.ogg", 2, 108000)
 	
